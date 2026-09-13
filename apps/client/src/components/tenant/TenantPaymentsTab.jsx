@@ -21,7 +21,9 @@ export const TenantPaymentsTab = ({
   const [isMethodsOpen, setIsMethodsOpen] = useState(false);
 
   const rentAmount = unit?.monthlyRent || tenant?.monthlyRent || 0;
-  const parkingFee = 150;
+  const hasParking = Boolean(tenant?.hasParking ?? unit?.hasParking ?? false);
+  const parkingSpot = hasParking ? (tenant?.parkingSpot || unit?.parkingSpot || 'Assigned Space') : null;
+  const parkingFee = hasParking ? Number(tenant?.parkingFee ?? unit?.parkingFee ?? 0) : 0;
   const utilityFee = 45;
   const totalMonthlyDue = rentAmount ? (rentAmount + parkingFee + utilityFee) : 0;
 
@@ -33,7 +35,10 @@ export const TenantPaymentsTab = ({
     ? payments.map((p) => ({
         id: p._id || p.id || p.transactionId || `TXN-${Math.floor(1000000 + Math.random() * 9000000)}`,
         period: p.notes || p.period || `${new Date(p.dueDate || p.createdAt || Date.now()).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })} Rent`,
-        amount: p.amount || rentAmount,
+        amount: p.amount || (rentAmount ? rentAmount + (p.parkingFee ?? (hasParking ? parkingFee : 0)) + utilityFee : 0),
+        hasParking,
+        parkingSpot,
+        parkingFee: p.parkingFee !== undefined ? p.parkingFee : (hasParking ? parkingFee : 0),
         paidAt: p.paidAt
           ? new Date(p.paidAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
           : p.createdAt
@@ -99,10 +104,17 @@ export const TenantPaymentsTab = ({
               <strong className="text-slate-900 dark:text-white">${rentAmount.toLocaleString()}.00</strong>
             </div>
 
-            <div className="flex justify-between p-3 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60">
-              <span className="text-slate-500">Assigned Parking (Level 2, Bay #14B)</span>
-              <strong className="text-slate-900 dark:text-white">${parkingFee}.00</strong>
-            </div>
+            {hasParking && parkingFee > 0 ? (
+              <div className="flex justify-between p-3 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60">
+                <span className="text-slate-500">Assigned Parking ({parkingSpot || 'Bay Slot'})</span>
+                <strong className="text-slate-900 dark:text-white">${parkingFee}.00</strong>
+              </div>
+            ) : (
+              <div className="flex justify-between p-3 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60">
+                <span className="text-slate-500">Assigned Parking</span>
+                <span className="text-slate-400 font-mono italic">None assigned ($0.00)</span>
+              </div>
+            )}
 
             <div className="flex justify-between p-3 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60">
               <span className="text-slate-500">Water, Sewer & Trash Service</span>

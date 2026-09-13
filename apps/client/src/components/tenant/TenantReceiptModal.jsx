@@ -16,9 +16,13 @@ export const TenantReceiptModal = ({
   };
 
   const amount = transaction.amount || 2400;
-  const baseRent = Math.round(amount * 0.90);
-  const parkingFee = 150;
-  const utilitiesFee = Math.max(0, amount - baseRent - parkingFee);
+  const hasParking = Boolean(transaction.hasParking ?? tenant?.hasParking ?? unit?.hasParking ?? (transaction.parkingFee > 0));
+  const parkingSpot = transaction.parkingSpot || tenant?.parkingSpot || unit?.parkingSpot || (hasParking ? 'Assigned Space' : null);
+  const parkingFee = transaction.parkingFee !== undefined 
+    ? Number(transaction.parkingFee) 
+    : (hasParking ? Number(tenant?.parkingFee ?? unit?.parkingFee ?? 0) : 0);
+  const baseRent = transaction.baseRent || Math.max(0, amount - parkingFee - (transaction.utilityFee ?? 45));
+  const utilitiesFee = transaction.utilityFee ?? Math.max(0, amount - baseRent - parkingFee);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto print:p-0 print:static print:bg-white">
@@ -121,10 +125,12 @@ export const TenantReceiptModal = ({
                 <span>Base Monthly Rent ({transaction.period || 'August 2026'})</span>
                 <span className="font-bold text-slate-900 dark:text-white">${baseRent.toLocaleString(undefined, { minimumFractionDigits: 2 })}</span>
               </div>
-              <div className="p-3 flex justify-between">
-                <span>Assigned Parking Bay #14B</span>
-                <span className="font-bold text-slate-900 dark:text-white">${parkingFee.toFixed(2)}</span>
-              </div>
+              {parkingFee > 0 && (
+                <div className="p-3 flex justify-between">
+                  <span>Assigned Parking ({parkingSpot})</span>
+                  <span className="font-bold text-slate-900 dark:text-white">${parkingFee.toFixed(2)}</span>
+                </div>
+              )}
               {utilitiesFee > 0 && (
                 <div className="p-3 flex justify-between">
                   <span>Water & Trash Utility Service</span>

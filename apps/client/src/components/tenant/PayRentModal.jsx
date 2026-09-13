@@ -16,8 +16,12 @@ export const PayRentModal = ({
   if (!isOpen) return null;
 
   const rentAmount = unit?.monthlyRent || tenant?.monthlyRent || 2400;
+  const hasParking = Boolean(tenant?.hasParking ?? unit?.hasParking ?? false);
+  const parkingSpot = hasParking ? (tenant?.parkingSpot || unit?.parkingSpot || 'Assigned Space') : null;
+  const parkingFee = hasParking ? Number(tenant?.parkingFee ?? unit?.parkingFee ?? 0) : 0;
+  const utilityFee = 45;
   const processingFee = paymentMethod === 'card' ? 45.00 : 0.00;
-  const totalAmount = rentAmount + processingFee;
+  const totalAmount = rentAmount + parkingFee + utilityFee + processingFee;
 
   const handlePay = (e) => {
     e.preventDefault();
@@ -29,6 +33,11 @@ export const PayRentModal = ({
       const receipt = {
         transactionId: `TXN_${Math.floor(10000000 + Math.random() * 90000000)}`,
         amount: totalAmount,
+        baseRent: rentAmount,
+        hasParking,
+        parkingSpot,
+        parkingFee,
+        utilityFee,
         paidAt: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         method: paymentMethod === 'card' ? 'Visa ending in 4242' : 'Chase Bank ACH ending in 9102',
         period: 'September 2026 Rent',
@@ -156,6 +165,16 @@ export const PayRentModal = ({
               <div className="flex justify-between text-slate-500 dark:text-slate-400">
                 <span>Base Rent (September)</span>
                 <span className="font-semibold text-slate-900 dark:text-white">${rentAmount.toLocaleString()}</span>
+              </div>
+              {hasParking && parkingFee > 0 && (
+                <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                  <span>Assigned Parking ({parkingSpot || 'Bay Slot'})</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">${parkingFee.toFixed(2)}</span>
+                </div>
+              )}
+              <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                <span>Water, Sewer & Trash Service</span>
+                <span className="font-semibold text-slate-900 dark:text-white">${utilityFee.toFixed(2)}</span>
               </div>
               <div className="flex justify-between text-slate-500 dark:text-slate-400">
                 <span>Payment Processing Fee</span>

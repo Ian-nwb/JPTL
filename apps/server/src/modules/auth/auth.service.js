@@ -148,8 +148,13 @@ async function changePasswordService(userId, currentPassword, newPassword) {
   // 3. Assign plain text; userSchema.pre('save') will hash it automatically on save()
   user.password = newPassword;
   await user.save();
-
   return { message: 'Password updated successfully' };
 }
 
-export { signupLandlord, login, changePasswordService, AuthError };
+async function getUserById(id) {
+  const user = await User.findById(id);
+  if (!user) return null;
+  return sanitizeUser(user);
+}
+
+export { signupLandlord, login, getUserById, changePasswordService, AuthError };

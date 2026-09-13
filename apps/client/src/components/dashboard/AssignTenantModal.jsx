@@ -17,6 +17,11 @@ export const AssignTenantModal = ({
   const [leaseEnd, setLeaseEnd] = useState('');
   const [durationMonths, setDurationMonths] = useState(12);
 
+  // Parking state
+  const [hasParking, setHasParking] = useState(false);
+  const [parkingSpot, setParkingSpot] = useState('');
+  const [parkingFee, setParkingFee] = useState('150');
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -48,6 +53,11 @@ export const AssignTenantModal = ({
       const today = new Date().toISOString().split('T')[0];
       const start = tenant.leaseStart ? new Date(tenant.leaseStart).toISOString().split('T')[0] : today;
       setLeaseStart(start);
+
+      // 5. Initial parking settings
+      setHasParking(Boolean(tenant.hasParking));
+      setParkingSpot(tenant.parkingSpot || '');
+      setParkingFee(tenant.parkingFee !== undefined && tenant.parkingFee !== null ? String(tenant.parkingFee) : '150');
 
       if (tenant.leaseEnd) {
         const end = new Date(tenant.leaseEnd).toISOString().split('T')[0];
@@ -176,6 +186,9 @@ export const AssignTenantModal = ({
           monthlyRent: Number(monthlyRent) || targetUnit?.monthlyRent || 0,
           leaseStart,
           leaseEnd,
+          hasParking,
+          parkingSpot: hasParking ? parkingSpot : null,
+          parkingFee: hasParking ? Number(parkingFee) || 0 : 0,
           status: 'active',
         });
         serverUpdated = res.data;
@@ -192,6 +205,9 @@ export const AssignTenantModal = ({
             monthlyRent: Number(monthlyRent) || targetUnit?.monthlyRent || 0,
             leaseStart,
             leaseEnd,
+            hasParking,
+            parkingSpot: hasParking ? parkingSpot : null,
+            parkingFee: hasParking ? Number(parkingFee) || 0 : 0,
             tempPassword: 'jptl2026',
           });
           serverUpdated = res.data;
@@ -222,6 +238,9 @@ export const AssignTenantModal = ({
         monthlyRent: Number(monthlyRent) || targetUnit?.monthlyRent || 0,
         leaseStart,
         leaseEnd,
+        hasParking,
+        parkingSpot: hasParking ? parkingSpot : null,
+        parkingFee: hasParking ? Number(parkingFee) || 0 : 0,
         status: 'active',
       };
 
@@ -443,6 +462,57 @@ export const AssignTenantModal = ({
               </span>
             </div>
           )}
+
+          {/* Assigned Parking Section */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
+            <label className="flex items-center justify-between cursor-pointer">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={hasParking}
+                  onChange={(e) => setHasParking(e.target.checked)}
+                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-700 cursor-pointer"
+                />
+                <span className="text-xs font-semibold text-slate-900 dark:text-white">
+                  Assign Parking Space (+ Monthly Fee)
+                </span>
+              </div>
+              <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${
+                hasParking ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20' : 'text-slate-400'
+              }`}>
+                {hasParking ? 'Included' : 'None ($0/mo)'}
+              </span>
+            </label>
+
+            {hasParking && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-slate-200 dark:border-slate-800">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                    Parking Bay / Slot
+                  </label>
+                  <input
+                    type="text"
+                    value={parkingSpot}
+                    onChange={(e) => setParkingSpot(e.target.value)}
+                    placeholder="e.g. Bay #14B (L2)"
+                    className="w-full bg-white dark:bg-[#0D111D] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                    Monthly Parking Fee ($)
+                  </label>
+                  <input
+                    type="number"
+                    value={parkingFee}
+                    onChange={(e) => setParkingFee(e.target.value)}
+                    placeholder="150"
+                    className="w-full bg-white dark:bg-[#0D111D] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Actions */}
           <div className="pt-3 flex items-center justify-end gap-3 border-t border-slate-200 dark:border-slate-800/80">

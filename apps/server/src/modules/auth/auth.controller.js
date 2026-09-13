@@ -25,8 +25,23 @@ async function signupLandlord(req, res) {
 async function login(req, res) {
   try {
     const { user, token } = await authService.login(req.body);
-    res.cookie(COOKIE_NAME, token, cookieOptions());
-    return res.status(200).json({ success: true, role: user.role, token });
+    // Clear global cookie so multi-tab sessionStorage isolation works cleanly
+    res.clearCookie(COOKIE_NAME, cookieOptions());
+    return res.status(200).json({ success: true, user, role: user.role, token });
+  } catch (err) {
+    const statusCode = err.statusCode || 500;
+    return res.status(statusCode).json({ success: false, message: err.message });
+  }
+}
+
+async function getMe(req, res) {
+  try {
+    const userId = req.user?.id || req.user?._id;
+    const user = await authService.getUserById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    return res.status(200).json({ success: true, user });
   } catch (err) {
     const statusCode = err.statusCode || 500;
     return res.status(statusCode).json({ success: false, message: err.message });
@@ -57,4 +72,4 @@ async function changePassword(req, res) {
   }
 }
 
-export { signupLandlord, login, logout, changePassword };
+export { signupLandlord, login, getMe, logout, changePassword };

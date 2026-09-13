@@ -1,12 +1,15 @@
-import React, { useState, useEffect, Component } from 'react';
+import React, { useState, useEffect, useCallback, Component } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { TenantPortalPage } from './pages/TenantPortalPage';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
+/* ─────────────────────────────────────────────
+   Error Boundary
+───────────────────────────────────────────── */
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -50,52 +53,105 @@ class ErrorBoundary extends Component {
   }
 }
 
-function App() {
+/* ─────────────────────────────────────────────
+   Auth loading spinner
+   Shown while AuthContext validates the saved
+   sessionStorage token with GET /auth/me.
+───────────────────────────────────────────── */
+function AuthLoadingScreen() {
+  return (
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-10 h-10 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
+        <p className="text-slate-400 text-xs font-mono tracking-widest uppercase">Restoring session…</p>
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Main router — auth-aware, role-aware
+───────────────────────────────────────────── */
+function AppRouter() {
+  const { user, loading, isAuthenticated } = useAuth();
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
 
-  useEffect(() => {
-    const handlePopState = () => {
-      setCurrentPath(window.location.pathname);
-    };
+  const navigate = useCallback((path) => {
+    window.history.pushState({}, '', path);
+    setCurrentPath(path);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
+  useEffect(() => {
+    const handlePopState = () => setCurrentPath(window.location.pathname);
     window.addEventListener('popstate', handlePopState);
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const navigate = (path) => {
-    window.history.pushState({}, '', path);
-    setCurrentPath(path);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  // Safe route guards in useEffect
+  useEffect(() => {
+    if (loading) return;
+    const role = user?.role;
 
-  const renderContent = () => {
-    if (currentPath === '/register') {
-      return <RegisterPage onNavigate={navigate} />;
+    if (!isAuthenticated) {
+      if (currentPath !== '/login' && currentPath !== '/' && currentPath !== '/register') {
+        window.history.replaceState({}, '', '/login');
+        setCurrentPath('/login');
+      }
+      return;
     }
 
-    if (currentPath === '/onboarding' || currentPath.startsWith('/onboarding')) {
-      return <OnboardingPage onNavigate={navigate} />;
+    // Authenticated
+    if (currentPath === '/login' || currentPath === '/') {
+      const target = role === 'tenant' ? '/tenant' : '/dashboard';
+      window.history.replaceState({}, '', target);
+      setCurrentPath(target);
+      return;
     }
 
-    if (currentPath === '/login') {
-      return <LoginPage onNavigate={navigate} />;
+    if (role === 'tenant' && currentPath.startsWith('/dashboard')) {
+      window.history.replaceState({}, '', '/tenant');
+      setCurrentPath('/tenant');
+      return;
     }
 
-    if (currentPath === '/tenant' || currentPath.startsWith('/tenant')) {
-      return <TenantPortalPage onNavigate={navigate} />;
+    if ((role === 'landlord' || role === 'superadmin') && currentPath.startsWith('/tenant')) {
+      window.history.replaceState({}, '', '/dashboard');
+      setCurrentPath('/dashboard');
     }
+  }, [loading, isAuthenticated, user?.role, currentPath]);
 
-    if (currentPath === '/dashboard' || currentPath.startsWith('/dashboard')) {
-      return <DashboardPage onNavigate={navigate} />;
-    }
+  // 1. Validating session
+  if (loading) return <AuthLoadingScreen />;
 
-    return <LandingPage onNavigate={navigate} />;
-  };
+  // 2. Authenticated user transitioning away from /login or /
+  if (isAuthenticated && (currentPath === '/login' || currentPath === '/')) {
+    return <AuthLoadingScreen />;
+  }
 
+  // 3. Unauthenticated user on protected route
+  if (!isAuthenticated && currentPath !== '/' && currentPath !== '/register') {
+    return <LoginPage onNavigate={navigate} />;
+  }
+
+  // 4. Render matched route
+  if (currentPath === '/register') return <RegisterPage onNavigate={navigate} />;
+  if (currentPath === '/onboarding' || currentPath.startsWith('/onboarding')) return <OnboardingPage onNavigate={navigate} />;
+  if (currentPath === '/login') return <LoginPage onNavigate={navigate} />;
+  if (currentPath.startsWith('/tenant')) return <TenantPortalPage onNavigate={navigate} />;
+  if (currentPath.startsWith('/dashboard')) return <DashboardPage onNavigate={navigate} />;
+
+  return <LandingPage onNavigate={navigate} />;
+}
+
+/* ─────────────────────────────────────────────
+   Root
+───────────────────────────────────────────── */
+function App() {
   return (
     <AuthProvider>
       <ErrorBoundary>
-        {renderContent()}
+        <AppRouter />
       </ErrorBoundary>
     </AuthProvider>
   );

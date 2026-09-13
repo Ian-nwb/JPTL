@@ -144,6 +144,9 @@ async function getTenantDirectory(landlordId, query = {}) {
           }
         : null,
       monthlyRent: profile?.monthlyRent ?? unitDoc?.monthlyRent ?? 0,
+      hasParking: profile?.hasParking ?? unitDoc?.hasParking ?? false,
+      parkingSpot: profile?.parkingSpot ?? unitDoc?.parkingSpot ?? null,
+      parkingFee: profile?.parkingFee ?? unitDoc?.parkingFee ?? 0,
       securityDeposit: profile?.securityDeposit ?? (profile?.monthlyRent ? profile.monthlyRent * 1.5 : 0),
       leaseStart: profile?.leaseStart ?? unitDoc?.leaseStart ?? null,
       leaseEnd: profile?.leaseEnd ?? unitDoc?.leaseEnd ?? null,
@@ -230,6 +233,9 @@ async function getTenantDetails(landlordId, tenantId) {
     leaseStart: profile?.leaseStart || profile?.unit?.leaseStart || null,
     leaseEnd: profile?.leaseEnd || profile?.unit?.leaseEnd || null,
     monthlyRent: profile?.monthlyRent || profile?.unit?.monthlyRent || 0,
+    hasParking: profile?.hasParking ?? profile?.unit?.hasParking ?? false,
+    parkingSpot: profile?.parkingSpot ?? profile?.unit?.parkingSpot ?? null,
+    parkingFee: profile?.parkingFee ?? profile?.unit?.parkingFee ?? 0,
     securityDeposit: profile?.securityDeposit ?? (profile?.monthlyRent ? profile.monthlyRent * 1.5 : 0),
     unit: profile?.unit || null,
     property: profile?.property || null,
@@ -256,6 +262,9 @@ async function createTenant(landlordId, data, ipAddress = '') {
     phone = '',
     unitId,
     monthlyRent,
+    hasParking = false,
+    parkingSpot = null,
+    parkingFee = 0,
     securityDeposit,
     leaseStart,
     leaseEnd,
@@ -307,6 +316,11 @@ async function createTenant(landlordId, data, ipAddress = '') {
     if (leaseStart) unit.leaseStart = new Date(leaseStart);
     if (leaseEnd) unit.leaseEnd = new Date(leaseEnd);
     if (monthlyRent) unit.monthlyRent = Number(monthlyRent);
+    if (hasParking !== undefined) {
+      unit.hasParking = Boolean(hasParking);
+      unit.parkingSpot = hasParking ? parkingSpot : null;
+      unit.parkingFee = hasParking ? Number(parkingFee || 0) : 0;
+    }
     await unit.save();
 
     assignedUnit = unit;
@@ -323,6 +337,9 @@ async function createTenant(landlordId, data, ipAddress = '') {
     property: assignedProperty ? assignedProperty._id : null,
     unit: assignedUnit ? assignedUnit._id : null,
     monthlyRent: profileRent,
+    hasParking: Boolean(hasParking),
+    parkingSpot: hasParking ? parkingSpot : null,
+    parkingFee: hasParking ? Number(parkingFee || 0) : 0,
     securityDeposit: depositAmount,
     leaseStart: leaseStart ? new Date(leaseStart) : null,
     leaseEnd: leaseEnd ? new Date(leaseEnd) : null,
@@ -373,6 +390,9 @@ async function createTenant(landlordId, data, ipAddress = '') {
     unitId: assignedUnit?._id || null,
     unitLabel: assignedUnit?.label || 'Unassigned',
     monthlyRent: profile.monthlyRent,
+    hasParking: profile.hasParking,
+    parkingSpot: profile.parkingSpot,
+    parkingFee: profile.parkingFee,
     leaseStart: profile.leaseStart,
     leaseEnd: profile.leaseEnd,
     status: profile.status,
@@ -397,6 +417,9 @@ async function updateTenant(landlordId, tenantId, data, ipAddress = '') {
     phone,
     unitId,
     monthlyRent,
+    hasParking,
+    parkingSpot,
+    parkingFee,
     securityDeposit,
     leaseStart,
     leaseEnd,
@@ -538,6 +561,9 @@ async function updateTenant(landlordId, tenantId, data, ipAddress = '') {
   }
 
   if (monthlyRent !== undefined) profile.monthlyRent = Number(monthlyRent);
+  if (hasParking !== undefined) profile.hasParking = Boolean(hasParking);
+  if (parkingSpot !== undefined) profile.parkingSpot = hasParking ? parkingSpot : null;
+  if (parkingFee !== undefined) profile.parkingFee = hasParking ? Number(parkingFee || 0) : 0;
   if (securityDeposit !== undefined) profile.securityDeposit = Number(securityDeposit);
   if (leaseStart !== undefined) profile.leaseStart = leaseStart ? new Date(leaseStart) : null;
   if (leaseEnd !== undefined) profile.leaseEnd = leaseEnd ? new Date(leaseEnd) : null;

@@ -5,9 +5,8 @@ import { useAuth } from '../context/AuthContext';
 
 export const LoginPage = ({ onNavigate = () => {} }) => {
   const { theme, toggleTheme } = useTheme();
-  const { login, logout } = useAuth();
+  const { login } = useAuth();
 
-  const [role, setRole] = useState('landlord'); // 'landlord' | 'tenant'
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -18,15 +17,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-
-  const handleRoleSwitch = (newRole) => {
-    setRole(newRole);
-    setTouched({});
-    setErrors({});
-    setApiError(null);
-    setEmail('');
-    setPassword('');
-  };
+  const [targetPortal, setTargetPortal] = useState('');
 
   const validateField = (name, value) => {
     let error = '';
@@ -82,30 +73,17 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
     try {
       const res = await login(email, password);
       const userRole = res?.user?.role || res?.role;
-
-      // Enforce tab role alignment
-      if (role === 'tenant' && userRole !== 'tenant') {
-        await logout();
-        setIsSubmitting(false);
-        setApiError('This account has landlord credentials. Please switch to the Landlord tab to sign in.');
-        return;
-      }
-
-      if (role === 'landlord' && userRole === 'tenant') {
-        await logout();
-        setIsSubmitting(false);
-        setApiError('This account has resident credentials. Please switch to the Resident tab to sign in.');
-        return;
-      }
+      const isTenant = userRole === 'tenant';
 
       setIsSubmitting(false);
       setIsSuccess(true);
+      setTargetPortal(isTenant ? 'Resident Portal' : 'Landlord Console');
 
       setTimeout(() => {
-        if (userRole === 'landlord' || userRole === 'superadmin') {
-          onNavigate('/dashboard');
-        } else {
+        if (isTenant) {
           onNavigate('/tenant');
+        } else {
+          onNavigate('/dashboard');
         }
       }, 500);
     } catch (err) {
@@ -159,16 +137,14 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
           </div>
 
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold font-grotesk text-white leading-[1.08] tracking-[-0.03em]">
-            {role === 'landlord' ? 'Landlord Portal.' : 'Resident Portal.'}
+            Welcome Back.
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300 max-w-md leading-relaxed font-sans font-normal">
-            {role === 'landlord'
-              ? 'Access your landlord control panel, view unit occupancy, track rent collections, and manage tenant requests.'
-              : 'Pay rent online, submit repair tickets, track technician dispatches, and access building announcements.'}
+            Unified access for landlords and residents. Sign in with your email and password to automatically access your management dashboard or resident portal.
           </p>
 
-          {/* Real Estate Statistics Cards */}
+          {/* Statistics Cards */}
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-xl shadow-xl">
               <span className="text-2xl sm:text-3xl font-extrabold font-grotesk text-white block tracking-tight">2,480+</span>
@@ -183,7 +159,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
 
         {/* Bottom Footer Note */}
         <div className="relative z-10 text-xs text-slate-400 font-mono tracking-wide">
-          {role === 'landlord' ? 'Landlord Control Panel' : 'Resident Portal'} &bull; Secure Authentication
+          JPTL Unified Portal &bull; Secure Authentication
         </div>
       </div>
 
@@ -191,41 +167,13 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
       <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 md:p-14 lg:p-16 max-w-xl mx-auto w-full my-auto">
         
         <div>
-          {/* ROLE SELECTOR TABS */}
-          <div className="flex items-center p-1 rounded-2xl bg-slate-200/70 dark:bg-[#10131F] border border-slate-300/60 dark:border-slate-800 mb-8 text-xs font-semibold">
-            <button
-              type="button"
-              onClick={() => handleRoleSwitch('landlord')}
-              className={`flex-1 py-2.5 rounded-xl font-grotesk font-bold transition-all btn-press ${
-                role === 'landlord'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              Landlord Console
-            </button>
-            <button
-              type="button"
-              onClick={() => handleRoleSwitch('tenant')}
-              className={`flex-1 py-2.5 rounded-xl font-grotesk font-bold transition-all btn-press ${
-                role === 'tenant'
-                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/20'
-                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-              }`}
-            >
-              Resident Portal
-            </button>
-          </div>
-
           {/* Header Title */}
-          <div className="mb-6">
+          <div className="mb-8">
             <h2 className="text-2xl sm:text-3xl font-bold font-grotesk text-slate-900 dark:text-white tracking-tight">
-              {role === 'landlord' ? 'Landlord Sign In' : 'Resident Sign In'}
+              Sign In to Your Account
             </h2>
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 font-sans">
-              {role === 'landlord'
-                ? 'Access your property management dashboard'
-                : 'Sign in with the resident credentials provided by your landlord'}
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1.5 font-sans">
+              Enter your credentials below to access your portal
             </p>
           </div>
 
@@ -246,7 +194,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
               <CheckCircle2 className="w-8 h-8 text-emerald-500" />
               <span className="font-bold text-sm text-slate-900 dark:text-white">Authenticated!</span>
               <span className="text-slate-600 dark:text-slate-300">
-                Entering {role === 'landlord' ? 'Landlord Console...' : 'Resident Portal...'}
+                Entering {targetPortal}...
               </span>
             </div>
           )}
@@ -267,7 +215,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
                 value={email}
                 onChange={(e) => handleChange('email', e.target.value)}
                 onBlur={() => handleBlur('email')}
-                placeholder={role === 'landlord' ? 'vance.landlord@horizonliving.io' : 'sophia.lin@example.com'}
+                placeholder="name@example.com"
                 className={`w-full bg-white dark:bg-[#0D111D] border ${
                   touched.email && errors.email
                     ? 'border-rose-500 focus:ring-rose-500'
@@ -296,7 +244,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
                   value={password}
                   onChange={(e) => handleChange('password', e.target.value)}
                   onBlur={() => handleBlur('password')}
-                  placeholder="Enter password"
+                  placeholder="Enter your password"
                   className={`w-full bg-white dark:bg-[#0D111D] border ${
                     touched.password && errors.password
                       ? 'border-rose-500 focus:ring-rose-500'
@@ -323,7 +271,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
             <button
               type="submit"
               disabled={isSubmitting || isSuccess}
-              className="w-full py-3.5 px-4 rounded-2xl font-grotesk font-bold text-xs sm:text-sm text-white bg-indigo-600 hover:bg-indigo-500 active:scale-[0.97] disabled:opacity-50 shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-transform duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-indigo-400 mt-5"
+              className="w-full py-3.5 px-4 rounded-2xl font-grotesk font-bold text-xs sm:text-sm text-white bg-indigo-600 hover:bg-indigo-500 active:scale-[0.97] disabled:opacity-50 shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-transform duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-indigo-400 mt-6 cursor-pointer"
             >
               {isSubmitting ? (
                 <>
@@ -332,7 +280,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
                 </>
               ) : (
                 <>
-                  <span>Sign In as {role === 'landlord' ? 'Landlord' : 'Resident'}</span>
+                  <span>Sign In</span>
                   <ArrowRight className="w-4 h-4" />
                 </>
               )}
@@ -342,20 +290,20 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
         </div>
 
         {/* Footer Note */}
-        <div className="mt-8 text-center text-xs text-slate-600 dark:text-slate-400">
-          {role === 'landlord' ? (
-            <>
-              Need a landlord account?{' '}
-              <button
-                onClick={() => onNavigate('/register')}
-                className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
-              >
-                Create one now
-              </button>
-            </>
-          ) : (
-            <span>Don't have login credentials? Contact your landlord to issue your resident account.</span>
-          )}
+        <div className="mt-8 pt-6 border-t border-slate-200/80 dark:border-slate-800/80 text-center text-xs text-slate-600 dark:text-slate-400 space-y-2">
+          <div>
+            Need a landlord account?{' '}
+            <button
+              type="button"
+              onClick={() => onNavigate('/register')}
+              className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+            >
+              Create one now
+            </button>
+          </div>
+          <div className="text-[11px] text-slate-400 dark:text-slate-500">
+            Resident access is granted by your landlord or property management office.
+          </div>
         </div>
 
       </div>

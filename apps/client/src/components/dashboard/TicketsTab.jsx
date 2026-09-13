@@ -36,11 +36,12 @@ export const TicketsTab = ({ tickets: initialTickets = [], searchQuery = '', onO
   };
 
   const filteredTickets = tickets.filter((t) => {
+    const q = searchQuery.toLowerCase();
     const matchesSearch =
-      t.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.propertyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.unitLabel.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.tenantName.toLowerCase().includes(searchQuery.toLowerCase());
+      (t.title ?? '').toLowerCase().includes(q) ||
+      (t.propertyName ?? '').toLowerCase().includes(q) ||
+      (t.unitLabel ?? '').toLowerCase().includes(q) ||
+      (t.tenantName ?? '').toLowerCase().includes(q);
 
     if (statusFilter !== 'all' && t.status !== statusFilter) return false;
     return matchesSearch;

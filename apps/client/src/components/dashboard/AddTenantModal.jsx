@@ -36,8 +36,10 @@ export const AddTenantModal = ({
   const [leaseStart, setLeaseStart] = useState('');
   const [leaseEnd, setLeaseEnd] = useState('');
   const [durationMonths, setDurationMonths] = useState(12);
-
   const [isPreAdd, setIsPreAdd] = useState(false);
+  const [hasParking, setHasParking] = useState(false);
+  const [parkingSpot, setParkingSpot] = useState('');
+  const [parkingFee, setParkingFee] = useState('150');
 
   const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
@@ -80,6 +82,9 @@ export const AddTenantModal = ({
       setErrorMessage(null);
       setSuccessData(null);
       setCopied(false);
+      setHasParking(false);
+      setParkingSpot('');
+      setParkingFee('150');
 
       // Default activeTab: if initialUnitId provided and there are pre-added tenants, default to 'existing'
       if (preAddedTenants.length > 0) {
@@ -302,6 +307,9 @@ export const AddTenantModal = ({
             lastName: selectedExistingTenant?.lastName || selectedExistingTenant?.name?.split(' ').slice(1).join(' '),
             unitId: selectedUnitId,
             monthlyRent: Number(monthlyRent) || targetUnit?.monthlyRent || 0,
+            hasParking,
+            parkingSpot: hasParking ? parkingSpot : null,
+            parkingFee: hasParking ? Number(parkingFee) || 0 : 0,
             leaseStart,
             leaseEnd,
             status: 'active',
@@ -316,6 +324,9 @@ export const AddTenantModal = ({
             phone: selectedExistingTenant?.phone || '',
             unitId: selectedUnitId,
             monthlyRent: Number(monthlyRent) || targetUnit?.monthlyRent || 0,
+            hasParking,
+            parkingSpot: hasParking ? parkingSpot : null,
+            parkingFee: hasParking ? Number(parkingFee) || 0 : 0,
             leaseStart,
             leaseEnd,
             tempPassword: 'jptl2026',
@@ -391,6 +402,9 @@ export const AddTenantModal = ({
         phone: tenantPhone.trim(),
         unitId: isPreAdd ? 'pre_add_unassigned' : selectedUnitId,
         monthlyRent: isPreAdd ? 0 : Number(monthlyRent) || targetUnit?.monthlyRent || 0,
+        hasParking: !isPreAdd && hasParking,
+        parkingSpot: (!isPreAdd && hasParking) ? parkingSpot : null,
+        parkingFee: (!isPreAdd && hasParking) ? Number(parkingFee) || 0 : 0,
         leaseStart: (!isPreAdd && leaseStart) ? leaseStart : undefined,
         leaseEnd: (!isPreAdd && leaseEnd) ? leaseEnd : undefined,
         tempPassword,
@@ -831,6 +845,57 @@ export const AddTenantModal = ({
                       </span>
                     </div>
                   )}
+
+                  {/* Assigned Parking Section */}
+                  <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
+                    <label className="flex items-center justify-between cursor-pointer">
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={hasParking}
+                          onChange={(e) => setHasParking(e.target.checked)}
+                          className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-700 cursor-pointer"
+                        />
+                        <span className="text-xs font-semibold text-slate-900 dark:text-white">
+                          Assign Parking Space (+ Monthly Fee)
+                        </span>
+                      </div>
+                      <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${
+                        hasParking ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20' : 'text-slate-400'
+                      }`}>
+                        {hasParking ? 'Included' : 'None ($0/mo)'}
+                      </span>
+                    </label>
+
+                    {hasParking && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-slate-200 dark:border-slate-800">
+                        <div>
+                          <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                            Parking Bay / Slot
+                          </label>
+                          <input
+                            type="text"
+                            value={parkingSpot}
+                            onChange={(e) => setParkingSpot(e.target.value)}
+                            placeholder="e.g. Bay #14B (L2)"
+                            className="w-full bg-white dark:bg-[#0D111D] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                            Monthly Parking Fee ($)
+                          </label>
+                          <input
+                            type="number"
+                            value={parkingFee}
+                            onChange={(e) => setParkingFee(e.target.value)}
+                            placeholder="150"
+                            className="w-full bg-white dark:bg-[#0D111D] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </>
               )}
 

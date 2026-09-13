@@ -136,6 +136,9 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
     id: user?._id || user?.id || tenantData?._id || tenantData?.id,
     name: tenantData?.fullName || tenantData?.name || [user?.firstName, user?.lastName].filter(Boolean).join(' ') || user?.name || 'Resident',
     email: user?.email || tenantData?.email || '',
+    hasParking: tenantData?.hasParking ?? unitData?.hasParking ?? false,
+    parkingSpot: tenantData?.parkingSpot ?? unitData?.parkingSpot ?? null,
+    parkingFee: tenantData?.parkingFee ?? unitData?.parkingFee ?? 0,
   };
   const currentUnit = unitData ? {
     ...unitData,

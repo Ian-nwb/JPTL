@@ -56,4 +56,41 @@ export async function uploadDocumentToCloudinary(fileBuffer, originalName = 'doc
   });
 }
 
+/**
+ * Upload a maintenance ticket photo buffer to Cloudinary.
+ * Falls back to a demo URL when credentials are missing (dev / CI).
+ */
+export async function uploadTicketPhotoToCloudinary(fileBuffer, originalName = 'photo.jpg') {
+  const client = getCloudinaryClient();
+  const folder = 'jptl_maintenance_photos';
+
+  if (!client) {
+    const cleanName = originalName.replace(/[^a-zA-Z0-9_.-]/g, '_');
+    const ts = Date.now();
+    return {
+      secure_url: `https://res.cloudinary.com/demo/image/upload/v${ts}/${folder}/${cleanName}`,
+      public_id: `${folder}/${cleanName}_${ts}`,
+      bytes: fileBuffer ? fileBuffer.length : 0,
+      format: originalName.split('.').pop() || 'jpg',
+      isSimulated: true,
+    };
+  }
+
+  return new Promise((resolve, reject) => {
+    const uploadStream = client.uploader.upload_stream(
+      {
+        folder,
+        resource_type: 'image',
+        public_id: `${Date.now()}_${originalName.replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_.-]/g, '_')}`,
+        transformation: [{ quality: 'auto', fetch_format: 'auto' }],
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    uploadStream.end(fileBuffer);
+  });
+}
+
 export { cloudinary };

@@ -19,6 +19,9 @@ const tenantProfileSchema = new mongoose.Schema(
       default: null,
     },
     monthlyRent: { type: Number, default: 0 },
+    hasParking: { type: Boolean, default: false },
+    parkingSpot: { type: String, default: null },
+    parkingFee: { type: Number, default: 0 },
     leaseStart: { type: Date, default: null },
     leaseEnd: { type: Date, default: null },
     status: {

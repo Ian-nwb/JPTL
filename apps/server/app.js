@@ -35,8 +35,8 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
 
-// Authentication routes with strict brute-force rate limiter
-app.use('/api/auth', authLimiter, authRoutes);
+// Authentication routes
+app.use('/api/auth', authRoutes);
 
 // Landlord routes
 app.use('/api/landlord/dash', landlordDashRoutes);

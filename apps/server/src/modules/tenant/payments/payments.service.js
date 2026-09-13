@@ -62,7 +62,9 @@ export async function getTenantLedger(tenantId) {
   const { userDoc, profile, unit, property } = await resolveTenantContext(tenantId);
 
   const rentAmount = profile?.monthlyRent || unit?.monthlyRent || 2400;
-  const parkingFee = 150;
+  const hasParking = Boolean(profile?.hasParking ?? unit?.hasParking ?? false);
+  const parkingSpot = hasParking ? (profile?.parkingSpot || unit?.parkingSpot || 'Assigned Space') : null;
+  const parkingFee = hasParking ? Number(profile?.parkingFee ?? unit?.parkingFee ?? 0) : 0;
   const utilityFee = 45;
   const totalMonthlyDue = rentAmount + parkingFee + utilityFee;
 
@@ -88,12 +90,14 @@ export async function getTenantLedger(tenantId) {
     dueDate: nextDueDate,
     status: upcomingInvoice?.status || 'pending',
     baseRent: upcomingInvoice?.baseRent || rentAmount,
-    parkingFee: upcomingInvoice?.parkingFee || parkingFee,
-    utilityFee: upcomingInvoice?.utilityFee || utilityFee,
+    hasParking,
+    parkingSpot,
+    parkingFee: upcomingInvoice?.parkingFee !== undefined ? upcomingInvoice.parkingFee : parkingFee,
+    utilityFee: upcomingInvoice?.utilityFee !== undefined ? upcomingInvoice.utilityFee : utilityFee,
     totalMonthlyDue: upcomingInvoice ? upcomingInvoice.amount : totalMonthlyDue,
     unitLabel: unit?.label || 'Unit 14B',
     propertyName: property?.name || 'Aura Sky Towers',
-    parkingBay: 'Level 2, Bay #14B',
+    parkingBay: parkingSpot,
   };
 
   const securityDeposit = profile?.securityDeposit || Math.round(rentAmount * 1.5);
@@ -124,8 +128,10 @@ export async function getTenantLedger(tenantId) {
       period: p.period || `Rent Due ${p.dueDate ? new Date(p.dueDate).toLocaleString('en-US', { month: 'long', year: 'numeric' }) : ''}`,
       amount: p.amount,
       baseRent: p.baseRent || Math.round(p.amount * 0.9),
-      parkingFee: p.parkingFee || parkingFee,
-      utilityFee: p.utilityFee || utilityFee,
+      hasParking,
+      parkingSpot,
+      parkingFee: p.parkingFee !== undefined ? p.parkingFee : (hasParking ? parkingFee : 0),
+      utilityFee: p.utilityFee !== undefined ? p.utilityFee : utilityFee,
       paidAt: paidDate || (p.status === 'paid' ? 'Paid & Cleared' : null),
       status: p.status,
       method: p.paymentMethod || 'Visa •••• 4242',
@@ -199,8 +205,10 @@ export async function getPaymentReceipt(tenantId, paymentId) {
   }
 
   const amount = payment.amount;
-  const baseRent = payment.baseRent || Math.round(amount * 0.9);
-  const parkingFee = payment.parkingFee ?? 150;
+  const hasParking = Boolean(profile?.hasParking ?? unit?.hasParking ?? (payment.parkingFee > 0));
+  const parkingSpot = hasParking ? (profile?.parkingSpot || unit?.parkingSpot || 'Assigned Space') : null;
+  const parkingFee = payment.parkingFee !== undefined ? Number(payment.parkingFee) : (hasParking ? Number(profile?.parkingFee ?? unit?.parkingFee ?? 0) : 0);
+  const baseRent = payment.baseRent || Math.max(0, amount - parkingFee - (payment.utilityFee ?? 45));
   const utilityFee = payment.utilityFee ?? Math.max(0, amount - baseRent - parkingFee);
 
   const formattedPaidAt = payment.paidAt
@@ -220,6 +228,8 @@ export async function getPaymentReceipt(tenantId, paymentId) {
     period: payment.period || 'Monthly Rent Statement',
     amount,
     baseRent,
+    hasParking,
+    parkingSpot,
     parkingFee,
     utilityFee,
     paidAt: formattedPaidAt,
@@ -258,7 +268,9 @@ export async function payRent(tenantId, data = {}, ipAddress = '') {
   const { paymentMethod = 'card', paymentId, period } = data;
 
   const baseMonthlyRent = profile?.monthlyRent || unit?.monthlyRent || 2400;
-  const parkingFee = 150;
+  const hasParking = Boolean(profile?.hasParking ?? unit?.hasParking ?? false);
+  const parkingFee = hasParking ? Number(profile?.parkingFee ?? unit?.parkingFee ?? 0) : 0;
+  const parkingSpot = hasParking ? (profile?.parkingSpot || unit?.parkingSpot || 'Assigned Space') : null;
   const utilityFee = 45;
   const processingFee = paymentMethod === 'card' ? 45.0 : 0.0;
 
@@ -295,6 +307,7 @@ export async function payRent(tenantId, data = {}, ipAddress = '') {
     payment.paymentMethod = methodLabel;
     payment.processingFee = processingFee;
     payment.amount = totalAmount;
+    payment.parkingFee = payment.parkingFee !== undefined ? payment.parkingFee : parkingFee;
     if (!payment.period) payment.period = currentPeriod;
     await payment.save();
   } else {

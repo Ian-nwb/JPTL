@@ -2,6 +2,7 @@ import Ticket from '../../../shared/models/ticket.model.js';
 import Property from '../../../shared/models/property.model.js';
 import Unit from '../../../shared/models/unit.model.js';
 import AuditLog from '../../../shared/models/auditLog.model.js';
+import User from '../../../shared/models/user.model.js';
 
 export class TicketError extends Error {
   constructor(message, statusCode = 400) {

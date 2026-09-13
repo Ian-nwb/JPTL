@@ -225,7 +225,11 @@ export const TenantOverviewTab = ({
               </div>
               <div className="flex justify-between items-center p-2 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60">
                 <span className="text-slate-400 flex items-center gap-1"><Car className="w-3 h-3" /> Assigned Parking:</span>
-                <strong className="text-indigo-500">Bay #14B (L2)</strong>
+                {Boolean(tenant?.hasParking ?? unit?.hasParking) ? (
+                  <strong className="text-indigo-500">{tenant?.parkingSpot || unit?.parkingSpot || 'Assigned Slot'}</strong>
+                ) : (
+                  <span className="text-slate-400 font-mono italic text-[11px]">None assigned</span>
+                )}
               </div>
             </div>
           </div>

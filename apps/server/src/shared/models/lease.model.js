@@ -45,6 +45,9 @@ const leaseSchema = new mongoose.Schema(
     leaseStart: { type: Date, required: true },
     leaseEnd: { type: Date, required: true },
     monthlyRent: { type: Number, required: true },
+    hasParking: { type: Boolean, default: false },
+    parkingSpot: { type: String, default: null },
+    parkingFee: { type: Number, default: 0 },
     securityDeposit: { type: Number, default: 0 },
     status: {
       type: String,

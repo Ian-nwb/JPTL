@@ -123,7 +123,7 @@ export const authApi = {
   login: async (credentials) => {
     const res = await api.post('/auth/login', credentials);
     const token = res.token || res.data?.token;
-    const user = res.data?.user || res.user;
+    const user = res.user || res.data?.user || (res.role ? { role: res.role, email: credentials.email } : null);
     if (token) tokenStorage.setToken(token);
     if (user) tokenStorage.setUser(user);
     return { token, user, role: user?.role || res.role };
@@ -135,7 +135,7 @@ export const authApi = {
 
   getMe: async () => {
     const res = await api.get('/auth/me');
-    const user = res.data || res.user;
+    const user = res.user || res.data?.user || res.data;
     if (user) tokenStorage.setUser(user);
     return user;
   },
@@ -176,7 +176,24 @@ export const landlordApi = {
   createUnit: (propertyId, data) => api.post(`/landlord/properties/${propertyId}/units`, data),
   deleteUnit: (propertyId, unitId) => api.delete(`/landlord/properties/${propertyId}/units/${unitId}`),
   
-  getTickets: () => api.get('/landlord/tickets'),
+  getTickets: (params = {}) => {
+    const qs = new URLSearchParams(params).toString();
+    return api.get(`/landlord/tickets${qs ? '?' + qs : ''}`);
+  },
+  uploadTicketPhotos: async (files) => {
+    const formData = new FormData();
+    files.forEach((file) => formData.append('photos', file));
+    const token = tokenStorage.getToken();
+    const res = await fetch(`${API_BASE_URL}/landlord/tickets/upload-photos`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      credentials: 'include',
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.message || 'Photo upload failed');
+    return data; // { success: true, photoUrls: [...] }
+  },
   createTicket: (data) => api.post('/landlord/tickets', data),
   updateTicketStatus: (id, status, notes) => api.patch(`/landlord/tickets/${id}/status`, { status, notes }),
   assignTechnician: (id, technicianData) => api.patch(`/landlord/tickets/${id}/assign`, technicianData),
