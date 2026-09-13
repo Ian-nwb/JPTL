@@ -15,15 +15,20 @@ export const TenantOverviewTab = ({
   onRequestRepairClick,
   onNavigateTab,
 }) => {
-  // Compute lease remaining days
-  const today = new Date('2026-08-27');
-  const leaseEndDate = new Date(unit?.leaseEnd || tenant?.leaseEnd || '2027-01-14');
-  const diffTime = Math.max(0, leaseEndDate - today);
-  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  // Detect if tenant is pre-added (no unit assigned yet)
+  const isPreAdded = !unit;
+
+  // Compute lease remaining days (only when a unit is assigned)
+  const today = new Date();
+  const leaseEndDate = unit?.leaseEnd || tenant?.leaseEnd ? new Date(unit?.leaseEnd || tenant?.leaseEnd) : null;
+  const diffDays = leaseEndDate ? Math.max(0, Math.ceil((leaseEndDate - today) / (1000 * 60 * 60 * 24))) : null;
 
   // Active tickets for this tenant
   const tenantTickets = tickets.filter((t) => t.unitId === unit?.id || t.tenantName === tenant?.name);
   const activeTickets = tenantTickets.filter((t) => t.status !== 'resolved');
+
+  // Monthly rent — only real data, no fallback
+  const monthlyRent = unit?.monthlyRent ?? null;
 
   return (
     <div className="space-y-6">
@@ -34,41 +39,58 @@ export const TenantOverviewTab = ({
           
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-mono font-medium">
             <Home className="w-3.5 h-3.5 text-indigo-500" />
-            <span>{property?.name || 'Aura Sky Towers & Residences'}</span>
+            <span>{property?.name || 'JPTL Property Management'}</span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-extrabold font-grotesk tracking-tight text-slate-900 dark:text-white leading-tight">
-            Welcome home, <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">{tenant?.name || 'Sophia'}</span> 👋
+            Welcome, <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">{tenant?.name || tenant?.firstName || 'Resident'}</span> 👋
           </h1>
 
-          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-mono flex items-center gap-3 flex-wrap">
-            <span className="text-slate-900 dark:text-white font-bold">{unit?.label || 'Unit 14B'}</span>
-            <span>&bull;</span>
-            <span>{unit?.bedrooms || 2} Bed &bull; {unit?.bathrooms || 2} Bath ({unit?.sqft || 1150} sqft)</span>
-            <span>&bull;</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{diffDays} days remaining on lease</span>
-          </p>
+          {isPreAdded ? (
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-mono flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-[11px]">
+                <Clock className="w-3 h-3" /> Pending Unit Assignment
+              </span>
+              <span className="text-slate-500">Your unit will be assigned by your landlord.</span>
+            </p>
+          ) : (
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-mono flex items-center gap-3 flex-wrap">
+              <span className="text-slate-900 dark:text-white font-bold">{unit?.label}</span>
+              <span>&bull;</span>
+              <span>{unit?.bedrooms} Bed &bull; {unit?.bathrooms} Bath{unit?.sqft ? ` (${unit.sqft} sqft)` : ''}</span>
+              {diffDays !== null && (
+                <>
+                  <span>&bull;</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{diffDays} days remaining on lease</span>
+                </>
+              )}
+            </p>
+          )}
         </div>
 
         {/* Action CTAs */}
         <div className="flex items-center gap-3 shrink-0">
-          <button
-            type="button"
-            onClick={onRequestRepairClick}
-            className="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-grotesk font-semibold text-xs border border-slate-200 dark:border-slate-800 flex items-center gap-2 btn-press"
-          >
-            <Wrench className="w-4 h-4 text-amber-500" />
-            <span>Report Repair</span>
-          </button>
+          {!isPreAdded && (
+            <button
+              type="button"
+              onClick={onRequestRepairClick}
+              className="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-grotesk font-semibold text-xs border border-slate-200 dark:border-slate-800 flex items-center gap-2 btn-press"
+            >
+              <Wrench className="w-4 h-4 text-amber-500" />
+              <span>Report Repair</span>
+            </button>
+          )}
 
-          <button
-            type="button"
-            onClick={onPayRentClick}
-            className="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-grotesk font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center gap-2 btn-press"
-          >
-            <CreditCard className="w-4 h-4" />
-            <span>Pay Rent</span>
-          </button>
+          {!isPreAdded && (
+            <button
+              type="button"
+              onClick={onPayRentClick}
+              className="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-grotesk font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center gap-2 btn-press"
+            >
+              <CreditCard className="w-4 h-4" />
+              <span>Pay Rent</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -80,32 +102,59 @@ export const TenantOverviewTab = ({
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <CreditCard className="w-3.5 h-3.5 text-emerald-500" /> Current Rent Balance
+                <CreditCard className="w-3.5 h-3.5 text-emerald-500" /> Monthly Rent
               </span>
-              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                Paid for Aug
-              </span>
+              {!isPreAdded && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  Active Lease
+                </span>
+              )}
+              {isPreAdded && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-slate-500/10 text-slate-500 border border-slate-500/20">
+                  Not Assigned
+                </span>
+              )}
             </div>
 
-            <h3 className="text-3xl font-extrabold font-grotesk text-slate-900 dark:text-white tracking-tight mt-2">
-              ${(unit?.monthlyRent || 2400).toLocaleString()}<span className="text-xs font-normal text-slate-400 font-mono">/mo</span>
-            </h3>
-
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
-              Next cycle due <strong className="text-slate-700 dark:text-slate-300">September 1, 2026</strong>
-            </p>
+            {isPreAdded ? (
+              <>
+                <h3 className="text-3xl font-extrabold font-grotesk text-slate-400 dark:text-slate-500 tracking-tight mt-2">
+                  —<span className="text-xs font-normal font-mono">/mo</span>
+                </h3>
+                <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+                  Rent amount will be set when a unit is assigned.
+                </p>
+              </>
+            ) : (
+              <>
+                <h3 className="text-3xl font-extrabold font-grotesk text-slate-900 dark:text-white tracking-tight mt-2">
+                  ${monthlyRent !== null ? monthlyRent.toLocaleString() : '—'}<span className="text-xs font-normal text-slate-400 font-mono">/mo</span>
+                </h3>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+                  Contact your landlord for next payment details.
+                </p>
+              </>
+            )}
           </div>
 
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
-            <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Auto-Pay Active
-            </span>
-            <button
-              onClick={onPayRentClick}
-              className="text-xs font-bold font-grotesk text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 btn-press"
-            >
-              Pay Early <ArrowRight className="w-3 h-3" />
-            </button>
+            {!isPreAdded ? (
+              <>
+                <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Lease Active
+                </span>
+                <button
+                  onClick={onPayRentClick}
+                  className="text-xs font-bold font-grotesk text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 btn-press"
+                >
+                  Pay Rent <ArrowRight className="w-3 h-3" />
+                </button>
+              </>
+            ) : (
+              <span className="text-[11px] font-mono text-slate-400 flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-amber-400" /> Awaiting unit assignment
+              </span>
+            )}
           </div>
         </div>
 

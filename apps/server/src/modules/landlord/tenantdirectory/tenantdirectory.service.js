@@ -8,6 +8,7 @@ import Payment from '../../../shared/models/payment.model.js';
 import Document from '../../../shared/models/document.model.js';
 import AuditLog from '../../../shared/models/auditLog.model.js';
 import crypto from 'crypto';
+import { sendTenantWelcomeEmail } from '../../../shared/utils/mailer.js';
 
 class TenantDirectoryError extends Error {
   constructor(message, statusCode = 400) {
@@ -272,11 +273,7 @@ async function createTenant(landlordId, data, ipAddress = '') {
     throw new TenantDirectoryError('A user with this email address already exists', 409);
   }
 
-<<<<<<< Updated upstream
   const generatedPassword = tempPassword || generateTemporaryPassword();
-=======
-  const initialPassword = tempPassword || 'jptl2026';
->>>>>>> Stashed changes
 
   // Create user
   const tenantUser = await User.create({
@@ -342,22 +339,25 @@ async function createTenant(landlordId, data, ipAddress = '') {
 
   const fullName = [tenantUser.firstName, tenantUser.middleName, tenantUser.lastName].filter(Boolean).join(' ');
 
-<<<<<<< Updated upstream
-=======
-  // Dispatch welcome email asynchronously
-  const landlordUser = await User.findById(landlordId).select('firstName lastName company').lean();
-  const landlordName = landlordUser ? [landlordUser.firstName, landlordUser.lastName].filter(Boolean).join(' ') : 'Your Landlord';
-  const propertyName = assignedProperty ? assignedProperty.name : 'Your Residence';
+  // Send welcome email with login credentials
+  try {
+    const landlordUser = await User.findById(landlordId).select('firstName lastName').lean();
+    const landlordName = landlordUser
+      ? [landlordUser.firstName, landlordUser.lastName].filter(Boolean).join(' ')
+      : 'Your Landlord';
+    const propertyName = assignedProperty?.name || 'your community';
 
-  sendTenantWelcomeEmail({
-    email: tenantUser.email,
-    name: fullName,
-    landlordName,
-    propertyName,
-    password: initialPassword,
-  }).catch((err) => console.error('Error sending welcome email:', err.message));
+    sendTenantWelcomeEmail({
+      email: tenantUser.email,
+      name: fullName,
+      landlordName,
+      propertyName,
+      password: generatedPassword,
+    }).catch((err) => console.error('Error sending tenant welcome email:', err.message));
+  } catch (err) {
+    console.error('Failed to initiate welcome email:', err.message);
+  }
 
->>>>>>> Stashed changes
   return {
     id: tenantUser._id,
     firstName: tenantUser.firstName,

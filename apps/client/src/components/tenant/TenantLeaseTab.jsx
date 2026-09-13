@@ -1,18 +1,83 @@
 import React, { useState } from 'react';
-import { FileText, Download, ShieldCheck, Home, Calendar, UserCheck, Key, CheckCircle2, AlertCircle, Plus, Sparkles } from 'lucide-react';
+import { FileText, Download, ShieldCheck, Home, Calendar, CheckCircle2, Clock, Plus, AlertCircle } from 'lucide-react';
 import { LeaseRenewalModal } from './LeaseRenewalModal';
 
 export const TenantLeaseTab = ({
   tenant,
   unit,
   property,
+  lease,
 }) => {
   const [isRenewalOpen, setIsRenewalOpen] = useState(false);
   const [renewalStatus, setRenewalStatus] = useState(null);
 
+  const isPreAdded = !unit && !lease?.leaseStart;
+
+  // Resolve real values — prefer lease profile data, fall back to unit
+  const leaseStart = lease?.leaseStart || unit?.leaseStart || null;
+  const leaseEnd = lease?.leaseEnd || unit?.leaseEnd || null;
+  const monthlyRent = lease?.monthlyRent ?? unit?.monthlyRent ?? null;
+  const securityDeposit = lease?.securityDeposit ?? (monthlyRent ? monthlyRent * 1.5 : null);
+
+  // Compute lease term in months
+  let leaseTerm = null;
+  if (leaseStart && leaseEnd) {
+    const s = new Date(leaseStart);
+    const e = new Date(leaseEnd);
+    const months = Math.round((e - s) / (1000 * 60 * 60 * 24 * 30.44));
+    leaseTerm = months > 0 ? `${months} Month${months !== 1 ? 's' : ''}` : null;
+  }
+
+  // Compute renewal window (60 days before lease end)
+  let renewalWindowDate = null;
+  if (leaseEnd) {
+    const end = new Date(leaseEnd);
+    end.setDate(end.getDate() - 60);
+    renewalWindowDate = end.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  const formatDate = (d) => {
+    if (!d) return '—';
+    return new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
   const handleRenewalSubmitted = (data) => {
     setRenewalStatus(data);
   };
+
+  // Pre-added empty state
+  if (isPreAdded) {
+    return (
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="p-6 rounded-3xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-mono font-medium">
+            <FileText className="w-3.5 h-3.5" />
+            <span>Digital Lease Agreement</span>
+          </div>
+          <h1 className="text-2xl font-extrabold font-grotesk text-slate-900 dark:text-white mt-1">My Lease & Documents</h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400">View official tenancy contracts, building rules, and renewal terms.</p>
+        </div>
+
+        {/* Empty State */}
+        <div className="flex flex-col items-center justify-center py-20 rounded-3xl apple-glass top-shade border border-dashed border-amber-400/30 bg-amber-500/5 text-center space-y-4">
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20">
+            <Clock className="w-8 h-8 text-amber-500" />
+          </div>
+          <div>
+            <h2 className="text-lg font-bold font-grotesk text-slate-900 dark:text-white">No Lease Assigned Yet</h2>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-md">
+              Your account has been created but you haven't been assigned to a unit yet.
+              Your landlord will assign you a unit and your lease details will appear here.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-mono font-semibold">
+            <AlertCircle className="w-3.5 h-3.5" /> Pending unit assignment
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -65,25 +130,35 @@ export const TenantLeaseTab = ({
         
         <div className="p-5 rounded-2xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-1">
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Lease Term</span>
-          <strong className="text-sm text-slate-900 dark:text-white font-mono block">12 Months (Standard)</strong>
-          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono">{unit?.leaseStart || '2026-01-15'} → {unit?.leaseEnd || '2027-01-14'}</p>
+          <strong className="text-sm text-slate-900 dark:text-white font-mono block">
+            {leaseTerm ? `${leaseTerm} (Standard)` : '—'}
+          </strong>
+          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono">
+            {leaseStart ? formatDate(leaseStart) : '—'} → {leaseEnd ? formatDate(leaseEnd) : '—'}
+          </p>
         </div>
 
         <div className="p-5 rounded-2xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-1">
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Monthly Rent Rate</span>
-          <strong className="text-xl text-slate-900 dark:text-white font-grotesk block">${(unit?.monthlyRent || 2400).toLocaleString()}/mo</strong>
+          <strong className="text-xl text-slate-900 dark:text-white font-grotesk block">
+            {monthlyRent !== null ? `$${monthlyRent.toLocaleString()}/mo` : '—'}
+          </strong>
           <p className="text-[11px] text-slate-400 font-mono">Due on the 1st of every month</p>
         </div>
 
         <div className="p-5 rounded-2xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-1">
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Security Deposit Held</span>
-          <strong className="text-xl text-indigo-500 font-grotesk block">${((unit?.monthlyRent || 2400) * 1.5).toLocaleString()}</strong>
+          <strong className="text-xl text-indigo-500 font-grotesk block">
+            {securityDeposit !== null ? `$${securityDeposit.toLocaleString()}` : '—'}
+          </strong>
           <p className="text-[11px] text-slate-400 font-mono">Refundable upon move-out</p>
         </div>
 
         <div className="p-5 rounded-2xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-1">
           <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Renewal Window</span>
-          <strong className="text-sm text-slate-900 dark:text-white font-mono block">Opens Nov 15, 2026</strong>
+          <strong className="text-sm text-slate-900 dark:text-white font-mono block">
+            {renewalWindowDate ? `Opens ${renewalWindowDate}` : '—'}
+          </strong>
           <p className="text-[11px] text-indigo-400 font-mono">60-day notice period</p>
         </div>
 
@@ -101,20 +176,24 @@ export const TenantLeaseTab = ({
           <div className="space-y-2 text-xs font-mono">
             <div className="flex justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14]">
               <span className="text-slate-500">Property:</span>
-              <strong className="text-slate-900 dark:text-white">{property?.name || 'Aura Sky Towers & Residences'}</strong>
+              <strong className="text-slate-900 dark:text-white">{property?.name || '—'}</strong>
             </div>
             <div className="flex justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14]">
               <span className="text-slate-500">Unit Number:</span>
-              <strong className="text-slate-900 dark:text-white">{unit?.label || 'Unit 14B'}</strong>
+              <strong className="text-slate-900 dark:text-white">{unit?.label || '—'}</strong>
             </div>
-            <div className="flex justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14]">
-              <span className="text-slate-500">Floor Plan:</span>
-              <strong className="text-slate-900 dark:text-white">{unit?.bedrooms || 2} Bedrooms, {unit?.bathrooms || 2} Bathrooms ({unit?.sqft || 1150} sqft)</strong>
-            </div>
-            <div className="flex justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14]">
-              <span className="text-slate-500">Assigned Parking Bay:</span>
-              <strong className="text-emerald-600 dark:text-emerald-400">Level 2, Bay #14B</strong>
-            </div>
+            {(unit?.bedrooms || unit?.bathrooms || unit?.sqft) && (
+              <div className="flex justify-between p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14]">
+                <span className="text-slate-500">Floor Plan:</span>
+                <strong className="text-slate-900 dark:text-white">
+                  {[
+                    unit?.bedrooms ? `${unit.bedrooms} Bed` : null,
+                    unit?.bathrooms ? `${unit.bathrooms} Bath` : null,
+                    unit?.sqft ? `(${unit.sqft} sqft)` : null,
+                  ].filter(Boolean).join(', ')}
+                </strong>
+              </div>
+            )}
           </div>
         </div>
 

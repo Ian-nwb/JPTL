@@ -306,6 +306,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
               tenant={currentTenant}
               unit={currentUnit}
               property={currentProperty}
+              lease={leaseData}
             />
           )}
 
