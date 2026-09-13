@@ -1,8 +1,9 @@
 import Document from '../../../shared/models/document.model.js';
 import Unit from '../../../shared/models/unit.model.js';
 import Property from '../../../shared/models/property.model.js';
+import User from '../../../shared/models/user.model.js';
 import AuditLog from '../../../shared/models/auditLog.model.js';
-import { uploadDocumentToCloudinary } from '../../../shared/config/cloudinary.js';
+import { getCloudinaryClient, uploadDocumentToCloudinary } from '../../../shared/config/cloudinary.js';
 
 export class DocumentError extends Error {
   constructor(message, statusCode = 400) {
@@ -44,6 +45,7 @@ export async function getTenantDocuments(tenantId, query = {}) {
 
   const rawDocs = await Document.find(matchFilter)
     .populate('unit')
+    .populate('tenant', 'firstName lastName email')
     .sort({ createdAt: -1 })
     .lean();
 
@@ -53,11 +55,17 @@ export async function getTenantDocuments(tenantId, query = {}) {
 
   const formattedDocs = rawDocs.map((d) => {
     const prop = d.unit?.property ? propertyMap.get(d.unit.property.toString()) : null;
+    const tenantName = d.tenant
+      ? `${d.tenant.firstName || ''} ${d.tenant.lastName || ''}`.trim() || d.tenant.email
+      : 'Resident';
     return {
       ...d,
       id: d._id,
+      tenantId: d.tenant?._id || d.tenant,
+      tenantName,
       unitLabel: d.unit?.label || 'Unit N/A',
       propertyName: prop?.name || 'Property N/A',
+      date: d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : 'Recently',
     };
   });
 
@@ -131,10 +139,20 @@ export async function submitTenantDocument(tenantId, payload, file = null, ipAdd
     ipAddress,
   });
 
+  const tenantUser = await User.findById(tenantId).lean();
+  const tenantName = tenantUser
+    ? `${tenantUser.firstName || ''} ${tenantUser.lastName || ''}`.trim() || tenantUser.email
+    : 'Resident';
+  const prop = targetUnit.property ? await Property.findById(targetUnit.property).lean() : null;
+
   return {
     ...newDoc.toObject(),
     id: newDoc._id,
+    tenantId,
+    tenantName,
     unitLabel: targetUnit.label,
+    propertyName: prop?.name || 'Property N/A',
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }),
     notes,
   };
 }
@@ -168,3 +186,37 @@ export async function deleteTenantDocument(tenantId, docId, ipAddress = '') {
     deletedDocId: docId,
   };
 }
+
+/**
+ * STREAM a document file securely (Tenant)
+ */
+export async function getDocumentStream(tenantId, documentId) {
+  const doc = await Document.findOne({ _id: documentId, tenant: tenantId }).lean();
+  if (!doc) throw new DocumentError('Document not found or access denied', 404);
+
+  if (doc.fileUrl && doc.fileUrl.includes('cloudinary.com')) {
+    const match = doc.fileUrl.match(/\/upload\/(?:v\d+\/)?(.+?)\.([a-zA-Z0-9]+)(?:\?.*)?$/i);
+    if (match) {
+      const publicId = match[1];
+      const format = match[2];
+      const client = getCloudinaryClient();
+      if (client) {
+        const downloadUrl = client.utils.private_download_url(publicId, format, {
+          resource_type: 'image',
+          type: 'upload',
+        });
+        const resp = await fetch(downloadUrl);
+        if (resp.ok) {
+          return {
+            stream: resp.body,
+            name: doc.name,
+            mimeType: resp.headers.get('content-type') || (format.toLowerCase() === 'pdf' ? 'application/pdf' : `image/${format}`),
+          };
+        }
+      }
+    }
+  }
+
+  throw new DocumentError('Document file stream unavailable', 404);
+}
+

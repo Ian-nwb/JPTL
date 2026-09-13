@@ -11,6 +11,8 @@
     "purge": "node scripts/purge.js",
     "purge:force": "node scripts/purge.js --force",
     "test:integration": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
+    "test:postman": "npm --prefix ../.. run test:postman",
+    "test:e2e": "npm --prefix ../.. run test:e2e",
     "env:encrypt": "openssl aes-256-cbc -salt -pbkdf2 -in .env -out .env.enc -k",
     "env:decrypt": "openssl aes-256-cbc -d -pbkdf2 -in .env.enc -out .env -k"
   },

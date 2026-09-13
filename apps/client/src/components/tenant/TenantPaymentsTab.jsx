@@ -24,12 +24,14 @@ export const TenantPaymentsTab = ({
   const hasParking = Boolean(tenant?.hasParking ?? unit?.hasParking ?? false);
   const parkingSpot = hasParking ? (tenant?.parkingSpot || unit?.parkingSpot || 'Assigned Space') : null;
   const parkingFee = hasParking ? Number(tenant?.parkingFee ?? unit?.parkingFee ?? 0) : 0;
-  const utilityFee = 45;
+  const utilityFee = Number(tenant?.utilityFee ?? unit?.utilityFee ?? 0);
   const totalMonthlyDue = rentAmount ? (rentAmount + parkingFee + utilityFee) : 0;
 
-  const depositAmount = securityDeposit !== undefined && securityDeposit !== null
+  const depositAmount = securityDeposit !== undefined && securityDeposit !== null && Number(securityDeposit) > 0
     ? Number(securityDeposit)
-    : (rentAmount ? rentAmount * 1.5 : 0);
+    : (tenant?.securityDeposit && Number(tenant.securityDeposit) > 0
+      ? Number(tenant.securityDeposit)
+      : (rentAmount ? rentAmount * 1.5 : 0));
 
   const livePayments = Array.isArray(payments) && payments.length > 0
     ? payments.map((p) => ({
@@ -116,10 +118,12 @@ export const TenantPaymentsTab = ({
               </div>
             )}
 
-            <div className="flex justify-between p-3 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60">
-              <span className="text-slate-500">Water, Sewer & Trash Service</span>
-              <strong className="text-slate-900 dark:text-white">${utilityFee}.00</strong>
-            </div>
+            {utilityFee > 0 && (
+              <div className="flex justify-between p-3 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60">
+                <span className="text-slate-500">Water, Sewer & Trash Service</span>
+                <strong className="text-slate-900 dark:text-white">${utilityFee}.00</strong>
+              </div>
+            )}
 
             <div className="pt-3 flex justify-between items-center text-sm font-bold text-slate-900 dark:text-white">
               <span>Total Statement Due</span>

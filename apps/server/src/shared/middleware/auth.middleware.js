@@ -5,8 +5,8 @@ function requireAuth(req, res, next) {
     ? req.headers.authorization.split(' ')[1]
     : null;
 
-  // Prioritize per-tab Bearer token from header over global browser cookie
-  const token = bearerToken || req.cookies?.token;
+  // Prioritize per-tab Bearer token from header over global browser cookie or URL query token
+  const token = bearerToken || req.cookies?.token || req.query?.token;
 
   if (!token) {
     return res.status(401).json({ success: false, message: 'No token provided' });

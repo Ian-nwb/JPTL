@@ -1,7 +1,9 @@
 import Document from '../../../shared/models/document.model.js';
 import Property from '../../../shared/models/property.model.js';
 import Unit from '../../../shared/models/unit.model.js';
+import User from '../../../shared/models/user.model.js';
 import AuditLog from '../../../shared/models/auditLog.model.js';
+import { getCloudinaryClient } from '../../../shared/config/cloudinary.js';
 
 export class LandlordDocumentError extends Error {
   constructor(message, statusCode = 400) {
@@ -75,8 +77,10 @@ export async function getLandlordDocuments(landlordId, query = {}) {
 
   // 5. Format documents with unit label & property name
   let formattedDocs = rawDocs.map((d) => {
-    const unitDoc = unitMap.get(d.unit?.toString());
-    const propertyDoc = unitDoc ? propertyMap.get(unitDoc.property?.toString()) : null;
+    const unitIdStr = (d.unit?._id || d.unit)?.toString();
+    const unitDoc = unitMap.get(unitIdStr) || (d.unit && typeof d.unit === 'object' ? d.unit : null);
+    const propIdStr = (unitDoc?.property?._id || unitDoc?.property)?.toString();
+    const propertyDoc = propIdStr ? propertyMap.get(propIdStr) : null;
 
     const tenantName = d.tenant
       ? `${d.tenant.firstName || ''} ${d.tenant.lastName || ''}`.trim() || d.tenant.email
@@ -85,12 +89,13 @@ export async function getLandlordDocuments(landlordId, query = {}) {
     return {
       ...d,
       id: d._id,
-      unitId: d.unit,
+      unitId: unitDoc?._id || d.unit,
       unitLabel: unitDoc?.label || 'Unit N/A',
       propertyId: propertyDoc?._id || null,
       propertyName: propertyDoc?.name || 'Property N/A',
       tenantName,
       tenantEmail: d.tenant?.email || '',
+      date: d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : 'Recently',
     };
   });
 
@@ -197,3 +202,47 @@ export async function deleteDocument(landlordId, docId, ipAddress = '') {
     deletedDocId: docId,
   };
 }
+
+/**
+ * STREAM a document file securely (Landlord)
+ */
+export async function getDocumentStream(landlordId, documentId) {
+  const doc = await Document.findById(documentId).populate('unit').lean();
+  if (!doc) throw new LandlordDocumentError('Document not found', 404);
+
+  // Validate landlord ownership: landlord must own the property of the unit, or tenant must belong to landlord
+  const unit = doc.unit ? await Unit.findById(doc.unit._id || doc.unit).populate('property').lean() : null;
+  const isOwner = unit?.property?.landlord?.toString() === landlordId.toString();
+  const tenant = await User.findById(doc.tenant).lean();
+  const isTenantOfLandlord = tenant?.landlord?.toString() === landlordId.toString();
+
+  if (!isOwner && !isTenantOfLandlord) {
+    throw new LandlordDocumentError('Unauthorized to access this document', 403);
+  }
+
+  if (doc.fileUrl && doc.fileUrl.includes('cloudinary.com')) {
+    const match = doc.fileUrl.match(/\/upload\/(?:v\d+\/)?(.+?)\.([a-zA-Z0-9]+)(?:\?.*)?$/i);
+    if (match) {
+      const publicId = match[1];
+      const format = match[2];
+      const client = getCloudinaryClient();
+      if (client) {
+        const downloadUrl = client.utils.private_download_url(publicId, format, {
+          resource_type: 'image',
+          type: 'upload',
+        });
+        const resp = await fetch(downloadUrl);
+        if (resp.ok) {
+          return {
+            stream: resp.body,
+            name: doc.name,
+            mimeType: resp.headers.get('content-type') || (format.toLowerCase() === 'pdf' ? 'application/pdf' : `image/${format}`),
+          };
+        }
+      }
+    }
+  }
+
+  throw new LandlordDocumentError('Document file stream unavailable', 404);
+}
+

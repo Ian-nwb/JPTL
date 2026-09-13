@@ -5,7 +5,7 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "base_url", "value": "http://localhost:3000", "type": "string" },
+    { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
     { "key": "landlord_token", "value": "", "type": "string" },
     { "key": "tenant_token", "value": "", "type": "string" },
     { "key": "created_ticket_id", "value": "", "type": "string" },
@@ -21,8 +21,9 @@
             "exec": [
               "const res = pm.response.json();",
               "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
-              "if (res.data && res.data.token) {",
-              "  pm.collectionVariables.set('tenant_token', res.data.token);",
+              "const token = res.token || (res.data && res.data.token);",
+              "if (token) {",
+              "  pm.collectionVariables.set('tenant_token', token);",
               "  console.log('Tenant token saved.');",
               "}"
             ]
@@ -34,7 +35,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"sophia.lin@example.com\",\n  \"password\": \"password123\"\n}"
+          "raw": "{\n  \"email\": \"sophia@jptl.dev\",\n  \"password\": \"Password123!\"\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/auth/login",
@@ -52,8 +53,9 @@
             "exec": [
               "const res = pm.response.json();",
               "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
-              "if (res.data && res.data.token) {",
-              "  pm.collectionVariables.set('landlord_token', res.data.token);",
+              "const token = res.token || (res.data && res.data.token);",
+              "if (token) {",
+              "  pm.collectionVariables.set('landlord_token', token);",
               "  console.log('Landlord token saved.');",
               "}"
             ]
@@ -65,7 +67,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"vance.landlord@example.com\",\n  \"password\": \"password123\"\n}"
+          "raw": "{\n  \"email\": \"landlord@jptl.dev\",\n  \"password\": \"Password123!\"\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/auth/login",
@@ -95,7 +97,7 @@
         "method": "POST",
         "header": [
           { "key": "Content-Type", "value": "application/json" },
-          { "key": "Cookie", "value": "token={{tenant_token}}" }
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
         ],
         "body": {
           "mode": "raw",
@@ -128,7 +130,7 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "Cookie", "value": "token={{tenant_token}}" }
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
         ],
         "url": {
           "raw": "{{base_url}}/api/tenant/tickets",
@@ -153,7 +155,7 @@
         "method": "POST",
         "header": [
           { "key": "Content-Type", "value": "application/json" },
-          { "key": "Cookie", "value": "token={{tenant_token}}" }
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
         ],
         "body": {
           "mode": "raw",
@@ -186,7 +188,7 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "Cookie", "value": "token={{landlord_token}}" }
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
         ],
         "url": {
           "raw": "{{base_url}}/api/landlord/tickets",
@@ -214,7 +216,7 @@
         "method": "PATCH",
         "header": [
           { "key": "Content-Type", "value": "application/json" },
-          { "key": "Cookie", "value": "token={{landlord_token}}" }
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
         ],
         "body": {
           "mode": "raw",
@@ -245,7 +247,7 @@
         "method": "PATCH",
         "header": [
           { "key": "Content-Type", "value": "application/json" },
-          { "key": "Cookie", "value": "token={{landlord_token}}" }
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
         ],
         "body": {
           "mode": "raw",
@@ -274,7 +276,7 @@
         "method": "PATCH",
         "header": [
           { "key": "Content-Type", "value": "application/json" },
-          { "key": "Cookie", "value": "token={{landlord_token}}" }
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
         ],
         "body": {
           "mode": "raw",
@@ -284,6 +286,56 @@
           "raw": "{{base_url}}/api/landlord/tickets/{{created_ticket_id}}/status",
           "host": ["{{base_url}}"],
           "path": ["api", "landlord", "tickets", "{{created_ticket_id}}", "status"]
+        }
+      }
+    },
+    {
+      "name": "10. Tenant – Delete Own Ticket",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Ticket deletion confirmed', () => pm.expect(res.success).to.be.true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/tenant/tickets/{{created_ticket_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "tenant", "tickets", "{{created_ticket_id}}"]
+        }
+      }
+    },
+    {
+      "name": "11. Error Handling – Delete Non-Existent Ticket (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 404 Not Found', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/landlord/tickets/000000000000000000000000",
+          "host": ["{{base_url}}"],
+          "path": ["api", "landlord", "tickets", "000000000000000000000000"]
         }
       }
     }

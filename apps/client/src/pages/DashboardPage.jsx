@@ -298,6 +298,55 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
     setTimeout(() => setToastNotification(null), 3500);
   };
 
+  const handleDeleteTicket = async (ticketId) => {
+    try {
+      await landlordApi.deleteTicket(ticketId);
+    } catch (err) {
+      console.warn('Server deleteTicket notice:', err.message);
+    }
+    setTickets((prev) => prev.filter((t) => t.id !== ticketId && t._id !== ticketId));
+    setToastNotification('Maintenance ticket deleted successfully.');
+    setTimeout(() => setToastNotification(null), 3500);
+  };
+
+  const handleAssignTechnician = async (ticketId, techData) => {
+    try {
+      await landlordApi.assignTechnician(ticketId, techData);
+    } catch (err) {
+      console.warn('Server assignTechnician notice:', err.message);
+    }
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === ticketId || t._id === ticketId
+          ? {
+              ...t,
+              status: t.status === 'submitted' ? 'in_progress' : t.status,
+              assignedTechnician: {
+                ...(t.assignedTechnician || {}),
+                ...techData,
+              },
+            }
+          : t
+      )
+    );
+    setToastNotification(`Technician ${techData.name} assigned to ticket.`);
+    setTimeout(() => setToastNotification(null), 3500);
+  };
+
+  const handleDeleteAnnouncement = async (announcementId) => {
+    try {
+      await landlordApi.deleteAnnouncement(announcementId);
+    } catch (err) {
+      console.warn('Server deleteAnnouncement notice:', err.message);
+    }
+    setAnnouncements((prev) => prev.filter((a) => a.id !== announcementId && a._id !== announcementId));
+    if (announcement && (announcement.id === announcementId || announcement._id === announcementId)) {
+      setAnnouncement(null);
+    }
+    setToastNotification('Announcement removed.');
+    setTimeout(() => setToastNotification(null), 3500);
+  };
+
   const handleLogout = async () => {
     await logout();
     onNavigate('/login');
@@ -356,9 +405,11 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
         if (tenantsRes.status === 'fulfilled') {
           const serverTenants = tenantsRes.value?.data || [];
           const map = new Map();
+          const emailSet = new Set();
           serverTenants.forEach((t) => {
             const id = String(t.id || t._id || t.email);
             map.set(id, { ...t, id: t.id || t._id });
+            if (t.email) emailSet.add(t.email.toLowerCase().trim());
           });
           try {
             const savedTenants = sessionStorage.getItem('jptl_onboarding_tenants');
@@ -367,8 +418,10 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
               if (Array.isArray(parsed)) {
                 parsed.forEach((t) => {
                   const id = String(t.id || t._id || t.email);
-                  if (id && !map.has(id)) {
+                  const email = (t.email || '').toLowerCase().trim();
+                  if (id && !map.has(id) && (!email || !emailSet.has(email))) {
                     map.set(id, t);
+                    if (email) emailSet.add(email);
                   }
                 });
               }
@@ -414,8 +467,27 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
 
     loadLiveDashboardData();
 
+    // Auto-refresh polling every 10s for real-time sync
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadLiveDashboardData();
+      }
+    }, 10000);
+
+    const onVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        loadLiveDashboardData();
+      }
+    };
+
+    window.addEventListener('focus', onVisibilityOrFocus);
+    document.addEventListener('visibilitychange', onVisibilityOrFocus);
+
     return () => {
       isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('focus', onVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', onVisibilityOrFocus);
     };
   }, []);
 
@@ -729,7 +801,11 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
           {/* ─── VIEW 2: ANNOUNCEMENTS PAGE (dedicated) */}
           {/* ═════════════════════════════════════════ */}
           {activeView === 'announcements' && (
-            <AnnouncementsTab announcements={announcements} onOpenNewAnnouncement={() => setIsNewAnnouncementOpen(true)} />
+            <AnnouncementsTab
+              announcements={announcements}
+              onOpenNewAnnouncement={() => setIsNewAnnouncementOpen(true)}
+              onDeleteAnnouncement={handleDeleteAnnouncement}
+            />
           )}
 
           {/* ═════════════════════════════════════════ */}
@@ -1137,6 +1213,8 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
               searchQuery={searchQuery}
               onOpenNewTicket={() => setIsNewTicketOpen(true)}
               onUpdateStatus={handleUpdateTicketStatus}
+              onDeleteTicket={handleDeleteTicket}
+              onAssignTechnician={handleAssignTechnician}
             />
           )}
 

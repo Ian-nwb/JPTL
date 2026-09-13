@@ -145,6 +145,20 @@ export async function updateProperty(landlordId, propertyId, payload, ipAddress 
   if (payload.image) property.image = payload.image;
   if (payload.featured !== undefined) property.featured = Boolean(payload.featured);
 
+  // Access codes (gate, wifi) — any provided key is updated individually
+  if (payload.accessCodes && typeof payload.accessCodes === 'object') {
+    property.accessCodes = {
+      gateCode:     payload.accessCodes.gateCode     ?? property.accessCodes?.gateCode     ?? '',
+      wifiSsid:     payload.accessCodes.wifiSsid     ?? property.accessCodes?.wifiSsid     ?? '',
+      wifiPassword: payload.accessCodes.wifiPassword ?? property.accessCodes?.wifiPassword ?? '',
+    };
+  }
+
+  // Building rules — replace the full array when provided
+  if (Array.isArray(payload.buildingRules)) {
+    property.buildingRules = payload.buildingRules.map((r) => String(r).trim()).filter(Boolean);
+  }
+
   await property.save();
 
   await logAction({

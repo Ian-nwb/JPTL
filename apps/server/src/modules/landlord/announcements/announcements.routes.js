@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createAnnouncement, getMyAnnouncements } from './announcements.controller.js';
+import { createAnnouncement, getMyAnnouncements, deleteAnnouncement } from './announcements.controller.js';
 import { requireAuth, requireRole } from '../../../shared/middleware/auth.middleware.js';
 
 const router = Router();
@@ -12,5 +12,8 @@ router.get('/', getMyAnnouncements);
 
 // POST /api/landlord/announcements
 router.post('/', createAnnouncement);
+
+// DELETE /api/landlord/announcements/:id
+router.delete('/:id', deleteAnnouncement);
 
 export default router;

@@ -14,6 +14,12 @@ const propertySchema = new mongoose.Schema(
       default: 'Residential',
     },
     featured: { type: Boolean, default: false },
+    accessCodes: {
+      gateCode:     { type: String, default: '' },
+      wifiSsid:     { type: String, default: '' },
+      wifiPassword: { type: String, default: '' },
+    },
+    buildingRules: [{ type: String }],
     landlord: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

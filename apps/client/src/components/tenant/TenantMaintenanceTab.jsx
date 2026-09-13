@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   Wrench, Plus, CheckCircle2, Clock, AlertTriangle, ShieldAlert, Check, 
-  Calendar, ArrowRight, UserCheck, Star, MessageSquare, Phone, ChevronDown, Paperclip 
+  Calendar, ArrowRight, UserCheck, Star, MessageSquare, Phone, ChevronDown, Paperclip, Trash2 
 } from 'lucide-react';
 import { TechnicianDetailModal } from './TechnicianDetailModal';
 
@@ -10,6 +10,7 @@ export const TenantMaintenanceTab = ({
   tenant,
   unit,
   onRequestRepairClick,
+  onDeleteTicket,
 }) => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedTechTicket, setSelectedTechTicket] = useState(null);
@@ -28,10 +29,10 @@ export const TenantMaintenanceTab = ({
 
   const getStepIndex = (status) => {
     switch (status) {
-      case 'submitted': return 1;
-      case 'in_progress': return 3;
-      case 'resolved': return 4;
-      default: return 2;
+      case 'submitted':   return 1;
+      case 'in_progress': return 2;
+      case 'resolved':    return 3;
+      default:            return 1;
     }
   };
 
@@ -112,17 +113,48 @@ export const TenantMaintenanceTab = ({
                     </div>
                     <h3 className="text-lg font-bold font-grotesk text-slate-900 dark:text-white">{t.title}</h3>
                     <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl">{t.description}</p>
+                    {t.photoUrls && t.photoUrls.length > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap pt-2">
+                        {t.photoUrls.map((url, i) => (
+                          <a
+                            key={i}
+                            href={url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 w-16 h-16 block hover:opacity-80 transition-opacity shrink-0"
+                          >
+                            <img src={url} alt={`Evidence ${i + 1}`} className="w-full h-full object-cover" />
+                          </a>
+                        ))}
+                      </div>
+                    )}
                   </div>
 
-                  <span className={`px-3.5 py-1 rounded-full text-xs font-bold font-mono border self-start ${
-                    isResolved
-                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                      : t.status === 'in_progress'
-                      ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20'
-                      : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                  }`}>
-                    {isResolved ? '✓ Completed & Signed Off' : t.status === 'in_progress' ? '⚡ Technician Dispatched' : '⏳ Review Pending'}
-                  </span>
+                  <div className="flex items-center gap-2 self-start">
+                    <span className={`px-3.5 py-1 rounded-full text-xs font-bold font-mono border ${
+                      isResolved
+                        ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                        : t.status === 'in_progress'
+                        ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20'
+                        : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                    }`}>
+                      {isResolved ? '✓ Completed & Signed Off' : t.status === 'in_progress' ? '⚡ Technician Dispatched' : '⏳ Review Pending'}
+                    </span>
+                    {onDeleteTicket && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm(`Are you sure you want to delete maintenance ticket ${t.id || t.title}?`)) {
+                            onDeleteTicket(t.id || t._id);
+                          }
+                        }}
+                        title="Delete ticket"
+                        className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-500 hover:border-rose-500/30 btn-press transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
 
                 {/* ─── 4-STEP PROGRESS STEPPER ─── */}
@@ -131,12 +163,11 @@ export const TenantMaintenanceTab = ({
                     Dispatch Lifecycle Progress
                   </span>
 
-                  <div className="grid grid-cols-4 gap-2 text-center text-[11px] font-mono">
+                  <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-mono">
                     {[
                       { step: 1, label: 'Submitted' },
-                      { step: 2, label: 'Approved' },
-                      { step: 3, label: 'Dispatched' },
-                      { step: 4, label: 'Resolved' },
+                      { step: 2, label: 'Dispatched' },
+                      { step: 3, label: 'Resolved' },
                     ].map((s) => (
                       <div key={s.step} className="space-y-1">
                         <div className={`h-2 rounded-full transition-all ${
@@ -157,17 +188,25 @@ export const TenantMaintenanceTab = ({
                 </div>
 
                 {/* Live Technician Card (If Dispatched or In Progress) */}
-                {t.status === 'in_progress' && (
+                {(t.status === 'in_progress' || t.assignedTechnician) && (
                   <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-500/10 to-purple-500/5 border border-indigo-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs font-grotesk shrink-0">
-                        MS
+                      <div className="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs font-grotesk shrink-0 uppercase">
+                        {t.assignedTechnician?.name ? t.assignedTechnician.name.split(' ').map(n => n[0]).join('').slice(0, 2) : 'TC'}
                       </div>
                       <div className="text-xs">
-                        <strong className="text-slate-900 dark:text-white font-grotesk block text-sm">Marcus Sterling — Tech Dispatched</strong>
-                        <span className="text-amber-500 font-mono flex items-center gap-1">
-                          <Clock className="w-3 h-3" /> ETA: Today between 2:00 PM – 4:00 PM
+                        <strong className="text-slate-900 dark:text-white font-grotesk block text-sm">
+                          {t.assignedTechnician?.name || 'Technician Assigned'}
+                          {t.assignedTechnician?.company ? ` — ${t.assignedTechnician.company}` : ''}
+                        </strong>
+                        <span className="text-amber-500 font-mono flex items-center gap-1 mt-0.5">
+                          <Clock className="w-3 h-3" /> ETA: {t.assignedTechnician?.eta || 'Pending dispatch confirmation'}
                         </span>
+                        {t.assignedTechnician?.phone && (
+                          <span className="text-slate-500 dark:text-slate-400 font-mono text-[11px] block mt-0.5">
+                            Direct: {t.assignedTechnician.phone}
+                          </span>
+                        )}
                       </div>
                     </div>
 

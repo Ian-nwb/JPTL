@@ -4,6 +4,7 @@ import {
   Loader2, Calendar, DollarSign, AlertTriangle, Clock, Users, CheckCircle2, Home, Sparkles 
 } from 'lucide-react';
 import { landlordApi } from '../../services/api';
+import { CountryCodeDropdown } from '../common/CountryCodeDropdown';
 
 export const AddTenantModal = ({
   isOpen,
@@ -27,6 +28,8 @@ export const AddTenantModal = ({
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [tenantEmail, setTenantEmail] = useState('');
+  const [tenantDialCode, setTenantDialCode] = useState('+63');
+  const [tenantLocalPhone, setTenantLocalPhone] = useState('');
   const [tenantPhone, setTenantPhone] = useState('');
 
   // Unit & Property assignment
@@ -673,6 +676,34 @@ export const AddTenantModal = ({
                     {touched.tenantEmail && errors.tenantEmail && (
                       <p className="text-[11px] text-rose-500 mt-1">{errors.tenantEmail}</p>
                     )}
+                  </div>
+
+                  <div>
+                    <label htmlFor="tenant-phone" className="text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1 block">
+                      Phone Number <span className="text-slate-400 font-normal">(Optional)</span>
+                    </label>
+                    <div className="flex gap-2">
+                      <CountryCodeDropdown
+                        id="tenant-country-code"
+                        value={tenantDialCode}
+                        onChange={(newCode) => {
+                          setTenantDialCode(newCode);
+                          setTenantPhone(newCode + ' ' + tenantLocalPhone);
+                        }}
+                      />
+                      <input
+                        id="tenant-phone"
+                        type="tel"
+                        value={tenantLocalPhone}
+                        onChange={(e) => {
+                          const local = e.target.value;
+                          setTenantLocalPhone(local);
+                          setTenantPhone(tenantDialCode + ' ' + local);
+                        }}
+                        placeholder="912 345 6789"
+                        className="flex-1 bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
                   </div>
                 </div>
               )}

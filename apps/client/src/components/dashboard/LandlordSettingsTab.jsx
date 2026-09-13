@@ -3,7 +3,7 @@ import {
   Building2, Users, Shield, Wrench, DollarSign, Bell, FileText, 
   Database, Lock, CheckCircle2, Clock, Download, 
   Key, RefreshCw, Zap, Check, AlertCircle, User, Sliders, Camera, Eye, EyeOff, Smartphone, ShieldCheck,
-  Search, Filter, Upload, Plus, FileCheck, AlertTriangle, ShieldAlert
+  Search, Filter, Upload, Plus, FileCheck, AlertTriangle, ShieldAlert, Wifi, BookOpen
 } from 'lucide-react';
 import { MOCK_DOCUMENTS } from '../../data/mockData';
 import { DocumentInspectionModal } from './DocumentInspectionModal';
@@ -118,6 +118,54 @@ export const LandlordSettingsTab = ({
 
   // 5. Document Management Vault state
   const [docExpirationReminderDays, setDocExpirationReminderDays] = useState('30');
+
+  // 6b. Building Access & Rules state
+  const DEFAULT_RULES = [
+    'Quiet Hours: 10:00 PM – 7:00 AM daily for residential floors.',
+    'Trash Disposal: Trash chutes on each floor (7:00 AM - 10:00 PM). Recyclables on B1.',
+    'Guest Policy: Visitors must register at concierge lobby for visits exceeding 48 hours.',
+    'Package Concierge: Deliveries are placed in automated smart lockers in the lobby.',
+  ];
+  const [buildingAccess, setBuildingAccess] = useState({
+    gateCode:     '#8821',
+    wifiSsid:     'Aura-Resident_5G',
+    wifiPassword: 'sky@2026',
+  });
+  const [buildingRules, setBuildingRules] = useState(DEFAULT_RULES);
+  const [showWifiPw, setShowWifiPw] = useState(false);
+  const [accessSaved, setAccessSaved] = useState(false);
+
+  const handleSaveBuildingAccess = async () => {
+    try {
+      const targetProperty = properties?.[0];
+      if (targetProperty?._id || targetProperty?.id) {
+        const propId = targetProperty._id || targetProperty.id;
+        await landlordApi.updateProperty(propId, {
+          accessCodes: buildingAccess,
+          buildingRules,
+        });
+      }
+    } catch (err) {
+      console.warn('Building access save notice:', err.message);
+    }
+    setAccessSaved(true);
+    setTimeout(() => setAccessSaved(false), 2500);
+  };
+
+  // Sync from loaded properties
+  useEffect(() => {
+    const prop = properties?.[0];
+    if (prop?.accessCodes) {
+      setBuildingAccess({
+        gateCode:     prop.accessCodes.gateCode     || '#8821',
+        wifiSsid:     prop.accessCodes.wifiSsid     || 'Aura-Resident_5G',
+        wifiPassword: prop.accessCodes.wifiPassword || 'sky@2026',
+      });
+    }
+    if (prop?.buildingRules?.length > 0) {
+      setBuildingRules(prop.buildingRules);
+    }
+  }, [properties]);
   const [documents, setDocuments] = useState(() => {
     if (documentsProp && documentsProp.length > 0) return documentsProp;
     try {
@@ -611,6 +659,131 @@ export const LandlordSettingsTab = ({
                 </div>
               </div>
 
+            </div>
+          </div>
+
+          {/* Building Access & Rules */}
+          <div className="p-6 rounded-3xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-5">
+            <div className="flex items-center justify-between">
+              <h2 className="text-base font-bold font-grotesk text-slate-900 dark:text-white flex items-center gap-2">
+                <Key className="w-4 h-4 text-indigo-500" /> Building Access &amp; Rules
+              </h2>
+              <div className="flex items-center gap-2">
+                {accessSaved && (
+                  <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 flex items-center gap-1 animate-pulse">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Saved!
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={handleSaveBuildingAccess}
+                  className="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-grotesk font-bold text-xs btn-press flex items-center gap-1.5"
+                >
+                  <Check className="w-3.5 h-3.5" /> Save Access &amp; Rules
+                </button>
+              </div>
+            </div>
+
+            {/* Access Codes */}
+            <div className="space-y-3">
+              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block">
+                Access Codes (Visible to Tenants)
+              </span>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-sans">
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                    <Key className="w-3 h-3 text-indigo-500" /> Gate / Front Code
+                  </label>
+                  <input
+                    type="text"
+                    value={buildingAccess.gateCode}
+                    onChange={(e) => setBuildingAccess((p) => ({ ...p, gateCode: e.target.value }))}
+                    placeholder="e.g. #8821"
+                    className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono tracking-widest"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                    <Wifi className="w-3 h-3 text-indigo-500" /> WiFi Network (SSID)
+                  </label>
+                  <input
+                    type="text"
+                    value={buildingAccess.wifiSsid}
+                    onChange={(e) => setBuildingAccess((p) => ({ ...p, wifiSsid: e.target.value }))}
+                    placeholder="e.g. Aura-Resident_5G"
+                    className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1 flex items-center gap-1">
+                    <Wifi className="w-3 h-3 text-indigo-500" /> WiFi Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showWifiPw ? 'text' : 'password'}
+                      value={buildingAccess.wifiPassword}
+                      onChange={(e) => setBuildingAccess((p) => ({ ...p, wifiPassword: e.target.value }))}
+                      placeholder="e.g. sky@2026"
+                      className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 pr-9 text-slate-900 dark:text-white font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowWifiPw((v) => !v)}
+                      className="absolute right-2.5 top-2 text-slate-400 hover:text-slate-200"
+                    >
+                      {showWifiPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Building Rules */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                  <BookOpen className="w-3 h-3" /> Building Rules &amp; Policies
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setBuildingRules((r) => [...r, ''])}
+                  className="text-[10px] font-mono text-indigo-500 hover:underline flex items-center gap-1"
+                >
+                  <Plus className="w-3 h-3" /> Add Rule
+                </button>
+              </div>
+              <div className="space-y-2">
+                {buildingRules.map((rule, i) => (
+                  <div key={i} className="flex items-start gap-2">
+                    <span className="shrink-0 mt-2.5 w-5 h-5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold font-mono flex items-center justify-center">
+                      {i + 1}
+                    </span>
+                    <input
+                      type="text"
+                      value={rule}
+                      onChange={(e) => {
+                        const updated = [...buildingRules];
+                        updated[i] = e.target.value;
+                        setBuildingRules(updated);
+                      }}
+                      className="flex-1 bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white font-sans"
+                    />
+                    {buildingRules.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => setBuildingRules((r) => r.filter((_, idx) => idx !== i))}
+                        className="shrink-0 mt-1.5 p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-500 hover:border-rose-500/30 transition-colors"
+                        title="Remove rule"
+                      >
+                        <ShieldAlert className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <p className="text-[11px] text-slate-400 font-mono">
+                Rules are visible to all tenants on their Overview dashboard.
+              </p>
             </div>
           </div>
 

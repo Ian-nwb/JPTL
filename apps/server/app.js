@@ -18,6 +18,7 @@ import tenantPaymentsRoutes from './src/modules/tenant/payments/payments.routes.
 import tenantTicketRoutes from './src/modules/tenant/tickets/tickets.routes.js';
 import tenantLeaseRoutes from './src/modules/tenant/lease/lease.routes.js';
 import tenantDocumentRoutes from './src/modules/tenant/documents/documents.routes.js';
+import notificationRoutes from './src/modules/notifications/notification.routes.js';
 import { generalLimiter, authLimiter } from './src/shared/middleware/rateLimiter.middleware.js';
 
 const app = express();
@@ -56,5 +57,8 @@ app.use('/api/tenant/payments', tenantPaymentsRoutes);
 app.use('/api/tenant/tickets', tenantTicketRoutes);
 app.use('/api/tenant/lease', tenantLeaseRoutes);
 app.use('/api/tenant/documents', tenantDocumentRoutes);
+
+// Shared notification routes (VAPID key + push subscribe)
+app.use('/api/notifications', notificationRoutes);
 
 export default app;

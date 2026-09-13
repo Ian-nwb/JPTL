@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Building2, Eye, EyeOff, AlertCircle, Loader2, ArrowRight, ShieldCheck, X, Sun, Moon, Check, Circle, Phone } from 'lucide-react';
+import { Building2, Eye, EyeOff, AlertCircle, Loader2, ArrowRight, ShieldCheck, X, Sun, Moon, Check, Circle, Phone, ChevronDown } from 'lucide-react';
+
+import { CountryCodeDropdown } from '../components/common/CountryCodeDropdown';
 import { useTheme } from '../hooks/useTheme';
 import { useAuth } from '../context/AuthContext';
 
@@ -11,6 +13,8 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [dialCode, setDialCode] = useState('+63');
+  const [localPhone, setLocalPhone] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -59,10 +63,9 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
     }
 
     if (name === 'phone') {
-      const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]{6,15}$/;
-      if (!value.trim()) {
+      if (!value.trim() || value.trim().length < 5) {
         error = 'Phone number is required';
-      } else if (!phoneRegex.test(value.trim())) {
+      } else if (value.trim().replace(/[\s\-().]/g, '').length < 7) {
         error = 'Enter a valid phone number';
       }
     }
@@ -123,6 +126,7 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
     }
     if (field === 'phone') {
       setPhone(val);
+      setLocalPhone(val.replace(/^[+]?\d{1,4}\s?/, ''));
       if (touched.phone) setErrors((prev) => ({ ...prev, phone: validateField('phone', val) }));
     }
     if (field === 'password') {
@@ -149,7 +153,9 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
   // Checkmark criteria boolean logic (strictly false when empty)
   const is8Chars = password.length >= 8;
   const hasDigit = /\d/.test(password);
-  const isPhoneValid = phone.trim().length >= 7 && /^[+]?[(]?[0-9]{1,4}[)]?[-\s./0-9]{6,15}$/.test(phone.trim());
+  const isPhoneValid = localPhone.trim().replace(/[\s\-().]/g, '').length >= 7;
+  // Combined phone = dialCode + localPhone, stored in phone state
+  // Keep phone in sync via handlePhoneChange
   const isFormValid =
     firstName.trim().length >= 2 &&
     firstName.trim().length <= 50 &&
@@ -444,23 +450,48 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
               <label htmlFor="reg-phone" className="text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1.5 block">
                 Phone number
               </label>
-              <div className="relative">
-                <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5 pointer-events-none" />
-                <input
-                  id="reg-phone"
-                  type="tel"
-                  required
+              <div className="flex gap-2">
+                {/* Searchable Country Code Dropdown */}
+                <CountryCodeDropdown
+                  id="reg-country-code"
+                  value={dialCode}
                   disabled={isSubmitting}
-                  value={phone}
-                  onChange={(e) => handleChange('phone', e.target.value)}
-                  onBlur={() => handleBlur('phone')}
-                  placeholder="+1 (555) 234-5678"
-                  className={`w-full bg-white dark:bg-[#0D111D] border ${
-                    touched.phone && errors.phone
-                      ? 'border-rose-500 focus:ring-rose-500'
-                      : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
-                  } rounded-2xl pl-10 pr-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
+                  error={touched.phone && Boolean(errors.phone)}
+                  onChange={(newCode) => {
+                    setDialCode(newCode);
+                    const combined = newCode + ' ' + localPhone;
+                    setPhone(combined);
+                    if (touched.phone) setErrors((prev) => ({ ...prev, phone: validateField('phone', combined) }));
+                  }}
                 />
+
+                {/* Local Number Input */}
+                <div className="flex-1 relative">
+                  <input
+                    id="reg-phone"
+                    type="tel"
+                    required
+                    disabled={isSubmitting}
+                    value={localPhone}
+                    onChange={(e) => {
+                      const local = e.target.value;
+                      setLocalPhone(local);
+                      const combined = dialCode + ' ' + local;
+                      setPhone(combined);
+                      if (touched.phone) setErrors((prev) => ({ ...prev, phone: validateField('phone', combined) }));
+                    }}
+                    onBlur={() => {
+                      setTouched((prev) => ({ ...prev, phone: true }));
+                      setErrors((prev) => ({ ...prev, phone: validateField('phone', phone) }));
+                    }}
+                    placeholder="912 345 6789"
+                    className={`w-full bg-white dark:bg-[#0D111D] border ${
+                      touched.phone && errors.phone
+                        ? 'border-rose-500 focus:ring-rose-500'
+                        : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
+                    } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
+                  />
+                </div>
               </div>
               {touched.phone && errors.phone && (
                 <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, Mail, Smartphone, Building2, CheckCircle2, ArrowRight, UserPlus, User } from 'lucide-react';
+import { CountryCodeDropdown } from './CountryCodeDropdown';
 
 export const LoginModal = ({ isOpen, initialRole = 'tenant', onClose, onLoginSuccess }) => {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
@@ -9,6 +10,8 @@ export const LoginModal = ({ isOpen, initialRole = 'tenant', onClose, onLoginSuc
   const [middleName, setMiddleName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [dialCode, setDialCode] = useState('+63');
+  const [localPhone, setLocalPhone] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -256,14 +259,25 @@ export const LoginModal = ({ isOpen, initialRole = 'tenant', onClose, onLoginSuc
 
                     <div>
                       <label className="text-xs text-slate-300 font-medium mb-1.5 block">Phone Number</label>
-                      <div className="relative">
-                        <Smartphone className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
+                      <div className="flex gap-2">
+                        <CountryCodeDropdown
+                          id="modal-country-code"
+                          value={dialCode}
+                          onChange={(newCode) => {
+                            setDialCode(newCode);
+                            setPhone(newCode + ' ' + localPhone);
+                          }}
+                        />
                         <input
                           type="tel"
-                          placeholder="+1 (555) 234-5678"
-                          value={phone}
-                          onChange={(e) => setPhone(e.target.value)}
-                          className="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
+                          placeholder="912 345 6789"
+                          value={localPhone}
+                          onChange={(e) => {
+                            const local = e.target.value;
+                            setLocalPhone(local);
+                            setPhone(dialCode + ' ' + local);
+                          }}
+                          className="flex-1 bg-slate-900 border border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500"
                         />
                       </div>
                     </div>

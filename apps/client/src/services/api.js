@@ -220,6 +220,7 @@ export const landlordApi = {
 
   getAnnouncements: () => api.get('/landlord/announcements'),
   createAnnouncement: (data) => api.post('/landlord/announcements', data),
+  deleteAnnouncement: (id) => api.delete(`/landlord/announcements/${id}`),
 
   getOnboardingStatus: () => api.get('/landlord/onboarding/status'),
   completeOnboarding: (data) => api.post('/landlord/onboarding/complete', data),
@@ -243,6 +244,22 @@ export const tenantApi = {
 
   getTickets: () => api.get('/tenant/tickets'),
   createTicket: (data) => api.post('/tenant/tickets', data),
+  deleteTicket: (id) => api.delete(`/tenant/tickets/${id}`),
+  uploadPhotos: async (files) => {
+    const formData = new FormData();
+    files.forEach((f) => formData.append('photos', f));
+    const token = tokenStorage.getToken();
+    const headers = token ? { Authorization: `Bearer ${token}` } : {};
+    const res = await fetch(`${API_BASE_URL}/tenant/tickets/upload-photos`, {
+      method: 'POST',
+      headers,
+      credentials: 'include',
+      body: formData,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data?.message || 'Photo upload failed');
+    return data;
+  },
   cancelTicket: (id) => api.patch(`/tenant/tickets/${id}/cancel`),
   addTicketComment: (id, text) => api.post(`/tenant/tickets/${id}/comments`, { text }),
 

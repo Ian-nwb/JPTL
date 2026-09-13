@@ -187,7 +187,7 @@ export async function getTenantLedger(tenantId) {
  * Retrieve official tax receipt for a cleared payment
  */
 export async function getPaymentReceipt(tenantId, paymentId) {
-  const { userDoc, unit, property } = await resolveTenantContext(tenantId);
+  const { userDoc, profile, unit, property } = await resolveTenantContext(tenantId);
 
   let payment;
   if (paymentId === 'latest') {

@@ -3,6 +3,7 @@ import Property from '../../../shared/models/property.model.js';
 import Unit from '../../../shared/models/unit.model.js';
 import AuditLog from '../../../shared/models/auditLog.model.js';
 import User from '../../../shared/models/user.model.js';
+import { sendPushToUsers } from '../../../shared/services/pushNotification.service.js';
 
 export class TicketError extends Error {
   constructor(message, statusCode = 400) {
@@ -334,6 +335,19 @@ export async function assignTechnician(landlordId, ticketId, technicianData, ipA
     afterState: ticket.toObject(),
     ipAddress,
   });
+
+  // Dispatch push notification to the tenant
+  try {
+    if (ticket.tenant) {
+      sendPushToUsers([ticket.tenant], {
+        title: `🔧 Technician Assigned: ${ticket.title?.slice(0, 40) || 'Maintenance Request'}`,
+        body: `${name.trim()} (${company || 'Service Team'}) is dispatched. ETA: ${eta || 'TBD'}`,
+        url: '/tenant',
+      }).catch((err) => console.error('Push dispatch error:', err.message));
+    }
+  } catch (err) {
+    console.error('Technician push error:', err.message);
+  }
 
   return {
     ...ticket.toObject(),

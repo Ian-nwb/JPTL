@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { X, Wrench, AlertTriangle, ShieldAlert, Sparkles, CheckCircle2, Clock, Camera, Upload, Paperclip } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Wrench, AlertTriangle, ShieldAlert, Sparkles, CheckCircle2, Clock, Camera, Upload, Paperclip, Loader2, Trash2 } from 'lucide-react';
+import { tenantApi } from '../../services/api';
 
 const ISSUE_CATEGORIES = [
   { key: 'Plumbing', label: 'Plumbing / Leak' },
@@ -24,21 +25,53 @@ export const ReportIssueModal = ({
   const [permissionToEnter, setPermissionToEnter] = useState(true);
   const [hasPets, setHasPets] = useState(false);
   const [preferredTime, setPreferredTime] = useState('afternoon');
-  const [attachedFiles, setAttachedFiles] = useState(['faucet-leak-photo.jpg']);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [filePreviews, setFilePreviews] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef(null);
 
   if (!isOpen) return null;
 
-  const handleAddMockFile = () => {
-    setAttachedFiles((prev) => [...prev, `repair-photo-${prev.length + 1}.png`]);
+  const handleFilesChosen = (files) => {
+    const valid = Array.from(files).filter((f) => f.type.startsWith('image/')).slice(0, 5);
+    if (valid.length === 0) return;
+
+    setSelectedFiles((prev) => [...prev, ...valid].slice(0, 5));
+    const newPreviews = valid.map((f) => ({
+      name: f.name,
+      url: URL.createObjectURL(f),
+      size: `${(f.size / 1024).toFixed(0)} KB`,
+    }));
+    setFilePreviews((prev) => [...prev, ...newPreviews].slice(0, 5));
   };
 
-  const handleRemoveFile = (fileName) => {
-    setAttachedFiles((prev) => prev.filter((f) => f !== fileName));
+  const handleRemoveFile = (index) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+    setFilePreviews((prev) => {
+      const target = prev[index];
+      if (target?.url) URL.revokeObjectURL(target.url);
+      return prev.filter((_, i) => i !== index);
+    });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!title.trim() || !description.trim()) return;
+
+    setIsSubmitting(true);
+    let uploadedPhotoUrls = [];
+
+    try {
+      if (selectedFiles.length > 0) {
+        const uploadRes = await tenantApi.uploadPhotos(selectedFiles);
+        if (uploadRes?.photoUrls?.length > 0) {
+          uploadedPhotoUrls = uploadRes.photoUrls;
+        }
+      }
+    } catch (err) {
+      console.warn('Photo upload fallback:', err.message);
+      uploadedPhotoUrls = filePreviews.map((p) => p.url);
+    }
 
     const newTicket = {
       id: `TCK-${Math.floor(1000 + Math.random() * 9000)}`,
@@ -56,19 +89,21 @@ export const ReportIssueModal = ({
       permissionToEnter,
       hasPets,
       preferredTime,
-      attachments: attachedFiles,
+      photoUrls: uploadedPhotoUrls,
+      attachments: filePreviews.map((p) => p.name),
       createdAt: new Date().toISOString(),
       statusHistory: [
         {
           status: 'submitted',
-          changedBy: tenant?.name || 'Sophia Lin',
+          changedBy: tenant?.name || 'Resident',
           userRole: 'tenant',
           timestamp: new Date().toISOString(),
-          note: 'Maintenance ticket created by tenant with media attachments',
+          note: 'Maintenance ticket created by resident with media attachments',
         },
       ],
     };
 
+    setIsSubmitting(false);
     onTicketSubmitted(newTicket);
     onClose();
   };
@@ -181,38 +216,64 @@ export const ReportIssueModal = ({
           {/* Photo & Video Attachment Dropzone */}
           <div>
             <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Photos / Video Evidence</label>
-            <div className="p-4 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 bg-slate-50/50 dark:bg-[#080B14]/50 text-center space-y-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              multiple
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files) handleFilesChosen(e.target.files);
+                e.target.value = '';
+              }}
+            />
+            <div
+              onDragOver={(e) => { e.preventDefault(); }}
+              onDrop={(e) => {
+                e.preventDefault();
+                if (e.dataTransfer.files) handleFilesChosen(e.dataTransfer.files);
+              }}
+              onClick={() => fileInputRef.current?.click()}
+              className="p-4 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 bg-slate-50/50 dark:bg-[#080B14]/50 text-center space-y-2 cursor-pointer hover:border-indigo-500 transition-colors"
+            >
               <div className="flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400">
                 <Camera className="w-4 h-4 text-indigo-500" />
-                <span>Drag & drop photos or click to attach</span>
+                <span>Drag & drop photos or click to attach (up to 5)</span>
               </div>
               <button
                 type="button"
-                onClick={handleAddMockFile}
+                onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
                 className="px-3 py-1 rounded-lg bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 font-mono text-[11px] btn-press inline-flex items-center gap-1"
               >
-                <Upload className="w-3 h-3" /> Add Photo
+                <Upload className="w-3 h-3" /> Select Images
               </button>
             </div>
 
-            {/* Attached file chips */}
-            {attachedFiles.length > 0 && (
-              <div className="flex items-center gap-2 flex-wrap mt-2">
-                {attachedFiles.map((file) => (
-                  <span
-                    key={file}
-                    className="px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] font-mono text-slate-700 dark:text-slate-300 flex items-center gap-1.5"
+            {/* Attached file previews / thumbnails */}
+            {filePreviews.length > 0 && (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-3">
+                {filePreviews.map((file, idx) => (
+                  <div
+                    key={idx}
+                    className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900"
                   >
-                    <Paperclip className="w-3 h-3 text-indigo-500" />
-                    <span>{file}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveFile(file)}
-                      className="text-slate-400 hover:text-rose-500 ml-1"
-                    >
-                      &times;
-                    </button>
-                  </span>
+                    <img
+                      src={file.url}
+                      alt={file.name}
+                      className="w-full h-20 object-cover"
+                    />
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-between p-2 text-white text-[10px]">
+                      <span className="truncate max-w-[80px] font-mono">{file.name}</span>
+                      <button
+                        type="button"
+                        onClick={(e) => { e.stopPropagation(); handleRemoveFile(idx); }}
+                        className="p-1 rounded-md bg-rose-500/80 hover:bg-rose-600 text-white"
+                        title="Remove photo"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  </div>
                 ))}
               </div>
             )}
@@ -252,15 +313,24 @@ export const ReportIssueModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 btn-press"
+              disabled={isSubmitting}
+              className="px-4 py-2 rounded-xl bg-slate-100 dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 btn-press disabled:opacity-50"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold font-grotesk btn-press shadow-md shadow-amber-600/20"
+              disabled={isSubmitting}
+              className="px-5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-bold font-grotesk btn-press shadow-md shadow-amber-600/20 flex items-center gap-2 disabled:opacity-50"
             >
-              Submit Service Ticket
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Uploading & Submitting…</span>
+                </>
+              ) : (
+                <span>Submit Service Ticket</span>
+              )}
             </button>
           </div>
 

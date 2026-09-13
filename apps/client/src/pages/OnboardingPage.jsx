@@ -196,7 +196,19 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
     } else if (value === 'CREATE_NEW_PROPERTY') {
       handleOpenAddProperty(memberId);
     } else {
-      handleUpdateMember(memberId, 'unitId', value);
+      const matched = unitsList.find((u) => u.id === value);
+      const defaultDeposit = matched?.monthlyRent ? Math.round(matched.monthlyRent * 1.5) : 0;
+      setTenantMembers((prev) =>
+        prev.map((m) =>
+          m.id === memberId
+            ? {
+                ...m,
+                unitId: value,
+                securityDeposit: m.securityDeposit !== undefined && m.securityDeposit !== '' ? m.securityDeposit : defaultDeposit,
+              }
+            : m
+        )
+      );
     }
   };
 
@@ -217,6 +229,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
         .map((m) => {
           const matchedUnit = unitsList.find((u) => u.id === m.unitId);
           const computedName = m.name?.trim() || [m.firstName?.trim(), m.middleName?.trim(), m.lastName?.trim()].filter(Boolean).join(' ');
+          const deposit = Number(m.securityDeposit) >= 0 ? Number(m.securityDeposit) : (matchedUnit?.monthlyRent ? Math.round(matchedUnit.monthlyRent * 1.5) : 0);
           return {
             id: `usr-tenant-${Date.now()}-${m.id}`,
             firstName: m.firstName?.trim() || '',
@@ -229,6 +242,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
             unitId: matchedUnit ? m.unitId : undefined,
             unitLabel: matchedUnit?.label || 'Unassigned',
             monthlyRent: matchedUnit?.monthlyRent || 0,
+            securityDeposit: deposit,
             status: matchedUnit ? 'active' : 'pre_added',
           };
         });
@@ -242,6 +256,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
             lastName: t.lastName,
             email: t.email,
             unitId: t.unitId,
+            securityDeposit: t.securityDeposit,
             tempPassword: 'jptl2026',
           })),
           announcement: {
@@ -253,7 +268,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
         console.warn('Onboarding server persistence notice:', err.message);
       }
 
-      sessionStorage.setItem('jptl_onboarding_tenants', JSON.stringify(validNewTenants));
+      sessionStorage.removeItem('jptl_onboarding_tenants');
       sessionStorage.setItem(
         'jptl_announcement',
         JSON.stringify({ subject: announcementSubject, body: announcementBody })
@@ -604,7 +619,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
                   {tenantMembers.map((member) => (
                     <div
                       key={member.id}
-                      className="p-3.5 rounded-2xl bg-white dark:bg-[#111625] border border-slate-200 dark:border-slate-800/80 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-[1.1fr_0.9fr_1.1fr_1.4fr_1.4fr_auto] items-center gap-2.5 w-full overflow-hidden shadow-sm"
+                      className="p-3.5 rounded-2xl bg-white dark:bg-[#111625] border border-slate-200 dark:border-slate-800/80 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-[1fr_0.8fr_1fr_1.3fr_1.3fr_1fr_auto] items-center gap-2.5 w-full overflow-hidden shadow-sm"
                     >
                       <input
                         type="text"
@@ -632,14 +647,14 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
                         value={member.email}
                         onChange={(e) => handleUpdateMember(member.id, 'email', e.target.value)}
                         placeholder="Email Address"
-                        className="w-full min-w-0 bg-slate-50 dark:bg-[#090C16] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 sm:col-span-3 lg:col-span-1"
+                        className="w-full min-w-0 bg-slate-50 dark:bg-[#090C16] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                       
                       {/* Select Dropdown with Vacant Units + Quick Creation */}
                       <select
                         value={member.unitId}
                         onChange={(e) => handleSelectUnitChange(member.id, e.target.value)}
-                        className="w-full min-w-0 bg-slate-50 dark:bg-[#090C16] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 truncate font-sans sm:col-span-2 lg:col-span-1"
+                        className="w-full min-w-0 bg-slate-50 dark:bg-[#090C16] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 truncate font-sans"
                       >
                         <option value="pre_add_unassigned">Unassigned (Pre-add)</option>
                         {vacantUnits.length > 0 && (
@@ -657,10 +672,21 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
                         </optgroup>
                       </select>
 
+                      {/* Security Deposit Input */}
+                      <input
+                        type="number"
+                        min="0"
+                        value={member.securityDeposit ?? ''}
+                        onChange={(e) => handleUpdateMember(member.id, 'securityDeposit', e.target.value)}
+                        placeholder="Deposit ($)"
+                        title="Security Deposit Amount"
+                        className="w-full min-w-0 bg-slate-50 dark:bg-[#090C16] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+                      />
+
                       <button
                         type="button"
                         onClick={() => handleRemoveMember(member.id)}
-                        className="p-2 text-slate-400 hover:text-rose-500 rounded-lg shrink-0 flex items-center justify-center justify-self-center sm:col-span-1 lg:col-span-1"
+                        className="p-2 text-slate-400 hover:text-rose-500 rounded-lg shrink-0 flex items-center justify-center justify-self-center"
                         title="Remove row"
                       >
                         <Trash2 className="w-4 h-4" />

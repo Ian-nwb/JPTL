@@ -235,3 +235,24 @@ export async function addTenantComment(tenantId, ticketId, note, ipAddress = '')
     ticket: { ...ticket.toObject(), id: ticket._id },
   };
 }
+
+/**
+ * DELETE ticket (Tenant)
+ */
+export async function deleteTenantTicket(tenantId, ticketId, ipAddress = '') {
+  const ticket = await Ticket.findOne({ _id: ticketId, tenant: tenantId });
+  if (!ticket) throw new TenantTicketError('Ticket not found or access denied', 404);
+
+  const beforeState = ticket.toObject();
+  await Ticket.findByIdAndDelete(ticketId);
+
+  await logAction({
+    actorId: tenantId,
+    action: 'TICKET_DELETED_BY_TENANT',
+    entityId: ticketId,
+    beforeState,
+    ipAddress,
+  });
+
+  return { success: true, message: 'Ticket deleted successfully', ticketId };
+}

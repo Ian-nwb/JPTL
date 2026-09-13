@@ -32,8 +32,14 @@ export const TenantDocumentsTab = ({
       try {
         const res = await tenantApi.getDocuments();
         if (!isMounted) return;
-        const docs = res.documents || res.data || [];
-        if (Array.isArray(docs) && docs.length > 0) {
+        const rawList = res.documents || res.data || [];
+        if (Array.isArray(rawList) && rawList.length > 0) {
+          const docs = rawList.map((d) => ({
+            ...d,
+            id: d._id || d.id,
+            tenantName: d.tenantName || currentTenantName,
+            date: d.date || (d.createdAt ? new Date(d.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : 'Recently'),
+          }));
           setDocuments(docs);
         }
       } catch (err) {
@@ -126,7 +132,15 @@ export const TenantDocumentsTab = ({
       fileUrl: createdDoc?.fileUrl || `/docs/${docData.name}`
     };
 
-    const newDoc = createdDoc ? { ...createdDoc, id: createdDoc._id || createdDoc.id } : fallbackDoc;
+    const newDoc = {
+      ...fallbackDoc,
+      ...(createdDoc || {}),
+      id: createdDoc?._id || createdDoc?.id || fallbackDoc.id,
+      tenantName: createdDoc?.tenantName || fallbackDoc.tenantName,
+      unitLabel: createdDoc?.unitLabel || fallbackDoc.unitLabel,
+      propertyName: createdDoc?.propertyName || fallbackDoc.propertyName,
+      date: createdDoc?.date || fallbackDoc.date,
+    };
     const updatedList = [newDoc, ...documents];
     updateDocumentList(updatedList);
     setIsSubmitModalOpen(false);
@@ -308,14 +322,18 @@ export const TenantDocumentsTab = ({
 
                         <p className="text-[11px] text-slate-500 dark:text-slate-400">
                           Scope: <strong className="text-slate-800 dark:text-slate-200">
-                            {docItem.tenantId === 'all' ? 'Building-wide Policy' : `${docItem.tenantName} (${docItem.unitLabel})`}
+                            {docItem.tenantId === 'all'
+                              ? 'Building-wide Policy'
+                              : `${docItem.tenantName || currentTenantName} (${docItem.unitLabel || 'Unit'})`}
                           </strong>
                         </p>
 
                         <div className="flex items-center gap-3 text-[10px] text-slate-400">
-                          <span>Submitted: {docItem.date}</span>
+                          <span>
+                            Submitted: {docItem.date || (docItem.createdAt ? new Date(docItem.createdAt).toLocaleDateString('en-US', { month: 'short', day: '2-digit', year: 'numeric' }) : 'Recently')}
+                          </span>
                           <span>&bull;</span>
-                          <span>Size: {docItem.size}</span>
+                          <span>Size: {docItem.size || '0.3 MB'}</span>
                           {docItem.reviewedBy && (
                             <>
                               <span>&bull;</span>

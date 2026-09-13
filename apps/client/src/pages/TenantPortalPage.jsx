@@ -77,7 +77,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
   const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
 
-  // Load live data from server on mount
+  // Load live data from server on mount + auto-refresh polling
   useEffect(() => {
     let isMounted = true;
 
@@ -124,8 +124,28 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
     }
 
     loadTenantData();
+
+    // Auto-refresh polling every 10 seconds when tab is visible
+    const interval = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadTenantData();
+      }
+    }, 10000);
+
+    const onVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        loadTenantData();
+      }
+    };
+
+    window.addEventListener('focus', onVisibilityOrFocus);
+    document.addEventListener('visibilitychange', onVisibilityOrFocus);
+
     return () => {
       isMounted = false;
+      clearInterval(interval);
+      window.removeEventListener('focus', onVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', onVisibilityOrFocus);
     };
   }, []);
 
@@ -158,6 +178,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
         description: newTicket.description,
         category: newTicket.category,
         priority: newTicket.priority,
+        photoUrls: newTicket.photoUrls || [],
       });
       const created = res.data || newTicket;
       setTickets((prev) => [created, ...prev]);
@@ -165,6 +186,15 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
       console.warn('Server ticket submission fallback:', err.message);
       setTickets((prev) => [newTicket, ...prev]);
     }
+  };
+
+  const handleDeleteTicket = async (ticketId) => {
+    try {
+      await tenantApi.deleteTicket(ticketId);
+    } catch (err) {
+      console.warn('Server ticket deletion notice:', err.message);
+    }
+    setTickets((prev) => prev.filter((t) => t.id !== ticketId && t._id !== ticketId));
   };
 
   const handlePaymentSuccess = async (receipt) => {
@@ -301,6 +331,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
               tenant={currentTenant}
               unit={currentUnit}
               onRequestRepairClick={() => setIsReportIssueOpen(true)}
+              onDeleteTicket={handleDeleteTicket}
             />
           )}
 

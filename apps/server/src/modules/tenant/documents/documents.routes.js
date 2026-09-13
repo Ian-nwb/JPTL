@@ -14,6 +14,7 @@ const router = Router();
 router.use(requireAuth, requireRole('tenant'));
 
 router.get('/', tenantDocController.getDocuments);
+router.get('/:id/file', tenantDocController.getDocumentFile);
 router.post('/', upload.single('file'), tenantDocController.submitDocument);
 router.delete('/:id', tenantDocController.deleteDocument);
 

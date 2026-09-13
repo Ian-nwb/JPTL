@@ -1,13 +1,43 @@
 import React, { useState, useEffect } from 'react';
-import { Wrench, Clock, CheckCircle2, AlertTriangle, ShieldAlert, User, Building2 } from 'lucide-react';
+import { Wrench, Clock, CheckCircle2, AlertTriangle, ShieldAlert, User, Building2, Trash2, HardHat } from 'lucide-react';
 
-export const TicketsTab = ({ tickets: initialTickets = [], searchQuery = '', onOpenNewTicket, onUpdateStatus }) => {
+export const TicketsTab = ({
+  tickets: initialTickets = [],
+  searchQuery = '',
+  onOpenNewTicket,
+  onUpdateStatus,
+  onDeleteTicket,
+  onAssignTechnician,
+}) => {
   const [tickets, setTickets] = useState(initialTickets);
   const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     setTickets(initialTickets);
   }, [initialTickets]);
+
+  const handleAssignTech = (ticketId, name) => {
+    if (!name.trim()) return;
+    const techData = {
+      name: name.trim(),
+      company: 'Certified Dispatch',
+      phone: '+1 (555) 0199',
+      eta: 'Next Business Day',
+    };
+    if (onAssignTechnician) {
+      onAssignTechnician(ticketId, techData);
+    }
+    setTickets((prev) =>
+      prev.map((t) =>
+        t.id === ticketId || t._id === ticketId
+          ? {
+              ...t,
+              assignedTechnician: { ...(t.assignedTechnician || {}), ...techData },
+            }
+          : t
+      )
+    );
+  };
 
   const handleUpdateStatus = (ticketId, newStatus) => {
     setTickets((prev) =>
@@ -166,16 +196,45 @@ export const TicketsTab = ({ tickets: initialTickets = [], searchQuery = '', onO
                   <p className="text-xs text-slate-600 dark:text-slate-300 max-w-2xl">
                     {t.description}
                   </p>
+                  {t.photoUrls && t.photoUrls.length > 0 && (
+                    <div className="flex items-center gap-2 flex-wrap pt-2">
+                      {t.photoUrls.map((url, i) => (
+                        <a
+                          key={i}
+                          href={url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 w-14 h-14 block hover:opacity-80 transition-opacity shrink-0"
+                        >
+                          <img src={url} alt={`Evidence ${i + 1}`} className="w-full h-full object-cover" />
+                        </a>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <div className="shrink-0 flex items-center gap-2">
+                <div className="shrink-0 flex items-center gap-2 self-start">
                   {getStatusBadge(t.status)}
+                  {onDeleteTicket && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(`Are you sure you want to delete maintenance ticket ${t.id || t.title}?`)) {
+                          onDeleteTicket(t.id || t._id);
+                        }
+                      }}
+                      title="Delete ticket"
+                      className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-500 hover:border-rose-500/30 btn-press transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
 
-              {/* Location & Tenant Info Bar */}
+              {/* Location, Tenant & Tech Assignment Bar */}
               <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60 text-xs flex flex-wrap items-center justify-between gap-3">
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
                   <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-300">
                     <Building2 className="w-3.5 h-3.5 text-indigo-500" />
                     <span>{t.propertyName} &bull; <strong className="text-slate-900 dark:text-white">{t.unitLabel}</strong></span>
@@ -186,18 +245,47 @@ export const TicketsTab = ({ tickets: initialTickets = [], searchQuery = '', onO
                   </div>
                 </div>
 
-                {/* Quick Status Action Switcher */}
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">Set Status:</span>
-                  <select
-                    value={t.status}
-                    onChange={(e) => handleUpdateStatus(t.id, e.target.value)}
-                    className="bg-white dark:bg-[#111625] border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                  >
-                    <option value="submitted">Submitted</option>
-                    <option value="in_progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                  </select>
+                {/* Quick Status & Assign Technician Controls */}
+                <div className="flex items-center gap-3 flex-wrap">
+                  {/* Assign Technician Input */}
+                  <div className="flex items-center gap-1.5">
+                    <HardHat className="w-3.5 h-3.5 text-amber-500" />
+                    <input
+                      type="text"
+                      placeholder="Assign Tech Name…"
+                      defaultValue={t.assignedTechnician?.name || ''}
+                      key={t.assignedTechnician?.name || 'empty'}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAssignTech(t.id || t._id, e.target.value);
+                          e.target.blur();
+                        }
+                      }}
+                      onBlur={(e) => {
+                        const val = e.target.value.trim();
+                        if (val && val !== (t.assignedTechnician?.name || '')) {
+                          handleAssignTech(t.id || t._id, val);
+                        }
+                      }}
+                      className="bg-white dark:bg-[#111625] border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 w-36 sm:w-44"
+                      title="Press Enter to assign technician"
+                    />
+                  </div>
+
+                  {/* Status Switcher */}
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">Status:</span>
+                    <select
+                      value={t.status}
+                      onChange={(e) => handleUpdateStatus(t.id, e.target.value)}
+                      className="bg-white dark:bg-[#111625] border border-slate-300 dark:border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-900 dark:text-white font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                    >
+                      <option value="submitted">Submitted</option>
+                      <option value="in_progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                    </select>
+                  </div>
                 </div>
               </div>
 

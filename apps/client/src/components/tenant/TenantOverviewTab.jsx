@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   Home, CreditCard, Wrench, Megaphone, Calendar, ShieldCheck, ArrowUpRight, 
-  Key, Wifi, Car, FileText, CheckCircle2, Clock, AlertTriangle, ArrowRight, UserCheck 
+  Key, Wifi, Car, FileText, CheckCircle2, Clock, AlertTriangle, ArrowRight, UserCheck, BookOpen
 } from 'lucide-react';
 
 export const TenantOverviewTab = ({
@@ -213,7 +213,7 @@ export const TenantOverviewTab = ({
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <Key className="w-3.5 h-3.5 text-indigo-500" /> Unit & Access Keys
+                <Key className="w-3.5 h-3.5 text-indigo-500" /> Unit &amp; Access Keys
               </span>
               <span className="text-[10px] font-mono text-slate-400">Encrypted</span>
             </div>
@@ -221,7 +221,9 @@ export const TenantOverviewTab = ({
             <div className="mt-3 space-y-2 text-xs font-mono">
               <div className="flex justify-between items-center p-2 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60">
                 <span className="text-slate-400 flex items-center gap-1"><Key className="w-3 h-3" /> Gate / Front Code:</span>
-                <strong className="text-slate-900 dark:text-white tracking-widest">#8821</strong>
+                <strong className="text-slate-900 dark:text-white tracking-widest">
+                  {property?.accessCodes?.gateCode || '—'}
+                </strong>
               </div>
               <div className="flex justify-between items-center p-2 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60">
                 <span className="text-slate-400 flex items-center gap-1"><Car className="w-3 h-3" /> Assigned Parking:</span>
@@ -235,12 +237,43 @@ export const TenantOverviewTab = ({
           </div>
 
           <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 text-[11px] font-mono text-slate-400 flex items-center justify-between">
-            <span className="flex items-center gap-1"><Wifi className="w-3 h-3 text-indigo-400" /> Aura-Resident_5G</span>
-            <span>Key: <strong className="text-slate-700 dark:text-slate-300">sky@2026</strong></span>
+            <span className="flex items-center gap-1">
+              <Wifi className="w-3 h-3 text-indigo-400" />
+              {property?.accessCodes?.wifiSsid || 'WiFi not configured'}
+            </span>
+            {property?.accessCodes?.wifiPassword ? (
+              <span>Key: <strong className="text-slate-700 dark:text-slate-300">{property.accessCodes.wifiPassword}</strong></span>
+            ) : (
+              <span className="italic">—</span>
+            )}
           </div>
         </div>
 
       </div>
+
+      {/* ─── 2b. BUILDING RULES & POLICIES ─── */}
+      {property?.buildingRules?.length > 0 && (
+        <div className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-5 space-y-3">
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4 text-indigo-500" />
+            <span className="text-sm font-bold font-grotesk text-slate-900 dark:text-white">Building Rules &amp; Policies</span>
+            <span className="text-[10px] font-mono text-slate-400 ml-auto">Set by Property Management</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {property.buildingRules.map((rule, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60"
+              >
+                <span className="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold font-mono flex items-center justify-center">
+                  {i + 1}
+                </span>
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{rule}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ─── 3. COMMUNITY BROADCASTS & RECENT UPDATES ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

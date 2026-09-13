@@ -34,3 +34,19 @@ export async function deleteDocument(req, res) {
     return res.status(statusCode).json({ success: false, message: err.message });
   }
 }
+
+export async function getDocumentFile(req, res) {
+  try {
+    const landlordId = req.user._id || req.user.id;
+    const { stream, name, mimeType } = await landlordDocService.getDocumentStream(landlordId, req.params.id);
+    res.setHeader('Content-Type', mimeType || 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(name)}"`);
+    const { Readable } = await import('node:stream');
+    const nodeStream = Readable.fromWeb(stream);
+    return nodeStream.pipe(res);
+  } catch (err) {
+    const statusCode = err.statusCode || 500;
+    return res.status(statusCode).json({ success: false, message: err.message });
+  }
+}
+

@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Megaphone, Plus, Pin, Calendar, Tag, User, Search, Sparkles } from 'lucide-react';
+import { Megaphone, Plus, Pin, Calendar, Tag, User, Search, Sparkles, Trash2 } from 'lucide-react';
 
 export const AnnouncementsTab = ({
   announcements = [],
   onOpenNewAnnouncement,
+  onDeleteAnnouncement,
 }) => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -105,17 +106,34 @@ export const AnnouncementsTab = ({
                   </span>
                 </div>
 
-                <div className="flex items-center gap-4 text-[11px] font-mono text-slate-400">
-                  <span className="flex items-center gap-1">
-                    <User className="w-3.5 h-3.5 text-indigo-400" /> {
-                      typeof a.author === 'object' && a.author !== null
-                        ? ([a.author.firstName, a.author.lastName].filter(Boolean).join(' ') || a.author.name || 'Landlord')
-                        : (a.author || a.creatorName || 'Landlord')
-                    }
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3.5 h-3.5" /> {a.date || (a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'Recent')}
-                  </span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-4 text-[11px] font-mono text-slate-400">
+                    <span className="flex items-center gap-1">
+                      <User className="w-3.5 h-3.5 text-indigo-400" /> {
+                        typeof a.author === 'object' && a.author !== null
+                          ? ([a.author.firstName, a.author.lastName].filter(Boolean).join(' ') || a.author.name || 'Landlord')
+                          : (a.author || a.creatorName || 'Landlord')
+                      }
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" /> {a.date || (a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'Recent')}
+                    </span>
+                  </div>
+
+                  {onDeleteAnnouncement && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (window.confirm(`Are you sure you want to delete announcement "${a.title}"?`)) {
+                          onDeleteAnnouncement(a.id || a._id);
+                        }
+                      }}
+                      title="Delete announcement"
+                      className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-500 hover:border-rose-500/30 btn-press transition-colors"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
                 </div>
               </div>
 

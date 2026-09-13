@@ -481,20 +481,28 @@ async function completeFullOnboarding(landlordId, payload, ipAddress = '') {
       }
     }
 
+    const rentAmount = assignedUnit ? assignedUnit.monthlyRent : 0;
+    const deposit = tenant.securityDeposit !== undefined && tenant.securityDeposit !== null && tenant.securityDeposit !== ''
+      ? Number(tenant.securityDeposit)
+      : (rentAmount ? rentAmount * 1.5 : 0);
+
     const profile = await TenantProfile.create({
       user: tenantUser._id,
       property: assignedProperty ? assignedProperty._id : null,
       unit: assignedUnit ? assignedUnit._id : null,
-      monthlyRent: assignedUnit ? assignedUnit.monthlyRent : 0,
+      monthlyRent: rentAmount,
+      securityDeposit: deposit,
       status: assignedUnit ? 'active' : 'pre_added',
     });
+
+    const fullName = [tenantUser.firstName, tenantUser.middleName, tenantUser.lastName].filter(Boolean).join(' ');
 
     createdTenants.push({
       id: tenantUser._id,
       firstName: tenantUser.firstName,
       middleName: tenantUser.middleName,
       lastName: tenantUser.lastName,
-      fullName: [tenantUser.firstName, tenantUser.middleName, tenantUser.lastName].filter(Boolean).join(' '),
+      fullName,
       email: tenantUser.email,
       role: tenantUser.role,
       temporaryPassword: tempPassword,
@@ -502,6 +510,8 @@ async function completeFullOnboarding(landlordId, payload, ipAddress = '') {
       unitLabel: assignedUnit ? assignedUnit.label : 'Unassigned',
       propertyId: assignedProperty ? assignedProperty._id : null,
       propertyName: assignedProperty ? assignedProperty.name : 'Unassigned',
+      monthlyRent: profile.monthlyRent,
+      securityDeposit: profile.securityDeposit,
       status: profile.status,
     });
 

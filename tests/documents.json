@@ -1,14 +1,15 @@
 {
   "info": {
     "name": "Resident Compliance Vault & Documents Module (Landlord & Tenant)",
-    "description": "Postman test collection for Resident Compliance Vault & Document Upload endpoints across Tenant and Landlord roles.\nIncludes document submission (insurance, ID, income, etc.), Cloudinary URL attachment, compliance queue inspection, verification/rejection workflows, and error handling.",
+    "description": "Postman test collection for Resident Compliance Vault & Document Upload endpoints across Tenant and Landlord roles.\nIncludes document submission (insurance, ID, income, etc.), Cloudinary URL attachment, compliance queue inspection, verification/rejection workflows, streaming proxy delivery, and error handling.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "base_url", "value": "http://localhost:3000", "type": "string" },
+    { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
     { "key": "landlord_token", "value": "", "type": "string" },
     { "key": "tenant_token", "value": "", "type": "string" },
-    { "key": "created_document_id", "value": "", "type": "string" }
+    { "key": "created_document_id", "value": "", "type": "string" },
+    { "key": "temp_delete_doc_id", "value": "", "type": "string" }
   ],
   "item": [
     {
@@ -20,8 +21,9 @@
             "exec": [
               "const res = pm.response.json();",
               "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
-              "if (res.data && res.data.token) {",
-              "  pm.collectionVariables.set('tenant_token', res.data.token);",
+              "const token = res.token || (res.data && res.data.token);",
+              "if (token) {",
+              "  pm.collectionVariables.set('tenant_token', token);",
               "  console.log('Tenant token saved.');",
               "}"
             ]
@@ -33,7 +35,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"sophia.lin@example.com\",\n  \"password\": \"password123\"\n}"
+          "raw": "{\n  \"email\": \"sophia@jptl.dev\",\n  \"password\": \"Password123!\"\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/auth/login",
@@ -51,8 +53,9 @@
             "exec": [
               "const res = pm.response.json();",
               "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
-              "if (res.data && res.data.token) {",
-              "  pm.collectionVariables.set('landlord_token', res.data.token);",
+              "const token = res.token || (res.data && res.data.token);",
+              "if (token) {",
+              "  pm.collectionVariables.set('landlord_token', token);",
               "  console.log('Landlord token saved.');",
               "}"
             ]
@@ -64,7 +67,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"vance.landlord@example.com\",\n  \"password\": \"password123\"\n}"
+          "raw": "{\n  \"email\": \"landlord@jptl.dev\",\n  \"password\": \"Password123!\"\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/auth/login",
@@ -94,11 +97,11 @@
         "method": "POST",
         "header": [
           { "key": "Content-Type", "value": "application/json" },
-          { "key": "Cookie", "value": "token={{tenant_token}}" }
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Renter_Liability_Insurance_Certificate.pdf\",\n  \"type\": \"Proof of Insurance\",\n  \"category\": \"upload\",\n  \"fileSize\": \"1.8 MB\",\n  \"notes\": \"Policy effective 2026-2027 underwritten by Travelers.\"\n}"
+          "raw": "{\n  \"name\": \"Final Project Specification_MWA.pdf\",\n  \"type\": \"Proof of Insurance\",\n  \"category\": \"upload\",\n  \"fileSize\": \"0.3 MB\",\n  \"fileUrl\": \"https://res.cloudinary.com/fzpweior/image/upload/v1789310514/jptl_compliance_vault/1789310511958_Final_Project_Specification_MWA.pdf\",\n  \"notes\": \"Policy effective 2026-2027 underwritten by Travelers.\"\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/tenant/documents",
@@ -127,7 +130,7 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "Cookie", "value": "token={{tenant_token}}" }
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
         ],
         "url": {
           "raw": "{{base_url}}/api/tenant/documents",
@@ -156,7 +159,7 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "Cookie", "value": "token={{landlord_token}}" }
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
         ],
         "url": {
           "raw": "{{base_url}}/api/landlord/documents",
@@ -183,7 +186,7 @@
         "method": "PATCH",
         "header": [
           { "key": "Content-Type", "value": "application/json" },
-          { "key": "Cookie", "value": "token={{landlord_token}}" }
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
         ],
         "body": {
           "mode": "raw",
@@ -212,7 +215,7 @@
         "method": "PATCH",
         "header": [
           { "key": "Content-Type", "value": "application/json" },
-          { "key": "Cookie", "value": "token={{landlord_token}}" }
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
         ],
         "body": {
           "mode": "raw",
@@ -222,6 +225,185 @@
           "raw": "{{base_url}}/api/landlord/documents/{{created_document_id}}/verify",
           "host": ["{{base_url}}"],
           "path": ["api", "landlord", "documents", "{{created_document_id}}", "verify"]
+        }
+      }
+    },
+    {
+      "name": "08. Landlord – Stream / Proxy Document File",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Content-Type is application/pdf', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/landlord/documents/{{created_document_id}}/file",
+          "host": ["{{base_url}}"],
+          "path": ["api", "landlord", "documents", "{{created_document_id}}", "file"]
+        }
+      }
+    },
+    {
+      "name": "09. Tenant – Stream / Proxy Document File",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Content-Type is application/pdf', () => pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf'));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/tenant/documents/{{created_document_id}}/file",
+          "host": ["{{base_url}}"],
+          "path": ["api", "tenant", "documents", "{{created_document_id}}", "file"]
+        }
+      }
+    },
+    {
+      "name": "10. Error Handling – Stream Non-existent Document File (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 404 Not Found', () => pm.response.to.have.status(404));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/landlord/documents/000000000000000000000000/file",
+          "host": ["{{base_url}}"],
+          "path": ["api", "landlord", "documents", "000000000000000000000000", "file"]
+        }
+      }
+    },
+    {
+      "name": "11. Error Handling – Stream Document File Unauthenticated (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 401 Unauthorized', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/api/landlord/documents/{{created_document_id}}/file",
+          "host": ["{{base_url}}"],
+          "path": ["api", "landlord", "documents", "{{created_document_id}}", "file"]
+        }
+      }
+    },
+    {
+      "name": "12. Error Handling – Cannot Delete Verified Document (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 400 Bad Request', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/tenant/documents/{{created_document_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "tenant", "documents", "{{created_document_id}}"]
+        }
+      }
+    },
+    {
+      "name": "13. Tenant – Create Temporary Pending Document For Deletion",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
+              "if (res.data) {",
+              "  pm.collectionVariables.set('temp_delete_doc_id', res.data._id || res.data.id);",
+              "}"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Temporary_Pet_Agreement_To_Delete.pdf\",\n  \"type\": \"Pet Registration\",\n  \"category\": \"upload\",\n  \"fileSize\": \"0.5 MB\"\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/api/tenant/documents",
+          "host": ["{{base_url}}"],
+          "path": ["api", "tenant", "documents"]
+        }
+      }
+    },
+    {
+      "name": "14. Tenant – Delete Own Pending Document (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Document deleted successfully', () => pm.expect(res.success).to.be.true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/tenant/documents/{{temp_delete_doc_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "tenant", "documents", "{{temp_delete_doc_id}}"]
         }
       }
     }

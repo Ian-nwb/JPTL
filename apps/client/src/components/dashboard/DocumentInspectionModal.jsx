@@ -27,6 +27,20 @@ export const DocumentInspectionModal = ({
 
   if (!doc) return null;
 
+  const isCloudinary = doc.fileUrl && doc.fileUrl.includes('cloudinary.com');
+  const isPdf = doc.name?.toLowerCase().endsWith('.pdf') || doc.fileUrl?.toLowerCase().includes('.pdf');
+  const isImage = /\.(jpe?g|png|gif|webp|bmp|svg)(\?|$)/i.test(doc.fileUrl) || doc.mimeType?.startsWith('image/');
+
+  // Server proxy URL that uses authenticated Cloudinary download with zero 401 errors
+  const serverProxyUrl = (doc.id || doc._id)
+    ? `http://localhost:8000/api/${(onVerify || onReject) ? 'landlord' : 'tenant'}/documents/${doc.id || doc._id}/file`
+    : doc.fileUrl;
+
+  // Cloudinary image rendition for PDFs (delivers with HTTP 200)
+  const cloudinaryPngPreview = isCloudinary && isPdf
+    ? doc.fileUrl.replace(/\.pdf(\?.*)?$/i, '.png$1')
+    : null;
+
   const handleApprove = () => {
     setIsVerifying(true);
     setTimeout(() => {
@@ -37,6 +51,10 @@ export const DocumentInspectionModal = ({
   };
 
   const handleDownload = () => {
+    if (serverProxyUrl) {
+      window.open(serverProxyUrl, '_blank');
+      return;
+    }
     if (doc.fileUrl && (doc.fileUrl.startsWith('http://') || doc.fileUrl.startsWith('https://') || doc.fileUrl.startsWith('blob:'))) {
       window.open(doc.fileUrl, '_blank');
       return;
@@ -304,76 +322,126 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
               </button>
             </div>
 
-            {/* Document Canvas Sheet */}
-            <div className="w-full flex-1 flex items-center justify-center p-4 overflow-auto scrollbar-thin">
-              <div 
-                className="w-full max-w-xl bg-white text-slate-900 rounded-2xl shadow-2xl p-8 border border-slate-200 space-y-6 transition-transform duration-200 transform origin-center select-none"
-                style={{ transform: `scale(${zoomLevel / 100})` }}
-              >
-                {/* Simulated Document Header */}
-                <div className="border-b-2 border-slate-900 pb-4 flex items-center justify-between">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <ShieldCheck className="w-5 h-5 text-indigo-600" />
-                      <span className="font-grotesk font-black text-sm tracking-wider uppercase text-slate-900">
-                        OFFICIAL RESIDENTIAL DOCUMENT
-                      </span>
+            {/* Document Canvas: Real File Viewer */}
+            <div className="w-full flex-1 flex items-start justify-center p-4 overflow-auto scrollbar-thin">
+              {doc.fileUrl || serverProxyUrl ? (
+                <>
+                  {/* If Cloudinary PDF, display rasterized page image with direct download link */}
+                  {cloudinaryPngPreview ? (
+                    <div
+                      className="flex flex-col items-center justify-center w-full overflow-auto space-y-3"
+                      style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center', transition: 'transform 0.2s ease' }}
+                    >
+                      <img
+                        src={cloudinaryPngPreview}
+                        alt={doc.name}
+                        className="max-w-full rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 bg-white"
+                        style={{ maxHeight: '65vh', objectFit: 'contain' }}
+                      />
+                      <div className="flex items-center gap-2">
+                        <a
+                          href={serverProxyUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-mono flex items-center gap-1.5 shadow-md shadow-indigo-600/20 btn-press"
+                        >
+                          <Download className="w-3.5 h-3.5" /> Download Original PDF
+                        </a>
+                      </div>
                     </div>
-                    <p className="text-[10px] font-mono text-slate-500 mt-0.5">
-                      JPTL PROPERTY MANAGEMENT VERIFICATION SYSTEM &bull; REF #{doc.id.toUpperCase()}
-                    </p>
+                  ) : isImage ? (
+                    <div
+                      className="flex items-center justify-center w-full overflow-auto"
+                      style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center', transition: 'transform 0.2s ease' }}
+                    >
+                      <img
+                        src={doc.fileUrl || serverProxyUrl}
+                        alt={doc.name}
+                        className="max-w-full rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700"
+                        style={{ maxHeight: '70vh', objectFit: 'contain' }}
+                        onError={(e) => { e.currentTarget.style.display = 'none'; }}
+                      />
+                    </div>
+                  ) : (
+                    <div
+                      className="w-full"
+                      style={{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center', transition: 'transform 0.2s ease' }}
+                    >
+                      <iframe
+                        src={serverProxyUrl}
+                        title={doc.name}
+                        className="w-full rounded-2xl border border-slate-200 dark:border-slate-700 shadow-2xl bg-white"
+                        style={{ height: '65vh', minHeight: '400px' }}
+                      />
+                    </div>
+                  )}
+                </>
+              ) : (
+                /* No valid URL — show metadata card */
+                <div
+                  className="w-full max-w-xl bg-white text-slate-900 rounded-2xl shadow-2xl p-8 border border-slate-200 space-y-6 transition-transform duration-200 transform origin-center select-none"
+                  style={{ transform: `scale(${zoomLevel / 100})` }}
+                >
+                  {/* Document Header */}
+                  <div className="border-b-2 border-slate-900 pb-4 flex items-center justify-between">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <ShieldCheck className="w-5 h-5 text-indigo-600" />
+                        <span className="font-grotesk font-black text-sm tracking-wider uppercase text-slate-900">
+                          OFFICIAL RESIDENTIAL DOCUMENT
+                        </span>
+                      </div>
+                      <p className="text-[10px] font-mono text-slate-500 mt-0.5">
+                        JPTL PROPERTY MANAGEMENT VERIFICATION SYSTEM &bull; REF #{String(doc.id || doc._id || '').toUpperCase()}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-mono text-slate-400 block uppercase">Document Category</span>
+                      <span className="text-xs font-mono font-bold text-slate-800">{doc.type}</span>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <span className="text-[10px] font-mono text-slate-400 block uppercase">Document Category</span>
-                    <span className="text-xs font-mono font-bold text-slate-800">{doc.type}</span>
+
+                  {/* Document Body */}
+                  <div className="space-y-4 font-mono text-xs text-slate-700">
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
+                      <div className="flex justify-between border-b border-slate-200 pb-1 text-[11px]">
+                        <span className="text-slate-500">Document Name:</span>
+                        <strong className="font-bold">{doc.name}</strong>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-200 pb-1 text-[11px]">
+                        <span className="text-slate-500">Resident / Policy Holder:</span>
+                        <strong>{doc.tenantName}</strong>
+                      </div>
+                      <div className="flex justify-between border-b border-slate-200 pb-1 text-[11px]">
+                        <span className="text-slate-500">Assigned Residence:</span>
+                        <strong>{doc.unitLabel} &bull; {doc.propertyName}</strong>
+                      </div>
+                      <div className="flex justify-between text-[11px]">
+                        <span className="text-slate-500">Filing Date:</span>
+                        <strong>{doc.date}</strong>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2 py-2">
+                      <div className="h-2 bg-slate-200 rounded w-full" />
+                      <div className="h-2 bg-slate-200 rounded w-11/12" />
+                      <div className="h-2 bg-slate-200 rounded w-4/5" />
+                      <div className="h-2 bg-slate-200 rounded w-9/12" />
+                    </div>
+
+                    <div className="pt-4 flex items-center justify-between">
+                      <div className="p-3 rounded-xl border-2 border-dashed border-amber-300 bg-amber-50/50 flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-600" />
+                        <span className="text-[10px] font-bold text-amber-700 uppercase">
+                          FILE NOT YET UPLOADED — PENDING SUBMISSION
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-
-                {/* Simulated Document Body Graphic */}
-                <div className="space-y-4 font-mono text-xs text-slate-700">
-                  <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-                    <div className="flex justify-between border-b border-slate-200 pb-1 text-[11px]">
-                      <span className="text-slate-500">Document Name:</span>
-                      <strong className="font-bold">{doc.name}</strong>
-                    </div>
-                    <div className="flex justify-between border-b border-slate-200 pb-1 text-[11px]">
-                      <span className="text-slate-500">Resident / Policy Holder:</span>
-                      <strong>{doc.tenantName}</strong>
-                    </div>
-                    <div className="flex justify-between border-b border-slate-200 pb-1 text-[11px]">
-                      <span className="text-slate-500">Assigned Residence:</span>
-                      <strong>{doc.unitLabel} &bull; {doc.propertyName}</strong>
-                    </div>
-                    <div className="flex justify-between text-[11px]">
-                      <span className="text-slate-500">Filing Date:</span>
-                      <strong>{doc.date}</strong>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 py-2">
-                    <div className="h-2 bg-slate-200 rounded w-full" />
-                    <div className="h-2 bg-slate-200 rounded w-11/12" />
-                    <div className="h-2 bg-slate-200 rounded w-4/5" />
-                    <div className="h-2 bg-slate-200 rounded w-9/12" />
-                  </div>
-
-                  {/* Watermark / Stamp */}
-                  <div className="pt-4 flex items-center justify-between">
-                    <div className="p-3 rounded-xl border-2 border-dashed border-indigo-300 bg-indigo-50/50 flex items-center gap-2">
-                      <FileCheck className="w-4 h-4 text-indigo-600" />
-                      <span className="text-[10px] font-bold text-indigo-700 uppercase">
-                        DIGITAL STAMP: VERIFICATION PENDING
-                      </span>
-                    </div>
-
-                    <div className="text-right text-[10px] text-slate-400">
-                      <span>Page 1 of 1</span>
-                    </div>
-                  </div>
-                </div>
-
-              </div>
+              )}
             </div>
+
 
             {/* Bottom Floating Action Bar for Verification Decision */}
             {!rejecting && (

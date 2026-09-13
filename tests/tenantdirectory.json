@@ -6,8 +6,8 @@
   },
   "variable": [
     { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
-    { "key": "landlord_token", "value": "<paste token here>", "type": "string" },
-    { "key": "tenant_token", "value": "<paste token here>", "type": "string" },
+    { "key": "landlord_token", "value": "", "type": "string" },
+    { "key": "tenant_token", "value": "", "type": "string" },
     { "key": "created_tenant_id", "value": "", "type": "string" },
     { "key": "sample_unit_id", "value": "", "type": "string" }
   ],
@@ -20,8 +20,10 @@
           "script": {
             "exec": [
               "const res = pm.response.json();",
-              "if (res.data && res.data.token) {",
-              "  pm.collectionVariables.set('landlord_token', res.data.token);",
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "const token = res.token || (res.data && res.data.token);",
+              "if (token) {",
+              "  pm.collectionVariables.set('landlord_token', token);",
               "  console.log('Landlord token saved.');",
               "}"
             ]
@@ -33,7 +35,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"vance.landlord@example.com\",\n  \"password\": \"password123\"\n}"
+          "raw": "{\n  \"email\": \"landlord@jptl.dev\",\n  \"password\": \"Password123!\"\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/auth/login",
@@ -50,8 +52,10 @@
           "script": {
             "exec": [
               "const res = pm.response.json();",
-              "if (res.data && res.data.token) {",
-              "  pm.collectionVariables.set('tenant_token', res.data.token);",
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "const token = res.token || (res.data && res.data.token);",
+              "if (token) {",
+              "  pm.collectionVariables.set('tenant_token', token);",
               "  console.log('Tenant token saved.');",
               "}"
             ]
@@ -63,7 +67,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"tenant@example.com\",\n  \"password\": \"JPTL2026\"\n}"
+          "raw": "{\n  \"email\": \"sophia@jptl.dev\",\n  \"password\": \"Password123!\"\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/auth/login",
@@ -74,6 +78,18 @@
     },
     {
       "name": "1. Get All Tenants (Full Directory & Summary)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Returns tenants array', () => pm.expect(Array.isArray(res.data)).to.be.true);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [
@@ -83,12 +99,23 @@
           "raw": "{{base_url}}/api/landlord/tenantdirectory",
           "host": ["{{base_url}}"],
           "path": ["api", "landlord", "tenantdirectory"]
-        },
-        "description": "Returns full directory of tenants belonging to this landlord, including summary metrics (totalTenants, activeLeasesCount, preAddedCount) and unit/property info for each tenant."
+        }
       }
     },
     {
       "name": "2. Search Tenants (by Name, Email, or Unit)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Returns filtered array', () => pm.expect(Array.isArray(res.data)).to.be.true);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [
@@ -101,12 +128,23 @@
           "query": [
             { "key": "search", "value": "Sophia" }
           ]
-        },
-        "description": "Filters tenants matching the query string in name, email, unit label, or property name."
+        }
       }
     },
     {
       "name": "3. Filter Tenants by Status – Active Leases",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Returns active leases', () => pm.expect(Array.isArray(res.data)).to.be.true);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [
@@ -119,12 +157,23 @@
           "query": [
             { "key": "status", "value": "active" }
           ]
-        },
-        "description": "Filters tenants having active assigned leases."
+        }
       }
     },
     {
       "name": "4. Filter Tenants by Status – Pre-added / Unassigned",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Returns pre_added list', () => pm.expect(Array.isArray(res.data)).to.be.true);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [
@@ -137,18 +186,26 @@
           "query": [
             { "key": "status", "value": "pre_added" }
           ]
-        },
-        "description": "Filters tenants pre-added without an active unit assignment."
+        }
       }
     },
     {
       "name": "5. Create Tenant – Pre-Added Unassigned",
       "event": [
         {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.variables.set('test_tenant_email', 'temp.tenant.' + Date.now() + '@example.com');"
+            ]
+          }
+        },
+        {
           "listen": "test",
           "script": {
             "exec": [
               "const res = pm.response.json();",
+              "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
               "if (res.data && res.data.id) {",
               "  pm.collectionVariables.set('created_tenant_id', res.data.id);",
               "  console.log('Saved created_tenant_id:', res.data.id);",
@@ -165,38 +222,29 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"firstName\": \"Elena\",\n  \"middleName\": \"\",\n  \"lastName\": \"Rostova\",\n  \"email\": \"elena.rostova@example.com\",\n  \"phone\": \"+1-555-0199\",\n  \"unitId\": \"pre_add_unassigned\"\n}"
+          "raw": "{\n  \"firstName\": \"Elena\",\n  \"middleName\": \"\",\n  \"lastName\": \"Rostova\",\n  \"email\": \"{{test_tenant_email}}\",\n  \"phone\": \"+1-555-0199\",\n  \"unitId\": \"pre_add_unassigned\"\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/landlord/tenantdirectory",
           "host": ["{{base_url}}"],
           "path": ["api", "landlord", "tenantdirectory"]
-        },
-        "description": "Creates a pre-added occupant without an immediate unit assignment. Returns generated temporary password for landlord to share."
+        }
       }
     },
     {
-      "name": "6. Create Tenant – Active Lease with Unit Assignment",
-      "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Authorization", "value": "Bearer {{landlord_token}}" },
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"firstName\": \"Marcus\",\n  \"middleName\": \"A.\",\n  \"lastName\": \"Brody\",\n  \"email\": \"marcus.brody@example.com\",\n  \"phone\": \"+1-555-0144\",\n  \"unitId\": \"{{sample_unit_id}}\",\n  \"monthlyRent\": 2400,\n  \"leaseStart\": \"2026-09-01\",\n  \"leaseEnd\": \"2027-08-31\"\n}"
-        },
-        "url": {
-          "raw": "{{base_url}}/api/landlord/tenantdirectory",
-          "host": ["{{base_url}}"],
-          "path": ["api", "landlord", "tenantdirectory"]
-        },
-        "description": "Creates a new tenant and assigns them to a vacant unit, marking unit as occupied and setting lease dates."
-      }
-    },
-    {
-      "name": "7. Get Single Tenant Details",
+      "name": "6. Get Single Tenant Details",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Tenant details returned', () => pm.expect(res.data).to.be.ok);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [
@@ -206,12 +254,22 @@
           "raw": "{{base_url}}/api/landlord/tenantdirectory/{{created_tenant_id}}",
           "host": ["{{base_url}}"],
           "path": ["api", "landlord", "tenantdirectory", "{{created_tenant_id}}"]
-        },
-        "description": "Returns full details for a single tenant, including profile, unit, property, recent tickets, and recent payments."
+        }
       }
     },
     {
-      "name": "8. Update Tenant Profile & Lease Details",
+      "name": "7. Update Tenant Profile & Lease Details",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "PUT",
         "header": [
@@ -226,12 +284,23 @@
           "raw": "{{base_url}}/api/landlord/tenantdirectory/{{created_tenant_id}}",
           "host": ["{{base_url}}"],
           "path": ["api", "landlord", "tenantdirectory", "{{created_tenant_id}}"]
-        },
-        "description": "Updates tenant contact info, lease dates, rent, or status."
+        }
       }
     },
     {
-      "name": "9. Delete / Offboard Tenant",
+      "name": "8. Delete / Offboard Tenant",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Tenant deleted', () => pm.expect(res.success).to.be.true);"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "DELETE",
         "header": [
@@ -241,12 +310,21 @@
           "raw": "{{base_url}}/api/landlord/tenantdirectory/{{created_tenant_id}}",
           "host": ["{{base_url}}"],
           "path": ["api", "landlord", "tenantdirectory", "{{created_tenant_id}}"]
-        },
-        "description": "Removes tenant account, releases assigned unit back to vacant status, and logs audit record."
+        }
       }
     },
     {
-      "name": "10. Guard Test – No Token (expect 401)",
+      "name": "9. Guard Test – No Token (expect 401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 401 Unauthorized', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [],
@@ -254,12 +332,21 @@
           "raw": "{{base_url}}/api/landlord/tenantdirectory",
           "host": ["{{base_url}}"],
           "path": ["api", "landlord", "tenantdirectory"]
-        },
-        "description": "Must return 401 – No token provided."
+        }
       }
     },
     {
-      "name": "11. Guard Test – Tenant Hits Landlord Route (expect 403)",
+      "name": "10. Guard Test – Tenant Hits Landlord Route (expect 403)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 403 Forbidden', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "GET",
         "header": [
@@ -269,12 +356,21 @@
           "raw": "{{base_url}}/api/landlord/tenantdirectory",
           "host": ["{{base_url}}"],
           "path": ["api", "landlord", "tenantdirectory"]
-        },
-        "description": "Tenant JWT sent to landlord tenant directory route. Must return 403 – Forbidden."
+        }
       }
     },
     {
-      "name": "12. Validation Test – Invalid Email Format (expect 400)",
+      "name": "11. Validation Test – Invalid Email Format (expect 400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 400 Bad Request', () => pm.response.to.have.status(400));"
+            ]
+          }
+        }
+      ],
       "request": {
         "method": "POST",
         "header": [
@@ -289,8 +385,7 @@
           "raw": "{{base_url}}/api/landlord/tenantdirectory",
           "host": ["{{base_url}}"],
           "path": ["api", "landlord", "tenantdirectory"]
-        },
-        "description": "Must return 400 – Invalid email format."
+        }
       }
     }
   ]

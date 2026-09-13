@@ -5,31 +5,12 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    {
-      "key": "base-url",
-      "value": "http://localhost:8000",
-      "type": "string"
-    },
-    {
-      "key": "jwt_token",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "property_id",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "unit_id",
-      "value": "",
-      "type": "string"
-    },
-    {
-      "key": "tenant_id",
-      "value": "",
-      "type": "string"
-    }
+    { "key": "base-url", "value": "http://localhost:8000", "type": "string" },
+    { "key": "jwt_token", "value": "", "type": "string" },
+    { "key": "onboarding_email", "value": "", "type": "string" },
+    { "key": "property_id", "value": "", "type": "string" },
+    { "key": "unit_id", "value": "", "type": "string" },
+    { "key": "tenant_id", "value": "", "type": "string" }
   ],
   "item": [
     {
@@ -37,6 +18,25 @@
       "item": [
         {
           "name": "1. Signup Landlord",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "exec": [
+                  "const email = 'onboarding.' + Date.now() + '@example.com';",
+                  "pm.collectionVariables.set('onboarding_email', email);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -44,7 +44,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Alexander\",\n  \"middleName\": \"J.\",\n  \"lastName\": \"Vance\",\n  \"email\": \"vance.landlord@example.com\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"firstName\": \"Alexander\",\n  \"middleName\": \"J.\",\n  \"lastName\": \"Vance\",\n  \"email\": \"{{onboarding_email}}\",\n  \"password\": \"Password123!\"\n}"
             },
             "url": {
               "raw": "{{base-url}}/api/auth/signup",
@@ -60,10 +60,12 @@
               "listen": "test",
               "script": {
                 "exec": [
-                  "var jsonData = pm.response.json();",
-                  "if (jsonData && jsonData.token) {",
-                  "    pm.collectionVariables.set('jwt_token', jsonData.token);",
-                  "    console.log('JWT Token successfully set:', jsonData.token);",
+                  "const jsonData = pm.response.json();",
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+                  "const token = jsonData.token || (jsonData.data && jsonData.data.token);",
+                  "if (token) {",
+                  "    pm.collectionVariables.set('jwt_token', token);",
+                  "    console.log('JWT Token successfully set:', token);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -77,7 +79,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"vance.landlord@example.com\",\n  \"password\": \"password123\"\n}"
+              "raw": "{\n  \"email\": \"{{onboarding_email}}\",\n  \"password\": \"Password123!\"\n}"
             },
             "url": {
               "raw": "{{base-url}}/api/auth/login",
@@ -93,6 +95,16 @@
       "item": [
         {
           "name": "1. Get Onboarding Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -107,6 +119,16 @@
         },
         {
           "name": "2. Select Portfolio Plan (Pro)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -132,9 +154,11 @@
               "script": {
                 "exec": [
                   "var jsonData = pm.response.json();",
-                  "if (jsonData && jsonData.data && jsonData.data._id) {",
-                  "    pm.collectionVariables.set('property_id', jsonData.data._id);",
-                  "    console.log('Saved property_id:', jsonData.data._id);",
+                  "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
+                  "const propId = (jsonData && jsonData.data) ? (jsonData.data.id || jsonData.data._id) : null;",
+                  "if (propId) {",
+                  "    pm.collectionVariables.set('property_id', propId);",
+                  "    console.log('Saved property_id:', propId);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -149,7 +173,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Grand Horizon Towers\",\n  \"address\": \"500 Ocean Avenue, Suite 100\",\n  \"city\": \"Metro Area\",\n  \"category\": \"Luxury\",\n  \"image\": \"/images/property-1.jpg\",\n  \"featured\": true\n}"
+              "raw": "{\n  \"name\": \"Skyline Luxury Residences\",\n  \"address\": \"742 Evergreen Terrace\",\n  \"city\": \"Springfield\",\n  \"category\": \"Luxury\",\n  \"featured\": true\n}"
             },
             "url": {
               "raw": "{{base-url}}/api/landlord/onboarding/properties",
@@ -166,9 +190,11 @@
               "script": {
                 "exec": [
                   "var jsonData = pm.response.json();",
-                  "if (jsonData && jsonData.data && jsonData.data._id) {",
-                  "    pm.collectionVariables.set('unit_id', jsonData.data._id);",
-                  "    console.log('Saved unit_id:', jsonData.data._id);",
+                  "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
+                  "const unitId = (jsonData && jsonData.data) ? (jsonData.data.id || jsonData.data._id) : null;",
+                  "if (unitId) {",
+                  "    pm.collectionVariables.set('unit_id', unitId);",
+                  "    console.log('Saved unit_id:', unitId);",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -183,7 +209,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"propertyId\": \"{{property_id}}\",\n  \"label\": \"Unit 24B\",\n  \"monthlyRent\": 2800,\n  \"bedrooms\": 2,\n  \"bathrooms\": 2,\n  \"sqft\": 1000,\n  \"status\": \"vacant\"\n}"
+              "raw": "{\n  \"propertyId\": \"{{property_id}}\",\n  \"label\": \"Penthouse 404\",\n  \"monthlyRent\": 3200,\n  \"bedrooms\": 3,\n  \"bathrooms\": 2,\n  \"sqft\": 1450,\n  \"status\": \"vacant\"\n}"
             },
             "url": {
               "raw": "{{base-url}}/api/landlord/onboarding/units",
@@ -200,6 +226,7 @@
               "script": {
                 "exec": [
                   "var jsonData = pm.response.json();",
+                  "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));",
                   "if (jsonData && jsonData.data && jsonData.data.id) {",
                   "    pm.collectionVariables.set('tenant_id', jsonData.data.id);",
                   "    console.log('Saved tenant_id:', jsonData.data.id);",
@@ -217,7 +244,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Sophia\",\n  \"middleName\": \"\",\n  \"lastName\": \"Lin\",\n  \"email\": \"sophia.lin@example.com\",\n  \"unitId\": \"{{unit_id}}\"\n}"
+              "raw": "{\n  \"firstName\": \"Sophia\",\n  \"middleName\": \"\",\n  \"lastName\": \"Lin\",\n  \"email\": \"sophia.onb_{{$timestamp}}@example.com\",\n  \"unitId\": \"{{unit_id}}\",\n  \"securityDeposit\": 3200\n}"
             },
             "url": {
               "raw": "{{base-url}}/api/landlord/onboarding/tenants",
@@ -228,6 +255,16 @@
         },
         {
           "name": "6. Add Unassigned Tenant (Pre-added)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -236,7 +273,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"Liam\",\n  \"middleName\": \"\",\n  \"lastName\": \"Carter\",\n  \"email\": \"liam.carter@example.com\",\n  \"unitId\": \"pre_add_unassigned\"\n}"
+              "raw": "{\n  \"firstName\": \"Liam\",\n  \"middleName\": \"\",\n  \"lastName\": \"Carter\",\n  \"email\": \"liam.onb_{{$timestamp}}@example.com\",\n  \"unitId\": \"pre_add_unassigned\"\n}"
             },
             "url": {
               "raw": "{{base-url}}/api/landlord/onboarding/tenants",
@@ -247,6 +284,16 @@
         },
         {
           "name": "7. Post Welcome Announcement",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 201 Created', () => pm.response.to.have.status(201));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -266,6 +313,16 @@
         },
         {
           "name": "8. Verify Final Onboarding Status",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [
@@ -285,6 +342,16 @@
       "item": [
         {
           "name": "Complete Onboarding (All-in-One Payload)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -293,7 +360,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"plan\": \"pro\",\n  \"properties\": [\n    {\n      \"tempId\": \"prop-batch-1\",\n      \"name\": \"Skyline Heights Residences\",\n      \"address\": \"1200 Sunset Boulevard\",\n      \"city\": \"Westside Metro\",\n      \"category\": \"Luxury\"\n    }\n  ],\n  \"units\": [\n    {\n      \"tempId\": \"unit-batch-101\",\n      \"propertyTempId\": \"prop-batch-1\",\n      \"label\": \"Penthouse 12A\",\n      \"monthlyRent\": 3500,\n      \"bedrooms\": 3,\n      \"bathrooms\": 2,\n      \"sqft\": 1450\n    },\n    {\n      \"tempId\": \"unit-batch-102\",\n      \"propertyTempId\": \"prop-batch-1\",\n      \"label\": \"Suite 4B\",\n      \"monthlyRent\": 2200,\n      \"bedrooms\": 1,\n      \"bathrooms\": 1,\n      \"sqft\": 750\n    }\n  ],\n  \"tenants\": [\n    {\n      \"firstName\": \"Maya\",\n      \"middleName\": \"Rose\",\n      \"lastName\": \"Patel\",\n      \"email\": \"maya.patel@example.com\",\n      \"unitTempId\": \"unit-batch-101\"\n    },\n    {\n      \"firstName\": \"Ethan\",\n      \"middleName\": \"\",\n      \"lastName\": \"Walker\",\n      \"email\": \"ethan.walker@example.com\",\n      \"unitTempId\": \"pre_add_unassigned\"\n    }\n  ],\n  \"announcement\": {\n    \"title\": \"Welcome to Skyline Heights Portal! 🏢\",\n    \"content\": \"Our digital tenant portal is now live. Access unit leases, receipts, and maintenance tickets here.\",\n    \"category\": \"General\",\n    \"isPinned\": true\n  }\n}"
+              "raw": "{\n  \"plan\": \"pro\",\n  \"properties\": [\n    {\n      \"tempId\": \"prop-batch-1\",\n      \"name\": \"Skyline Heights Residences\",\n      \"address\": \"1200 Sunset Boulevard\",\n      \"city\": \"Westside Metro\",\n      \"category\": \"Luxury\"\n    }\n  ],\n  \"units\": [\n    {\n      \"tempId\": \"unit-batch-101\",\n      \"propertyTempId\": \"prop-batch-1\",\n      \"label\": \"Penthouse 12A\",\n      \"monthlyRent\": 3500,\n      \"bedrooms\": 3,\n      \"bathrooms\": 2,\n      \"sqft\": 1450\n    },\n    {\n      \"tempId\": \"unit-batch-102\",\n      \"propertyTempId\": \"prop-batch-1\",\n      \"label\": \"Suite 4B\",\n      \"monthlyRent\": 2200,\n      \"bedrooms\": 1,\n      \"bathrooms\": 1,\n      \"sqft\": 750\n    }\n  ],\n  \"tenants\": [\n    {\n      \"firstName\": \"Maya\",\n      \"middleName\": \"Rose\",\n      \"lastName\": \"Patel\",\n      \"email\": \"maya.onb_{{$timestamp}}@example.com\",\n      \"unitTempId\": \"unit-batch-101\",\n      \"securityDeposit\": 3500\n    },\n    {\n      \"firstName\": \"Ethan\",\n      \"middleName\": \"\",\n      \"lastName\": \"Walker\",\n      \"email\": \"ethan.onb_{{$timestamp}}@example.com\",\n      \"unitTempId\": \"pre_add_unassigned\"\n    }\n  ],\n  \"announcement\": {\n    \"title\": \"Welcome to Skyline Heights Portal! 🏢\",\n    \"content\": \"Our digital tenant portal is now live. Access unit leases, receipts, and maintenance tickets here.\",\n    \"category\": \"General\",\n    \"isPinned\": true\n  }\n}"
             },
             "url": {
               "raw": "{{base-url}}/api/landlord/onboarding/complete",
@@ -309,6 +376,16 @@
       "item": [
         {
           "name": "Invalid Plan (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400 Bad Request', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -328,6 +405,16 @@
         },
         {
           "name": "Missing Property Required Fields (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400 Bad Request', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -347,6 +434,16 @@
         },
         {
           "name": "Invalid Tenant Email Format (400)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 400 Bad Request', () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "POST",
             "header": [
@@ -366,6 +463,16 @@
         },
         {
           "name": "Unauthorized - Missing Token (401)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status is 401 Unauthorized', () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ],
           "request": {
             "method": "GET",
             "header": [],

@@ -19,7 +19,7 @@ export const PayRentModal = ({
   const hasParking = Boolean(tenant?.hasParking ?? unit?.hasParking ?? false);
   const parkingSpot = hasParking ? (tenant?.parkingSpot || unit?.parkingSpot || 'Assigned Space') : null;
   const parkingFee = hasParking ? Number(tenant?.parkingFee ?? unit?.parkingFee ?? 0) : 0;
-  const utilityFee = 45;
+  const utilityFee = Number(tenant?.utilityFee ?? unit?.utilityFee ?? 0);
   const processingFee = paymentMethod === 'card' ? 45.00 : 0.00;
   const totalAmount = rentAmount + parkingFee + utilityFee + processingFee;
 
@@ -172,10 +172,12 @@ export const PayRentModal = ({
                   <span className="font-semibold text-slate-900 dark:text-white">${parkingFee.toFixed(2)}</span>
                 </div>
               )}
-              <div className="flex justify-between text-slate-500 dark:text-slate-400">
-                <span>Water, Sewer & Trash Service</span>
-                <span className="font-semibold text-slate-900 dark:text-white">${utilityFee.toFixed(2)}</span>
-              </div>
+              {utilityFee > 0 && (
+                <div className="flex justify-between text-slate-500 dark:text-slate-400">
+                  <span>Water, Sewer & Trash Service</span>
+                  <span className="font-semibold text-slate-900 dark:text-white">${utilityFee.toFixed(2)}</span>
+                </div>
+              )}
               <div className="flex justify-between text-slate-500 dark:text-slate-400">
                 <span>Payment Processing Fee</span>
                 <span className="text-slate-900 dark:text-white">${processingFee.toFixed(2)}</span>

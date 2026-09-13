@@ -32,7 +32,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"alexander.vance@example.com\",\n  \"password\": \"Password123!\"\n}"
+          "raw": "{\n  \"email\": \"landlord@jptl.dev\",\n  \"password\": \"Password123!\"\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/auth/login",
@@ -62,7 +62,7 @@
         "header": [{ "key": "Content-Type", "value": "application/json" }],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"email\": \"sophia.lin@example.com\",\n  \"password\": \"Password123!\"\n}"
+          "raw": "{\n  \"email\": \"sophia@jptl.dev\",\n  \"password\": \"Password123!\"\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/auth/login",
@@ -93,7 +93,7 @@
         "method": "POST",
         "header": [
           { "key": "Content-Type", "value": "application/json" },
-          { "key": "Cookie", "value": "token={{landlord_token}}" }
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
         ],
         "body": {
           "mode": "raw",
@@ -123,7 +123,7 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "Cookie", "value": "token={{landlord_token}}" }
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
         ],
         "url": {
           "raw": "{{base_url}}/api/landlord/announcements",
@@ -149,7 +149,7 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "Cookie", "value": "token={{tenant_token}}" }
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
         ],
         "url": {
           "raw": "{{base_url}}/api/tenant/announcements",
@@ -175,7 +175,7 @@
       "request": {
         "method": "GET",
         "header": [
-          { "key": "Cookie", "value": "token={{tenant_token}}" }
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
         ],
         "url": {
           "raw": "{{base_url}}/api/tenant/announcements/{{created_announcement_id}}",
@@ -200,7 +200,7 @@
         "method": "POST",
         "header": [
           { "key": "Content-Type", "value": "application/json" },
-          { "key": "Cookie", "value": "token={{tenant_token}}" }
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
         ],
         "body": {
           "mode": "raw",
@@ -229,7 +229,7 @@
         "method": "POST",
         "header": [
           { "key": "Content-Type", "value": "application/json" },
-          { "key": "Cookie", "value": "token={{landlord_token}}" }
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
         ],
         "body": {
           "mode": "raw",
@@ -239,6 +239,56 @@
           "raw": "{{base_url}}/api/landlord/announcements",
           "host": ["{{base_url}}"],
           "path": ["api", "landlord", "announcements"]
+        }
+      }
+    },
+    {
+      "name": "09. Error Handling - Tenant Forbidden from Deleting Announcement (403)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status is 403 Forbidden', () => pm.response.to.have.status(403));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{tenant_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/landlord/announcements/{{created_announcement_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "landlord", "announcements", "{{created_announcement_id}}"]
+        }
+      }
+    },
+    {
+      "name": "10. Landlord - Delete Announcement",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const res = pm.response.json();",
+              "pm.test('Status is 200 OK', () => pm.response.to.have.status(200));",
+              "pm.test('Delete confirmed', () => pm.expect(res.success).to.be.true);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{landlord_token}}" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/api/landlord/announcements/{{created_announcement_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["api", "landlord", "announcements", "{{created_announcement_id}}"]
         }
       }
     }
