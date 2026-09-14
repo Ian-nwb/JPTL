@@ -156,6 +156,39 @@ function AppRouter() {
     }
   }, [isAuthenticated, user?.id]);
 
+  // Safe route guards in useEffect
+  useEffect(() => {
+    if (loading) return;
+    const role = user?.role;
+
+    if (!isAuthenticated) {
+      if (currentPath !== '/login' && currentPath !== '/' && currentPath !== '/register') {
+        window.history.replaceState({}, '', '/login');
+        setCurrentPath('/login');
+      }
+      return;
+    }
+
+    // Authenticated
+    if (currentPath === '/login' || currentPath === '/') {
+      const target = role === 'tenant' ? '/tenant' : '/dashboard';
+      window.history.replaceState({}, '', target);
+      setCurrentPath(target);
+      return;
+    }
+
+    if (role === 'tenant' && currentPath.startsWith('/dashboard')) {
+      window.history.replaceState({}, '', '/tenant');
+      setCurrentPath('/tenant');
+      return;
+    }
+
+    if ((role === 'landlord' || role === 'superadmin') && currentPath.startsWith('/tenant')) {
+      window.history.replaceState({}, '', '/dashboard');
+      setCurrentPath('/dashboard');
+    }
+  }, [loading, isAuthenticated, user?.role, currentPath]);
+
   // If maintenance mode is active, display lockdown screen regardless of cached session
   if (maintenanceState) {
     return (
@@ -189,39 +222,6 @@ function AppRouter() {
       </div>
     );
   }
-
-  // Safe route guards in useEffect
-  useEffect(() => {
-    if (loading) return;
-    const role = user?.role;
-
-    if (!isAuthenticated) {
-      if (currentPath !== '/login' && currentPath !== '/' && currentPath !== '/register') {
-        window.history.replaceState({}, '', '/login');
-        setCurrentPath('/login');
-      }
-      return;
-    }
-
-    // Authenticated
-    if (currentPath === '/login' || currentPath === '/') {
-      const target = role === 'tenant' ? '/tenant' : '/dashboard';
-      window.history.replaceState({}, '', target);
-      setCurrentPath(target);
-      return;
-    }
-
-    if (role === 'tenant' && currentPath.startsWith('/dashboard')) {
-      window.history.replaceState({}, '', '/tenant');
-      setCurrentPath('/tenant');
-      return;
-    }
-
-    if ((role === 'landlord' || role === 'superadmin') && currentPath.startsWith('/tenant')) {
-      window.history.replaceState({}, '', '/dashboard');
-      setCurrentPath('/dashboard');
-    }
-  }, [loading, isAuthenticated, user?.role, currentPath]);
 
   // 1. Validating session
   if (loading) return <AuthLoadingScreen />;
