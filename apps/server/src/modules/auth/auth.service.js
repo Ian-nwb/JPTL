@@ -1,5 +1,7 @@
 import jwt from 'jsonwebtoken';
 import User from '../../shared/models/user.model.js';
+import { recordLoginSession } from '../../shared/services/sessionMonitor.service.js';
+import { getMaintenanceState } from '../../shared/services/systemState.service.js';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_MIN_LENGTH = 8;
@@ -77,6 +79,11 @@ function sanitizeUser(user) {
 }
 
 async function signupLandlord({ firstName, middleName, lastName, email, phone, password }) {
+  const state = await getMaintenanceState();
+  if (state.enabled) {
+    throw new AuthError(state.message || 'Platform is currently undergoing scheduled maintenance. New registrations are temporarily paused.', 503);
+  }
+
   validateSignup({ firstName, lastName, email, phone, password });
 
   const normalizedEmail = email.trim().toLowerCase();
@@ -100,7 +107,7 @@ async function signupLandlord({ firstName, middleName, lastName, email, phone, p
   return sanitizeUser(user);
 }
 
-async function login({ email, password }) {
+async function login({ email, password, ip = '', userAgent = '' }) {
   if (!email?.trim() || !password) {
     throw new AuthError('Email and password are required', 400);
   }
@@ -110,6 +117,12 @@ async function login({ email, password }) {
     throw new AuthError('Invalid email or password', 401);
   }
 
+  // Check maintenance mode: non-superadmin users are blocked when active
+  const state = await getMaintenanceState();
+  if (state.enabled && user.role !== 'superadmin') {
+    throw new AuthError(state.message || 'Platform is currently undergoing scheduled maintenance. Non-administrative logins are temporarily paused.', 503);
+  }
+
   // Use model method
   const isMatch = await user.comparePassword(password);
   if (!isMatch) {
@@ -117,6 +130,47 @@ async function login({ email, password }) {
   }
 
   const token = signToken({ id: user._id.toString(), role: user.role });
+
+  // Record login session
+  await recordLoginSession({
+    userId: user._id,
+    email: user.email,
+    role: user.role,
+    ip,
+    userAgent,
+  });
+
+  return { user: sanitizeUser(user), token };
+}
+
+async function loginSuperadmin({ email, password, ip = '', userAgent = '' }) {
+  if (!email?.trim() || !password) {
+    throw new AuthError('Email and password are required', 400);
+  }
+
+  const user = await User.findOne({ email: email.trim().toLowerCase() }).select('+password');
+  if (!user) {
+    throw new AuthError('Invalid superadmin credentials', 401);
+  }
+  if (user.role !== 'superadmin') {
+    throw new AuthError('Access denied: Superadmin role required', 403);
+  }
+
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) {
+    throw new AuthError('Invalid superadmin credentials', 401);
+  }
+
+  const token = signToken({ id: user._id.toString(), role: user.role });
+
+  // Record login session
+  await recordLoginSession({
+    userId: user._id,
+    email: user.email,
+    role: user.role,
+    ip,
+    userAgent,
+  });
 
   return { user: sanitizeUser(user), token };
 }
@@ -157,4 +211,4 @@ async function getUserById(id) {
   return sanitizeUser(user);
 }
 
-export { signupLandlord, login, getUserById, changePasswordService, AuthError };
+export { signupLandlord, login, loginSuperadmin, getUserById, changePasswordService, AuthError };

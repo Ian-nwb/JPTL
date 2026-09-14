@@ -2,6 +2,7 @@ import Ticket from '../../../shared/models/ticket.model.js';
 import Unit from '../../../shared/models/unit.model.js';
 import Property from '../../../shared/models/property.model.js';
 import AuditLog from '../../../shared/models/auditLog.model.js';
+import { createNotification } from '../../../shared/services/notification.service.js';
 
 export class TenantTicketError extends Error {
   constructor(message, statusCode = 400) {
@@ -155,6 +156,17 @@ export async function submitTenantTicket(tenantId, payload, ipAddress = '') {
     ipAddress,
   });
 
+  if (property?.landlord) {
+    createNotification({
+      userId: property.landlord,
+      title: '🔧 New Maintenance Ticket',
+      body: `${title.trim().slice(0, 50)} (Unit: ${targetUnit.label})`,
+      type: 'maintenance',
+      refModel: 'Ticket',
+      refId: ticket._id,
+    });
+  }
+
   return {
     ...ticket.toObject(),
     id: ticket._id,
@@ -195,6 +207,22 @@ export async function cancelTenantTicket(tenantId, ticketId, reason = '', ipAddr
     afterState: ticket.toObject(),
     ipAddress,
   });
+
+  try {
+    const unitDoc = await Unit.findById(ticket.unit).populate('property').lean();
+    if (unitDoc?.property?.landlord) {
+      createNotification({
+        userId: unitDoc.property.landlord,
+        title: '⚠️ Maintenance Ticket Cancelled',
+        body: `Ticket "${ticket.title}" (${unitDoc.label}) was cancelled by the tenant.`,
+        type: 'maintenance',
+        refModel: 'Ticket',
+        refId: ticket._id,
+      });
+    }
+  } catch (err) {
+    console.error('Error notifying landlord of cancellation:', err.message);
+  }
 
   return {
     success: true,

@@ -1,0 +1,19 @@
+{
+  "short_name": "JPTL",
+  "name": "JPTL Property Management & Resident Portal",
+  "description": "Integrated Home Rental & Property Maintenance Platform",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192 512x512",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#08080C",
+  "theme_color": "#4F46E5",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "categories": ["business", "productivity", "utilities"]
+}

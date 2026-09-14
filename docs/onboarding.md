@@ -111,19 +111,57 @@ bun run dev
 # Check container status
 docker compose ps
 
-# Stream backend logs
+# Stream all service logs
+docker compose logs -f
+
+# Stream backend server logs
 docker compose logs -f server
 
-# Stream frontend logs
+# Stream superadmin portal logs
+docker compose logs -f superadmin
+
+# Stream client portal logs
 docker compose logs -f client
+
+# Alternatively using standard docker commands:
+docker logs -f server
+docker logs -f superadmin
+docker logs -f client
 ```
 
 ---
 
-## Ports
+## Default Superadmin Credentials & Portals
 
-| Service | Port | URL |
-|---|---|---|
-| Frontend | `5173` | http://localhost:5173 |
-| Backend | `3000` | http://localhost:3000 |
-| MongoDB Atlas | — | hosted, no local port |
+| Role / Service | Portal URL | Default Credentials | Description |
+|---|---|---|---|
+| **Superadmin Portal** | http://localhost:5174 | `superadmin@jptl.sys` / `admin123` | Platform CRUD for Users, Properties, Units & Live Monitoring |
+| **Interactive Swagger API** | http://localhost:8000/api/docs | — (Use Bearer token in UI) | Interactive OpenAPI 3.0 API Documentation |
+| **Resident & Landlord Portal** | http://localhost:5173 | Seeded users via `npm run seed` | Tenant portal & Landlord dashboard |
+| **Backend REST API** | http://localhost:8000 | — | Express + Mongoose API server |
+
+---
+
+## How to Open Swagger API Documentation
+
+1. Start the stack via `docker compose up -d` or start the server via `bun run dev` in `apps/server`.
+2. Open your browser and navigate to:
+   ```
+   http://localhost:8000/api/docs
+   ```
+3. To authorize requests inside Swagger:
+   - Click the **Authorize** button (top-right).
+   - Log in via `POST /api/auth/login` or `POST /api/auth/superadmin/login` to obtain your JWT token.
+   - Enter `Bearer <token>` and click Authorize.
+
+---
+
+## Ports & Services
+
+| Service | Port | URL | Description |
+|---|---|---|---|
+| Client Portal | `5173` | http://localhost:5173 | Tenant & Landlord Web Application |
+| Superadmin Portal | `5174` | http://localhost:5174 | Superadmin Platform Management |
+| Backend Server | `8000` | http://localhost:8000 | REST API Server |
+| Swagger API Docs | `8000` | http://localhost:8000/api/docs | Interactive API Docs |
+| MongoDB Atlas | — | Hosted Cloud Cluster | Managed Cloud MongoDB |

@@ -6,7 +6,7 @@ import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { TenantPortalPage } from './pages/TenantPortalPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
-import { notificationApi } from './services/api';
+import { notificationApi, systemApi } from './services/api';
 
 /* ─────────────────────────────────────────────
    Service Worker + Push Notification Registration
@@ -15,8 +15,9 @@ async function registerPushNotifications() {
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) return;
 
   try {
-    // Register the service worker
+    // Register the service worker and check for updates immediately
     const registration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+    try { await registration.update(); } catch (_) {}
 
     // Request permission
     const permission = await Notification.requestPermission();
@@ -117,11 +118,29 @@ function AuthLoadingScreen() {
 function AppRouter() {
   const { user, loading, isAuthenticated } = useAuth();
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
+  const [maintenanceState, setMaintenanceState] = useState(null);
 
   const navigate = useCallback((path) => {
     window.history.pushState({}, '', path);
     setCurrentPath(path);
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
+  // Check system status on mount & listen to maintenance events
+  useEffect(() => {
+    systemApi.getStatus()
+      .then((data) => {
+        if (data?.maintenance) {
+          setMaintenanceState(data.message || 'Platform is currently undergoing scheduled maintenance.');
+        }
+      })
+      .catch(() => {});
+
+    const handleMaintenance = (e) => {
+      setMaintenanceState(e.detail?.message || 'Platform is currently undergoing scheduled maintenance.');
+    };
+    window.addEventListener('jptl-maintenance-active', handleMaintenance);
+    return () => window.removeEventListener('jptl-maintenance-active', handleMaintenance);
   }, []);
 
   useEffect(() => {
@@ -136,6 +155,40 @@ function AppRouter() {
       registerPushNotifications();
     }
   }, [isAuthenticated, user?.id]);
+
+  // If maintenance mode is active, display lockdown screen regardless of cached session
+  if (maintenanceState) {
+    return (
+      <div className="min-h-screen bg-[#050811] text-slate-100 flex flex-col items-center justify-center p-6 text-center select-none font-sans">
+        <div className="p-8 max-w-md w-full bg-[#0D111D] border border-amber-500/30 rounded-3xl space-y-5 shadow-2xl shadow-amber-500/10 backdrop-blur-xl">
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20">
+            <svg className="w-8 h-8 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <div className="space-y-2">
+            <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              System Lockdown
+            </span>
+            <h1 className="text-xl font-extrabold font-grotesk tracking-tight text-white">
+              Platform Maintenance Active
+            </h1>
+          </div>
+          <p className="text-xs text-slate-400 font-mono leading-relaxed">
+            {maintenanceState}
+          </p>
+          <div className="pt-2">
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full py-3 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-mono text-xs font-bold transition btn-press cursor-pointer"
+            >
+              Check Again / Retry Connection
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Safe route guards in useEffect
   useEffect(() => {

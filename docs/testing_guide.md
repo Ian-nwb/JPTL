@@ -121,6 +121,34 @@ Functional test cases validate application business logic, user interface state 
 | **TC-DOC-02** | Real Document Inspection | Landlord clicks "Inspect" on tenant document | Document Inspection Modal opens displaying actual document (embedded `<iframe>` for PDFs or `<img>` for images), NOT a generic placeholder. |
 | **TC-DOC-03** | Verify / Reject Document | Landlord approves compliance document | Status transitions to `Verified`, status badge updates immediately. |
 
+### 2.8 Superadmin Platform Management
+
+| Test ID | Feature / Action | Input / Precondition | Expected Behavior |
+| :--- | :--- | :--- | :--- |
+| **TC-SADM-01** | Superadmin Sign-In | Valid email (`superadmin@jptl.sys`) & password (`admin123`) on port 5174 | 200 OK. JWT issued, session log recorded, redirected to Superadmin Root Console. |
+| **TC-SADM-02** | Superadmin User Management CRUD | Superadmin creates/updates/deletes a landlord or tenant account | User created/updated in DB; lookup reflects in dropdowns. |
+| **TC-SADM-03** | Superadmin Properties CRUD | Superadmin creates, edits, or deletes any property across the system | Property created and linked to selected landlord; changes persist in MongoDB. |
+| **TC-SADM-04** | Superadmin Units CRUD | Superadmin creates, assigns, or deletes a unit | Unit linked to target property and optional tenant. Status updates correctly. |
+| **TC-SADM-05** | Live Login Monitoring (SSE) | Tenant or landlord logs in on port 5173 | Superadmin Live Monitor tab receives real-time SSE stream event showing email, role, IP, user-agent, and login timestamp without page refresh. |
+
+### 2.9 In-App Notifications Lifecycle
+
+| Test ID | Feature / Action | Input / Precondition | Expected Behavior |
+| :--- | :--- | :--- | :--- |
+| **TC-NOTIF-01** | Maintenance Notification Dispatch | Landlord creates ticket or updates status | Notification created in DB with type `maintenance`; badge counter increments on tenant sidebar. |
+| **TC-NOTIF-02** | Announcement Broadcast Notification | Landlord broadcasts an announcement | Notification created in DB with type `announcement` for all tenants under the landlord. |
+| **TC-NOTIF-03** | Mark Single Notification Read | User clicks individual notification item | PATCH `/api/notifications/:id/read` returns 200; unread indicator dot clears. |
+| **TC-NOTIF-04** | Mark All Notifications Read | User clicks "Mark all read" button in sidebar | PATCH `/api/notifications/read-all` sets all user notifications to `read: true`; counter resets to 0. |
+| **TC-NOTIF-05** | Clear All Notifications | User clicks "Clear All" (Trash icon) in sidebar | DELETE `/api/notifications/clear-all` deletes all notifications for user; list empties. |
+
+### 2.10 Progressive Web App (PWA) Capabilities
+
+| Test ID | Feature / Action | Input / Precondition | Expected Behavior |
+| :--- | :--- | :--- | :--- |
+| **TC-PWA-01** | Web App Manifest Validation | Navigate to `/manifest.json` | Returns valid JSON with `name`, `short_name`, `theme_color`, `background_color`, `display: standalone`, and icons array. |
+| **TC-PWA-02** | Service Worker Registration | Open client portal in browser | `sw.js` registers successfully; offline cache primed for static assets and shell. |
+| **TC-PWA-03** | PWA Installability Check | Inspect via Chrome DevTools Lighthouse / Application tab | PWA install criteria passed; browser prompts "Install JPTL" or displays address bar install icon. |
+
 ---
 
 ## 🔗 3. Integration Test Cases —

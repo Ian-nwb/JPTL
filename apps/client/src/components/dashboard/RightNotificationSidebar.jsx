@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, CheckCircle2, Clock, AlertTriangle, ShieldAlert, X, Check, Sparkles, Loader2 } from 'lucide-react';
+import { Bell, CheckCircle2, Clock, AlertTriangle, ShieldAlert, X, Check, Sparkles, Loader2, Trash2 } from 'lucide-react';
 import { notificationApi } from '../../services/api';
 
 export const RightNotificationSidebar = ({
@@ -59,6 +59,15 @@ export const RightNotificationSidebar = ({
     setNotifs((prev) =>
       prev.map((n) => (n.id === id ? { ...n, unread: false } : n))
     );
+  };
+
+  const clearAll = async () => {
+    try {
+      await notificationApi.clearAll();
+    } catch (e) {
+      console.warn('Failed to clear notifications:', e.message);
+    }
+    setNotifs([]);
   };
 
   const filtered = notifs.filter((n) => {
@@ -128,6 +137,15 @@ export const RightNotificationSidebar = ({
                 className="text-[10px] font-mono text-indigo-500 hover:underline flex items-center gap-1 btn-press"
               >
                 <Check className="w-3 h-3" /> Mark all read
+              </button>
+            )}
+
+            {notifs.length > 0 && (
+              <button
+                onClick={clearAll}
+                className="text-[10px] font-mono text-rose-400 hover:underline flex items-center gap-1 btn-press"
+              >
+                <Trash2 className="w-3 h-3" /> Clear all
               </button>
             )}
           </div>

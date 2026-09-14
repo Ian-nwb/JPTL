@@ -1,40 +1,35 @@
 import React, { useState } from 'react';
-import { ShieldCheck, Lock, Mail, Key, Sparkles, ArrowRight, ShieldAlert } from 'lucide-react';
+import { ShieldCheck, Lock, Mail, Sparkles, ArrowRight, ShieldAlert } from 'lucide-react';
+import { loginSuperadmin } from '../services/superadminApi';
 
 export const SuperadminLoginPage = ({ onLoginSuccess = () => {} }) => {
   const [email, setEmail] = useState('superadmin@jptl.sys');
   const [password, setPassword] = useState('admin123');
-  const [mfaCode, setMfaCode] = useState('849201');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
     if (!email.trim() || !password.trim()) {
-      setError('Please provide valid Superadmin credentials.');
-      return;
-    }
-
-    if (mfaCode.trim().length !== 6) {
-      setError('MFA Security PIN must be exactly 6 digits.');
+      setError('Please provide email and password.');
       return;
     }
 
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
-      sessionStorage.setItem('jptl_superadmin_auth', 'true');
-      sessionStorage.setItem('jptl_superadmin_user', JSON.stringify({
+    try {
+      await loginSuperadmin({
         email: email.trim(),
-        role: 'SUPERADMIN_ROOT',
-        loginTime: new Date().toISOString(),
-        ip: '192.168.1.100'
-      }));
+        password: password.trim(),
+      });
       onLoginSuccess();
-    }, 600);
+    } catch (err) {
+      setError(err.message || 'Authentication failed. Please verify your credentials.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -105,32 +100,13 @@ export const SuperadminLoginPage = ({ onLoginSuccess = () => {} }) => {
             </div>
           </div>
 
-          <div className="space-y-1">
-            <div className="flex justify-between items-center text-[11px]">
-              <label className="text-slate-400 font-semibold">6-Digit MFA Security PIN</label>
-              <span className="text-[10px] text-indigo-400 font-bold">Preset: 849201</span>
-            </div>
-            <div className="relative">
-              <Key className="w-4 h-4 absolute left-3 top-3 text-slate-500" />
-              <input
-                type="text"
-                maxLength={6}
-                value={mfaCode}
-                onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                placeholder="849201"
-                required
-                className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#070A12] border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 tracking-widest font-bold"
-              />
-            </div>
-          </div>
-
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold font-grotesk text-xs flex items-center justify-center gap-2 btn-press shadow-lg shadow-indigo-600/30 transition-all mt-2 cursor-pointer"
+            className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold font-grotesk text-xs flex items-center justify-center gap-2 btn-press shadow-lg shadow-indigo-600/30 transition-all mt-2 cursor-pointer disabled:opacity-50"
           >
             {loading ? (
-              <span>Authenticating Cryptographic Key…</span>
+              <span>Authenticating Credentials…</span>
             ) : (
               <>
                 <span>Authenticate & Access Command Center</span>
@@ -147,11 +123,10 @@ export const SuperadminLoginPage = ({ onLoginSuccess = () => {} }) => {
             onClick={() => {
               setEmail('superadmin@jptl.sys');
               setPassword('admin123');
-              setMfaCode('849201');
             }}
             className="text-[11px] font-mono text-indigo-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
           >
-            <Sparkles className="w-3 h-3 text-indigo-400" /> Auto-Fill Demo Superadmin Credentials
+            <Sparkles className="w-3 h-3 text-indigo-400" /> Auto-Fill Default Superadmin Credentials
           </button>
         </div>
 
@@ -164,3 +139,4 @@ export const SuperadminLoginPage = ({ onLoginSuccess = () => {} }) => {
     </div>
   );
 };
+export default SuperadminLoginPage;

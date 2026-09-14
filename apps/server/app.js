@@ -2,7 +2,9 @@ import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import { corsOptions } from './src/shared/config/cors.js';
+import { swaggerUi, swaggerSpec } from './src/shared/config/swagger.js';
 import authRoutes from './src/modules/auth/auth.routes.js';
+import superadminRoutes from './src/modules/superadmin/superadmin.routes.js';
 import landlordAnnouncementRoutes from './src/modules/landlord/announcements/announcements.routes.js';
 import landlordOnboardingRoutes from './src/modules/landlord/onboarding/onboarding.routes.js';
 import landlordDashRoutes from './src/modules/landlord/dash/dash.routers.js';
@@ -20,6 +22,8 @@ import tenantLeaseRoutes from './src/modules/tenant/lease/lease.routes.js';
 import tenantDocumentRoutes from './src/modules/tenant/documents/documents.routes.js';
 import notificationRoutes from './src/modules/notifications/notification.routes.js';
 import { generalLimiter, authLimiter } from './src/shared/middleware/rateLimiter.middleware.js';
+import { checkMaintenanceMode } from './src/shared/middleware/maintenance.middleware.js';
+import { getMaintenanceState } from './src/shared/services/systemState.service.js';
 
 const app = express();
 
@@ -28,7 +32,16 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
 
-// Apply global rate limiting for all API routes
+// Swagger Documentation UI (Accessible at /api/docs)
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+// Apply global rate limiting and disable caching for API routes
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
 app.use('/api', generalLimiter);
 
 // Health check route
@@ -36,8 +49,25 @@ app.get('/api/health', (req, res) => {
   res.status(200).json({ status: 'ok', message: 'Server is running' });
 });
 
+// Public platform status (checks if maintenance mode is active)
+app.get('/api/system/status', async (req, res) => {
+  const state = await getMaintenanceState();
+  res.status(200).json({
+    success: true,
+    maintenance: state.enabled,
+    message: state.message,
+    timestamp: state.updatedAt,
+  });
+});
+
+// Maintenance mode barrier (intercepts non-superadmin traffic when active)
+app.use(checkMaintenanceMode);
+
 // Authentication routes
 app.use('/api/auth', authRoutes);
+
+// Superadmin routes (Always accessible to superadmins)
+app.use('/api/superadmin', superadminRoutes);
 
 // Landlord routes
 app.use('/api/landlord/dash', landlordDashRoutes);

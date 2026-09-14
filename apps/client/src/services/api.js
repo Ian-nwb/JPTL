@@ -91,6 +91,13 @@ async function request(endpoint, options = {}) {
     }
 
     if (!res.ok) {
+      if (res.status === 503) {
+        window.dispatchEvent(
+          new CustomEvent('jptl-maintenance-active', {
+            detail: { message: data?.message || 'Platform is currently undergoing scheduled maintenance.' },
+          })
+        );
+      }
       const errorMessage = data?.message || data?.error || `Request failed with status ${res.status}`;
       const err = new Error(errorMessage);
       err.status = res.status;
@@ -107,6 +114,10 @@ async function request(endpoint, options = {}) {
     throw err;
   }
 }
+
+export const systemApi = {
+  getStatus: () => request('/system/status'),
+};
 
 export const api = {
   get: (endpoint, options) => request(endpoint, { ...options, method: 'GET' }),
@@ -281,5 +292,6 @@ export const notificationApi = {
   getVapidKey: () => api.get('/notifications/vapid-key'),
   markAsRead: (id) => api.patch(`/notifications/${id}/read`),
   markAllAsRead: () => api.patch('/notifications/read-all'),
+  clearAll: () => api.delete('/notifications/clear-all'),
   subscribePush: (subscription) => api.post('/notifications/subscribe', { subscription }),
 };

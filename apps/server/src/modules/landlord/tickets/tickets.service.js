@@ -4,6 +4,7 @@ import Unit from '../../../shared/models/unit.model.js';
 import AuditLog from '../../../shared/models/auditLog.model.js';
 import User from '../../../shared/models/user.model.js';
 import { sendPushToUsers } from '../../../shared/services/pushNotification.service.js';
+import { createNotification } from '../../../shared/services/notification.service.js';
 
 export class TicketError extends Error {
   constructor(message, statusCode = 400) {
@@ -68,17 +69,38 @@ export async function getLandlordTickets(landlordId, query = {}) {
     matchFilter.priority = priority;
   }
 
-  // 4. Fetch tickets with populated tenant
+  // 4. Fetch tickets with populated tenant and unit (including unit.property)
   const rawTickets = await Ticket.find(matchFilter)
     .populate('tenant', 'firstName lastName email phone')
-    .populate('unit')
+    .populate({ path: 'unit', populate: { path: 'property' } })
     .sort({ createdAt: -1 })
     .lean();
 
   // 5. Format tickets with unit label and property details
   let formattedTickets = rawTickets.map((t) => {
-    const unitDoc = unitMap.get(t.unit?.toString());
-    const propertyDoc = unitDoc ? propertyMap.get(unitDoc.property?.toString()) : null;
+    // Check if unit is populated object or ID
+    const unitIdStr = t.unit?._id ? t.unit._id.toString() : (t.unit ? t.unit.toString() : null);
+    let unitDoc = unitIdStr ? unitMap.get(unitIdStr) : null;
+    if (!unitDoc && t.unit && typeof t.unit === 'object' && t.unit.label) {
+      unitDoc = t.unit;
+    }
+
+    // Fallback: if unit is still not resolved, check if tenant is assigned to any unit under this landlord
+    if (!unitDoc && t.tenant?._id) {
+      const tenantIdStr = t.tenant._id.toString();
+      unitDoc = units.find((u) => u.tenant && u.tenant.toString() === tenantIdStr);
+    }
+
+    // Resolve property: prefer populated property from unit, fallback to local map
+    let propertyDoc = null;
+    if (unitDoc?.property && typeof unitDoc.property === 'object' && unitDoc.property.name) {
+      propertyDoc = unitDoc.property;
+    } else {
+      const propIdStr = unitDoc?.property?._id
+        ? unitDoc.property._id.toString()
+        : (unitDoc?.property ? unitDoc.property.toString() : null);
+      propertyDoc = propIdStr ? propertyMap.get(propIdStr) : null;
+    }
 
     const tenantName = t.tenant
       ? `${t.tenant.firstName || ''} ${t.tenant.lastName || ''}`.trim() || t.tenant.email
@@ -87,7 +109,7 @@ export async function getLandlordTickets(landlordId, query = {}) {
     return {
       ...t,
       id: t._id,
-      unitId: t.unit,
+      unitId: unitDoc?._id || t.unit?._id || t.unit || null,
       unitLabel: unitDoc?.label || 'Unit N/A',
       propertyId: propertyDoc?._id || null,
       propertyName: propertyDoc?.name || 'Property N/A',
@@ -97,6 +119,7 @@ export async function getLandlordTickets(landlordId, query = {}) {
       tenantPhone: t.tenant?.phone || '',
     };
   });
+
 
   // 6. Search filter (if provided)
   if (search?.trim()) {
@@ -146,17 +169,24 @@ export async function getLandlordTickets(landlordId, query = {}) {
 export async function getTicketById(landlordId, ticketId) {
   const ticket = await Ticket.findById(ticketId)
     .populate('tenant', 'firstName lastName email phone')
-    .populate('unit')
+    .populate({ path: 'unit', populate: { path: 'property' } })
     .lean();
 
   if (!ticket) throw new TicketError('Ticket not found', 404);
 
   // Validate landlord ownership of property
-  const unit = ticket.unit;
-  if (!unit) throw new TicketError('Associated unit not found', 404);
+  let unit = ticket.unit;
+  if (!unit && ticket.tenant?._id) {
+    unit = await Unit.findOne({ tenant: ticket.tenant._id }).lean();
+  }
 
-  const property = await Property.findOne({ _id: unit.property, landlord: landlordId }).lean();
-  if (!property) throw new TicketError('Access denied. Ticket does not belong to your properties', 403);
+  let property = null;
+  if (unit?.property && typeof unit.property === 'object' && unit.property.name) {
+    property = unit.property;
+  } else if (unit?.property) {
+    const propId = unit.property._id || unit.property;
+    property = await Property.findOne({ _id: propId, landlord: landlordId }).lean();
+  }
 
   const tenantName = ticket.tenant
     ? `${ticket.tenant.firstName || ''} ${ticket.tenant.lastName || ''}`.trim() || ticket.tenant.email
@@ -165,9 +195,9 @@ export async function getTicketById(landlordId, ticketId) {
   return {
     ...ticket,
     id: ticket._id,
-    unitLabel: unit.label,
-    propertyName: property.name,
-    propertyAddress: property.address,
+    unitLabel: unit?.label || 'Unit N/A',
+    propertyName: property?.name || 'Property N/A',
+    propertyAddress: property?.address || '',
     tenantName,
     tenantEmail: ticket.tenant?.email || '',
     tenantPhone: ticket.tenant?.phone || '',
@@ -222,6 +252,17 @@ export async function createLandlordTicket(landlordId, payload, ipAddress = '') 
     afterState: ticket.toObject(),
     ipAddress,
   });
+
+  if (tenantId && tenantId.toString() !== landlordId.toString()) {
+    createNotification({
+      userId: tenantId,
+      title: `🔧 New Ticket: ${title.trim().slice(0, 40)}`,
+      body: `A maintenance ticket was opened for your unit (${unit.label}): ${description.trim().slice(0, 100)}`,
+      type: 'maintenance',
+      refModel: 'Ticket',
+      refId: ticket._id,
+    });
+  }
 
   return {
     ...ticket.toObject(),
@@ -283,6 +324,17 @@ export async function updateTicketStatus(landlordId, ticketId, payload, ipAddres
     ipAddress,
   });
 
+  if (ticket.tenant && ticket.tenant.toString() !== landlordId.toString()) {
+    createNotification({
+      userId: ticket.tenant,
+      title: `🔧 Ticket Status: ${nextStatus.replace('_', ' ').toUpperCase()}`,
+      body: note || `Maintenance ticket "${ticket.title}" status updated to ${nextStatus.replace('_', ' ')}.`,
+      type: 'maintenance',
+      refModel: 'Ticket',
+      refId: ticket._id,
+    });
+  }
+
   return {
     ...ticket.toObject(),
     id: ticket._id,
@@ -336,9 +388,18 @@ export async function assignTechnician(landlordId, ticketId, technicianData, ipA
     ipAddress,
   });
 
-  // Dispatch push notification to the tenant
+  // Dispatch in-app notification & push notification to the tenant
   try {
     if (ticket.tenant) {
+      createNotification({
+        userId: ticket.tenant,
+        title: `🔧 Technician Assigned`,
+        body: `${name.trim()} (${company || 'Service Team'}) is dispatched. ETA: ${eta || 'TBD'}`,
+        type: 'maintenance',
+        refModel: 'Ticket',
+        refId: ticket._id,
+      });
+
       sendPushToUsers([ticket.tenant], {
         title: `🔧 Technician Assigned: ${ticket.title?.slice(0, 40) || 'Maintenance Request'}`,
         body: `${name.trim()} (${company || 'Service Team'}) is dispatched. ETA: ${eta || 'TBD'}`,
