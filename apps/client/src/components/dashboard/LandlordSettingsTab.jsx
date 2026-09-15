@@ -3,7 +3,7 @@ import {
   Building2, Users, Shield, Wrench, DollarSign, Bell, FileText, 
   Database, Lock, CheckCircle2, Clock, Download, 
   Key, RefreshCw, Zap, Check, AlertCircle, User, Sliders, Camera, Eye, EyeOff, Smartphone, ShieldCheck,
-  Search, Filter, Upload, Plus, FileCheck, AlertTriangle, ShieldAlert, Wifi, BookOpen
+  Search, Filter, Upload, Plus, FileCheck, AlertTriangle, ShieldAlert, Wifi, BookOpen, Loader2
 } from 'lucide-react';
 import { MOCK_DOCUMENTS } from '../../data/mockData';
 import { DocumentInspectionModal } from './DocumentInspectionModal';
@@ -65,6 +65,7 @@ export const LandlordSettingsTab = ({
         company: user.company || prev.company,
         officePhone: user.officePhone || prev.officePhone,
       }));
+      if (user.avatarUrl !== undefined) setAvatarUrl(user.avatarUrl || null);
     }
     landlordApi.getVendors().then((res) => {
       if (res.data?.length > 0) setVendors(res.data);
@@ -74,8 +75,11 @@ export const LandlordSettingsTab = ({
       if (res.data?.length > 0) setAuditLogs(res.data);
     }).catch(() => {});
   }, [user]);
-  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || null);
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
   const [passwordForm, setPasswordForm] = useState({ current: '', newPass: '', confirm: '' });
+  const [passwordStatus, setPasswordStatus] = useState({ loading: false, error: '', success: '' });
   const [showPassword, setShowPassword] = useState(false);
   const [enable2FA, setEnable2FA] = useState(false);
   const [show2FAModal, setShow2FAModal] = useState(false);
@@ -327,6 +331,34 @@ export const LandlordSettingsTab = ({
     setTimeout(() => setSaved(false), 2500);
   };
 
+  const handleUpdatePassword = async (e) => {
+    if (e) e.preventDefault();
+    if (!passwordForm.current || !passwordForm.newPass) {
+      setPasswordStatus({ loading: false, error: 'Current and new password are required', success: '' });
+      return;
+    }
+    if (passwordForm.newPass.length < 8) {
+      setPasswordStatus({ loading: false, error: 'New password must be at least 8 characters', success: '' });
+      return;
+    }
+    if (passwordForm.confirm && passwordForm.newPass !== passwordForm.confirm) {
+      setPasswordStatus({ loading: false, error: 'New passwords do not match', success: '' });
+      return;
+    }
+    setPasswordStatus({ loading: true, error: '', success: '' });
+    try {
+      await authApi.changePassword({
+        currentPassword: passwordForm.current,
+        newPassword: passwordForm.newPass,
+      });
+      setPasswordStatus({ loading: false, error: '', success: 'Password updated successfully!' });
+      setPasswordForm({ current: '', newPass: '', confirm: '' });
+      setTimeout(() => setPasswordStatus((s) => ({ ...s, success: '' })), 4000);
+    } catch (err) {
+      setPasswordStatus({ loading: false, error: err.message || 'Failed to update password', success: '' });
+    }
+  };
+
   const handleTriggerBackup = () => {
     setIsBackingUp(true);
     setTimeout(() => {
@@ -412,22 +444,40 @@ export const LandlordSettingsTab = ({
             {/* Photo & Avatar Controls */}
             <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60 text-center space-y-3">
               <div className="relative group">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-600 to-purple-700 text-white flex items-center justify-center text-3xl font-extrabold font-grotesk shadow-xl overflow-hidden">
-                  {avatarUrl ? (
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-600 to-purple-700 text-white flex items-center justify-center text-3xl font-extrabold font-grotesk shadow-xl overflow-hidden relative">
+                  {avatarLoading ? (
+                    <Loader2 className="w-8 h-8 animate-spin text-white" />
+                  ) : avatarUrl ? (
                     <img src={avatarUrl} alt="Landlord Profile" className="w-full h-full object-cover" />
                   ) : (
                     ((landlordProfile.firstName?.[0] || '') + (landlordProfile.lastName?.[0] || '')).toUpperCase() || 'AV'
                   )}
                 </div>
-                <label className="absolute bottom-0 right-0 p-2 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg cursor-pointer btn-press">
+                <label className="absolute bottom-0 right-0 p-2 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg cursor-pointer btn-press disabled:opacity-50">
                   <Camera className="w-4 h-4" />
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    disabled={avatarLoading}
                     className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        setAvatarUrl(URL.createObjectURL(e.target.files[0]));
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 4 * 1024 * 1024) {
+                        setAvatarError('Photo size exceeds 4MB limit. Please upload an image under 4MB.');
+                        return;
+                      }
+                      setAvatarError('');
+                      setAvatarLoading(true);
+                      try {
+                        const res = await authApi.uploadAvatar(file);
+                        const newUrl = res.avatarUrl || res.data?.avatarUrl;
+                        setAvatarUrl(newUrl);
+                        updateUser({ ...(user || {}), avatarUrl: newUrl });
+                      } catch (err) {
+                        setAvatarError(err.message || 'Failed to upload photo to Cloudinary');
+                      } finally {
+                        setAvatarLoading(false);
                       }
                     }}
                   />
@@ -441,10 +491,30 @@ export const LandlordSettingsTab = ({
                 <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">Property Owner & Landlord</span>
               </div>
 
+              {avatarError && (
+                <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] max-w-[220px]">
+                  {avatarError}
+                </div>
+              )}
+
               {avatarUrl && (
                 <button
-                  onClick={() => setAvatarUrl(null)}
-                  className="text-[11px] font-mono text-rose-500 hover:underline"
+                  type="button"
+                  disabled={avatarLoading}
+                  onClick={async () => {
+                    setAvatarLoading(true);
+                    setAvatarError('');
+                    try {
+                      await authApi.removeAvatar();
+                      setAvatarUrl(null);
+                      updateUser({ ...(user || {}), avatarUrl: '' });
+                    } catch (err) {
+                      setAvatarError(err.message || 'Failed to remove photo');
+                    } finally {
+                      setAvatarLoading(false);
+                    }
+                  }}
+                  className="text-[11px] font-mono text-rose-500 hover:underline disabled:opacity-50"
                 >
                   Remove custom photo
                 </button>
@@ -621,6 +691,24 @@ export const LandlordSettingsTab = ({
                     onChange={(e) => setPasswordForm((p) => ({ ...p, confirm: e.target.value }))}
                     className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
                   />
+                  {passwordStatus.error && (
+                    <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px]">
+                      {passwordStatus.error}
+                    </div>
+                  )}
+                  {passwordStatus.success && (
+                    <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px]">
+                      {passwordStatus.success}
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleUpdatePassword}
+                    disabled={passwordStatus.loading}
+                    className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-grotesk font-bold text-xs btn-press disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+                  >
+                    {passwordStatus.loading ? 'Updating...' : 'Update Password'}
+                  </button>
                 </div>
               </div>
 

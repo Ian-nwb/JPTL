@@ -178,6 +178,27 @@ export const authApi = {
   changePassword: async (data) => {
     return api.patch('/auth/change-password', data);
   },
+
+  uploadAvatar: async (file) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    const res = await request('/auth/avatar', {
+      method: 'POST',
+      body: formData,
+    });
+    const updated = res.user || res.data?.user;
+    if (updated) tokenStorage.setUser(updated);
+    return res;
+  },
+
+  removeAvatar: async () => {
+    const res = await request('/auth/avatar', {
+      method: 'DELETE',
+    });
+    const updated = res.user || res.data?.user;
+    if (updated) tokenStorage.setUser(updated);
+    return res;
+  },
 };
 
 /* -------------------------------------------------------------

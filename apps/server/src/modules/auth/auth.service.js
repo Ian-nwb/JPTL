@@ -4,6 +4,7 @@ import User from '../../shared/models/user.model.js';
 import { recordLoginSession } from '../../shared/services/sessionMonitor.service.js';
 import { getMaintenanceState } from '../../shared/services/systemState.service.js';
 import { sendPasswordResetEmail } from '../../shared/services/email.service.js';
+import { uploadAvatarToCloudinary } from '../../shared/config/cloudinary.js';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_MIN_LENGTH = 8;
@@ -76,6 +77,7 @@ function sanitizeUser(user) {
     email: user.email,
     phone: user.phone || '',
     role: user.role,
+    avatarUrl: user.avatarUrl || '',
     createdAt: user.createdAt,
   };
 }
@@ -270,4 +272,87 @@ async function resetPassword({ token, newPassword }) {
   return { message: 'Password has been reset successfully. You may now sign in.' };
 }
 
-export { signupLandlord, login, loginSuperadmin, getUserById, changePasswordService, forgotPassword, resetPassword, AuthError };
+/**
+ * Update Profile — updates basic profile info and optionally password
+ */
+async function updateProfileService(userId, { firstName, middleName, lastName, name, phone, currentPassword, newPassword }) {
+  const user = await User.findById(userId).select('+password');
+  if (!user) {
+    throw new AuthError('User not found', 404);
+  }
+
+  // Parse combined name if provided without explicit firstName/lastName
+  if (name && (!firstName || !lastName)) {
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) {
+      user.firstName = parts[0];
+    } else if (parts.length === 2) {
+      user.firstName = parts[0];
+      user.lastName = parts[1];
+    } else if (parts.length >= 3) {
+      user.firstName = parts[0];
+      user.middleName = parts.slice(1, -1).join(' ');
+      user.lastName = parts[parts.length - 1];
+    }
+  }
+
+  if (firstName !== undefined && firstName.trim()) user.firstName = firstName.trim();
+  if (middleName !== undefined) user.middleName = middleName.trim();
+  if (lastName !== undefined && lastName.trim()) user.lastName = lastName.trim();
+  if (phone !== undefined) user.phone = phone.trim();
+
+  // If password update was included in profile patch
+  if (newPassword) {
+    if (!currentPassword) {
+      throw new AuthError('Current password is required to set a new password', 400);
+    }
+    validatePasswordStrength(newPassword);
+    const isMatch = await user.comparePassword(currentPassword);
+    if (!isMatch) {
+      throw new AuthError('Current password is incorrect', 401);
+    }
+    user.password = newPassword;
+  }
+
+  await user.save();
+  return sanitizeUser(user);
+}
+
+/**
+ * Upload and update user avatar photo via Cloudinary
+ */
+async function updateAvatarService(userId, fileBuffer, originalName) {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AuthError('User not found', 404);
+  }
+
+  const result = await uploadAvatarToCloudinary(fileBuffer, originalName, user._id.toString());
+  user.avatarUrl = result.secure_url;
+  await user.save();
+
+  return {
+    avatarUrl: user.avatarUrl,
+    user: sanitizeUser(user),
+  };
+}
+
+/**
+ * Remove user avatar photo
+ */
+async function removeAvatarService(userId) {
+  const user = await User.findById(userId);
+  if (!user) {
+    throw new AuthError('User not found', 404);
+  }
+
+  user.avatarUrl = '';
+  await user.save();
+
+  return {
+    avatarUrl: '',
+    user: sanitizeUser(user),
+  };
+}
+
+export { signupLandlord, login, loginSuperadmin, getUserById, changePasswordService, forgotPassword, resetPassword, updateProfileService, updateAvatarService, removeAvatarService, AuthError };

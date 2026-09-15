@@ -283,8 +283,12 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
 
               {/* User Avatar + Unit Pill */}
               <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200 dark:border-slate-800">
-                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold font-grotesk">
-                  {initials}
+                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold font-grotesk overflow-hidden">
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={displayName} className="w-full h-full object-cover" />
+                  ) : (
+                    initials
+                  )}
                 </div>
                 <div className="text-right hidden sm:block">
                   <span className="text-xs font-bold text-slate-900 dark:text-white block leading-tight">{displayName}</span>

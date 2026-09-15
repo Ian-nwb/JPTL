@@ -142,4 +142,69 @@ async function resetPassword(req, res) {
   }
 }
 
-export { signupLandlord, login, loginSuperadmin, getMe, logout, changePassword, forgotPassword, resetPassword };
+async function updateProfile(req, res) {
+  try {
+    const userId = req.user?.id || req.user?._id;
+    const updatedUser = await authService.updateProfileService(userId, req.body);
+    return res.status(200).json({
+      success: true,
+      message: 'Profile updated successfully',
+      user: updatedUser,
+      data: { user: updatedUser },
+    });
+  } catch (err) {
+    const statusCode = err.statusCode || 500;
+    return res.status(statusCode).json({ success: false, message: err.message });
+  }
+}
+
+async function uploadAvatar(req, res) {
+  try {
+    const userId = req.user?.id || req.user?._id;
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'Please select an image file to upload' });
+    }
+
+    // Explicit < 4MB check
+    const MAX_SIZE = 4 * 1024 * 1024; // 4MB
+    if (req.file.size > MAX_SIZE) {
+      return res.status(400).json({ success: false, message: 'Image size exceeds maximum limit of 4MB' });
+    }
+
+    const result = await authService.updateAvatarService(
+      userId,
+      req.file.buffer,
+      req.file.originalname
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: 'Avatar uploaded successfully',
+      avatarUrl: result.avatarUrl,
+      user: result.user,
+      data: { avatarUrl: result.avatarUrl, user: result.user },
+    });
+  } catch (err) {
+    const statusCode = err.statusCode || 500;
+    return res.status(statusCode).json({ success: false, message: err.message });
+  }
+}
+
+async function removeAvatar(req, res) {
+  try {
+    const userId = req.user?.id || req.user?._id;
+    const result = await authService.removeAvatarService(userId);
+    return res.status(200).json({
+      success: true,
+      message: 'Avatar removed successfully',
+      avatarUrl: '',
+      user: result.user,
+      data: { avatarUrl: '', user: result.user },
+    });
+  } catch (err) {
+    const statusCode = err.statusCode || 500;
+    return res.status(statusCode).json({ success: false, message: err.message });
+  }
+}
+
+export { signupLandlord, login, loginSuperadmin, getMe, logout, changePassword, forgotPassword, resetPassword, updateProfile, uploadAvatar, removeAvatar };

@@ -3,7 +3,7 @@ import {
   User, Bell, Shield, Phone, Mail, Car, CheckCircle2, Plus, Trash2, ShieldAlert,
   Lock, Key, Smartphone, Camera, Building2, Clock, Wrench, CreditCard, FileText,
   Upload, Eye, EyeOff, Check, AlertCircle, Download, ExternalLink, HelpCircle,
-  FileCheck, ShieldCheck
+  FileCheck, ShieldCheck, Loader2
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { tenantApi, authApi } from '../../services/api';
@@ -41,10 +41,13 @@ export const TenantSettingsTab = ({
   const [email, setEmail] = useState(tenant?.email || user?.email || 'sophia.lin@example.com');
   const [phone, setPhone] = useState(user?.phone || '+1 (555) 234-8901');
   const [emergencyContact, setEmergencyContact] = useState('David Lin (+1 555-901-4432) - Brother');
-  const [avatarUrl, setAvatarUrl] = useState(null);
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || null);
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const [avatarError, setAvatarError] = useState('');
   const [enable2FA, setEnable2FA] = useState(false);
   const [show2FAModal, setShow2FAModal] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ current: '', newPass: '', confirm: '' });
+  const [passwordStatus, setPasswordStatus] = useState({ loading: false, error: '', success: '' });
 
   useEffect(() => {
     if (user) {
@@ -52,6 +55,7 @@ export const TenantSettingsTab = ({
       if (user.lastName) setLastName(user.lastName);
       if (user.email) setEmail(user.email);
       if (user.phone) setPhone(user.phone);
+      if (user.avatarUrl !== undefined) setAvatarUrl(user.avatarUrl || null);
       if (user.emergencyContact?.name) {
         setEmergencyContact(`${user.emergencyContact.name} (${user.emergencyContact.phone || ''})`);
       }
@@ -138,6 +142,30 @@ export const TenantSettingsTab = ({
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
+  };
+
+  const handleUpdatePassword = async (e) => {
+    if (e) e.preventDefault();
+    if (!passwordForm.current || !passwordForm.newPass) {
+      setPasswordStatus({ loading: false, error: 'Current and new password are required', success: '' });
+      return;
+    }
+    if (passwordForm.newPass.length < 8) {
+      setPasswordStatus({ loading: false, error: 'New password must be at least 8 characters', success: '' });
+      return;
+    }
+    setPasswordStatus({ loading: true, error: '', success: '' });
+    try {
+      await authApi.changePassword({
+        currentPassword: passwordForm.current,
+        newPassword: passwordForm.newPass,
+      });
+      setPasswordStatus({ loading: false, error: '', success: 'Password updated successfully!' });
+      setPasswordForm({ current: '', newPass: '', confirm: '' });
+      setTimeout(() => setPasswordStatus((s) => ({ ...s, success: '' })), 4000);
+    } catch (err) {
+      setPasswordStatus({ loading: false, error: err.message || 'Failed to update password', success: '' });
+    }
   };
 
   const handleToggleChannel = (category, channel) => {
@@ -332,22 +360,40 @@ export const TenantSettingsTab = ({
             {/* Photo & Avatar Controls */}
             <div className="flex flex-col items-center justify-center p-6 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60 text-center space-y-3">
               <div className="relative group">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-3xl font-extrabold font-grotesk shadow-xl overflow-hidden">
-                  {avatarUrl ? (
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 text-white flex items-center justify-center text-3xl font-extrabold font-grotesk shadow-xl overflow-hidden relative">
+                  {avatarLoading ? (
+                    <Loader2 className="w-8 h-8 animate-spin text-white" />
+                  ) : avatarUrl ? (
                     <img src={avatarUrl} alt="Profile" className="w-full h-full object-cover" />
                   ) : (
-                    ((firstName?.[0] || '') + (lastName?.[0] || '')).toUpperCase() || 'SL'
+                    ((firstName?.[0] || '') + (lastName?.[0] || '')).toUpperCase() || 'IS'
                   )}
                 </div>
-                <label className="absolute bottom-0 right-0 p-2 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg cursor-pointer btn-press">
+                <label className="absolute bottom-0 right-0 p-2 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg cursor-pointer btn-press disabled:opacity-50">
                   <Camera className="w-4 h-4" />
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/png,image/jpeg,image/jpg,image/webp"
+                    disabled={avatarLoading}
                     className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        setAvatarUrl(URL.createObjectURL(e.target.files[0]));
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      if (file.size > 4 * 1024 * 1024) {
+                        setAvatarError('Photo size exceeds 4MB limit. Please upload an image under 4MB.');
+                        return;
+                      }
+                      setAvatarError('');
+                      setAvatarLoading(true);
+                      try {
+                        const res = await authApi.uploadAvatar(file);
+                        const newUrl = res.avatarUrl || res.data?.avatarUrl;
+                        setAvatarUrl(newUrl);
+                        updateUser({ ...(user || {}), avatarUrl: newUrl });
+                      } catch (err) {
+                        setAvatarError(err.message || 'Failed to upload photo to Cloudinary');
+                      } finally {
+                        setAvatarLoading(false);
                       }
                     }}
                   />
@@ -359,10 +405,30 @@ export const TenantSettingsTab = ({
                 <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">Resident Account</span>
               </div>
 
+              {avatarError && (
+                <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] max-w-[220px]">
+                  {avatarError}
+                </div>
+              )}
+
               {avatarUrl && (
                 <button
-                  onClick={() => setAvatarUrl(null)}
-                  className="text-[11px] font-mono text-rose-500 hover:underline"
+                  type="button"
+                  disabled={avatarLoading}
+                  onClick={async () => {
+                    setAvatarLoading(true);
+                    setAvatarError('');
+                    try {
+                      await authApi.removeAvatar();
+                      setAvatarUrl(null);
+                      updateUser({ ...(user || {}), avatarUrl: '' });
+                    } catch (err) {
+                      setAvatarError(err.message || 'Failed to remove photo');
+                    } finally {
+                      setAvatarLoading(false);
+                    }
+                  }}
+                  className="text-[11px] font-mono text-rose-500 hover:underline disabled:opacity-50"
                 >
                   Remove custom photo
                 </button>
@@ -558,9 +624,7 @@ export const TenantSettingsTab = ({
             </h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
-              
-              {/* Change Password */}
-              <div className="space-y-3 p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800">
+                         <div className="space-y-3 p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800">
                 <h3 className="font-grotesk font-bold text-slate-900 dark:text-white">Change Account Password</h3>
                 <div>
                   <label className="block text-slate-500 mb-1">Current Password</label>
@@ -582,12 +646,40 @@ export const TenantSettingsTab = ({
                     className="w-full bg-white dark:bg-[#10131F] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
                   />
                 </div>
+                <div>
+                  <label className="block text-slate-500 mb-1">Confirm New Password</label>
+                  <input
+                    type="password"
+                    placeholder="Re-enter new password"
+                    value={passwordForm.confirm}
+                    onChange={(e) => setPasswordForm((p) => ({ ...p, confirm: e.target.value }))}
+                    className={`w-full bg-white dark:bg-[#10131F] border rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono ${
+                      passwordForm.confirm && passwordForm.newPass !== passwordForm.confirm
+                        ? 'border-rose-500 focus:ring-rose-500'
+                        : 'border-slate-300 dark:border-slate-800'
+                    }`}
+                  />
+                  {passwordForm.confirm && passwordForm.newPass !== passwordForm.confirm && (
+                    <p className="text-rose-500 text-[11px] mt-1 font-mono">Passwords do not match</p>
+                  )}
+                </div>
+                {passwordStatus.error && (
+                  <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px]">
+                    {passwordStatus.error}
+                  </div>
+                )}
+                {passwordStatus.success && (
+                  <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px]">
+                    {passwordStatus.success}
+                  </div>
+                )}
                 <button
                   type="button"
-                  onClick={handleSave}
-                  className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-grotesk font-bold btn-press"
+                  onClick={handleUpdatePassword}
+                  disabled={passwordStatus.loading || (!!passwordForm.confirm && passwordForm.newPass !== passwordForm.confirm)}
+                  className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-100 text-white dark:text-slate-900 font-grotesk font-bold btn-press disabled:opacity-50 flex items-center justify-center gap-2"
                 >
-                  Update Password
+                  {passwordStatus.loading ? 'Updating...' : 'Update Password'}
                 </button>
               </div>
 

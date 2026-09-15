@@ -19,6 +19,7 @@ const userSchema = new Schema(
     onboardingCompleted: { type: Boolean, default: false },
     landlord: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     status: { type: String, enum: ['active', 'suspended'], default: 'active' },
+    avatarUrl: { type: String, default: '' },
     passwordResetToken: { type: String, select: false },
     passwordResetExpires: { type: Date, select: false },
   },
