@@ -116,4 +116,30 @@ async function changePassword(req, res) {
   }
 }
 
-export { signupLandlord, login, loginSuperadmin, getMe, logout, changePassword };
+async function forgotPassword(req, res) {
+  try {
+    const origin = req.headers.origin || process.env.CLIENT_URL || 'http://localhost:5173';
+    await authService.forgotPassword({ email: req.body.email, origin });
+    // Always return 200 regardless of whether the email exists (prevent enumeration)
+    return res.status(200).json({
+      success: true,
+      message: 'If an account with that email exists, a password reset link has been sent.',
+    });
+  } catch (err) {
+    const statusCode = err.statusCode || 500;
+    return res.status(statusCode).json({ success: false, message: err.message });
+  }
+}
+
+async function resetPassword(req, res) {
+  try {
+    const { token, newPassword } = req.body;
+    const result = await authService.resetPassword({ token, newPassword });
+    return res.status(200).json({ success: true, message: result.message });
+  } catch (err) {
+    const statusCode = err.statusCode || 500;
+    return res.status(statusCode).json({ success: false, message: err.message });
+  }
+}
+
+export { signupLandlord, login, loginSuperadmin, getMe, logout, changePassword, forgotPassword, resetPassword };

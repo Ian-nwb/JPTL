@@ -119,6 +119,7 @@ export const systemApi = {
   getStatus: () => request('/system/status'),
 };
 
+
 export const api = {
   get: (endpoint, options) => request(endpoint, { ...options, method: 'GET' }),
   post: (endpoint, body, options) => request(endpoint, { ...options, method: 'POST', body }),
@@ -160,6 +161,12 @@ export const authApi = {
       tokenStorage.clearAuth();
     }
   },
+
+  forgotPassword: (email) =>
+    request('/auth/forgot-password', { method: 'POST', body: { email } }),
+
+  resetPassword: (token, newPassword) =>
+    request('/auth/reset-password', { method: 'POST', body: { token, newPassword } }),
 
   updateProfile: async (data) => {
     const res = await api.patch('/auth/profile', data);

@@ -232,9 +232,18 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
 
             {/* Password */}
             <div>
-              <label htmlFor="login-password" className="text-xs font-semibold text-slate-800 dark:text-slate-200 mb-1.5 block">
-                Password
-              </label>
+              <div className="flex items-center justify-between mb-1.5">
+                <label htmlFor="login-password" className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                  Password
+                </label>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('/forgot-password')}
+                  className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-medium focus:outline-none"
+                >
+                  Forgot password?
+                </button>
+              </div>
               <div className="relative">
                 <input
                   id="login-password"

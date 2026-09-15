@@ -1,7 +1,9 @@
 import jwt from 'jsonwebtoken';
+import crypto from 'crypto';
 import User from '../../shared/models/user.model.js';
 import { recordLoginSession } from '../../shared/services/sessionMonitor.service.js';
 import { getMaintenanceState } from '../../shared/services/systemState.service.js';
+import { sendPasswordResetEmail } from '../../shared/services/email.service.js';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASSWORD_MIN_LENGTH = 8;
@@ -211,4 +213,61 @@ async function getUserById(id) {
   return sanitizeUser(user);
 }
 
-export { signupLandlord, login, loginSuperadmin, getUserById, changePasswordService, AuthError };
+/**
+ * Forgot Password — generate a reset token and send email.
+ * Always responds with a generic 200 to prevent email enumeration.
+ */
+async function forgotPassword({ email, origin }) {
+  if (!email?.trim()) throw new AuthError('Email is required', 400);
+
+  const user = await User.findOne({ email: email.trim().toLowerCase() }).select(
+    '+passwordResetToken +passwordResetExpires'
+  );
+
+  // Silently succeed even if user not found (prevent enumeration)
+  if (!user) return;
+
+  const rawToken = user.createPasswordResetToken();
+  await user.save({ validateBeforeSave: false });
+
+  const resetUrl = `${origin}/reset-password?token=${rawToken}`;
+
+  await sendPasswordResetEmail({
+    to: user.email,
+    firstName: user.firstName,
+    resetUrl,
+  });
+}
+
+/**
+ * Reset Password — consume the reset token and set a new password.
+ */
+async function resetPassword({ token, newPassword }) {
+  if (!token) throw new AuthError('Reset token is required', 400);
+
+  validatePasswordStrength(newPassword);
+
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await User.findOne({
+    passwordResetToken: hashedToken,
+    passwordResetExpires: { $gt: Date.now() },
+  }).select('+password +passwordResetToken +passwordResetExpires');
+
+  if (!user) {
+    throw new AuthError('Reset token is invalid or has expired', 400);
+  }
+
+  // Prevent reusing the same password
+  const isSame = await user.comparePassword(newPassword);
+  if (isSame) throw new AuthError('New password must be different from current password', 400);
+
+  user.password = newPassword;
+  user.passwordResetToken = undefined;
+  user.passwordResetExpires = undefined;
+  await user.save();
+
+  return { message: 'Password has been reset successfully. You may now sign in.' };
+}
+
+export { signupLandlord, login, loginSuperadmin, getUserById, changePasswordService, forgotPassword, resetPassword, AuthError };

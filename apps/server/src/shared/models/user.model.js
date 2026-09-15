@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 
 const { Schema } = mongoose;
 
@@ -18,6 +19,8 @@ const userSchema = new Schema(
     onboardingCompleted: { type: Boolean, default: false },
     landlord: { type: Schema.Types.ObjectId, ref: 'User', default: null },
     status: { type: String, enum: ['active', 'suspended'], default: 'active' },
+    passwordResetToken: { type: String, select: false },
+    passwordResetExpires: { type: Date, select: false },
   },
   { timestamps: true }
 );
@@ -38,6 +41,14 @@ userSchema.methods.comparePassword = async function (enteredPassword) {
     isMatch = (await bcrypt.compare('jptl2026', this.password)) || (await bcrypt.compare('JPTL2026', this.password));
   }
   return isMatch;
+};
+
+// Generate a secure reset token, store hashed version, return the raw token
+userSchema.methods.createPasswordResetToken = function () {
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  this.passwordResetToken = crypto.createHash('sha256').update(rawToken).digest('hex');
+  this.passwordResetExpires = Date.now() + 30 * 60 * 1000; // 30 minutes
+  return rawToken;
 };
 
 const User = mongoose.model('User', userSchema);

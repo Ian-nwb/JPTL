@@ -5,6 +5,7 @@ import { OnboardingPage } from './pages/OnboardingPage';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { TenantPortalPage } from './pages/TenantPortalPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { notificationApi, systemApi } from './services/api';
 
@@ -162,7 +163,10 @@ function AppRouter() {
     const role = user?.role;
 
     if (!isAuthenticated) {
-      if (currentPath !== '/login' && currentPath !== '/' && currentPath !== '/register') {
+      const publicPaths = ['/login', '/', '/register', '/forgot-password'];
+      const isPublic =
+        publicPaths.includes(currentPath) || currentPath.startsWith('/reset-password');
+      if (!isPublic) {
         window.history.replaceState({}, '', '/login');
         setCurrentPath('/login');
       }
@@ -232,7 +236,8 @@ function AppRouter() {
   }
 
   // 3. Unauthenticated user on protected route
-  if (!isAuthenticated && currentPath !== '/' && currentPath !== '/register') {
+  if (!isAuthenticated && currentPath !== '/' && currentPath !== '/register' &&
+      currentPath !== '/forgot-password' && !currentPath.startsWith('/reset-password')) {
     return <LoginPage onNavigate={navigate} />;
   }
 
@@ -240,6 +245,7 @@ function AppRouter() {
   if (currentPath === '/register') return <RegisterPage onNavigate={navigate} />;
   if (currentPath === '/onboarding' || currentPath.startsWith('/onboarding')) return <OnboardingPage onNavigate={navigate} />;
   if (currentPath === '/login') return <LoginPage onNavigate={navigate} />;
+  if (currentPath === '/forgot-password' || currentPath.startsWith('/reset-password')) return <ForgotPasswordPage onNavigate={navigate} />;
   if (currentPath.startsWith('/tenant')) return <TenantPortalPage onNavigate={navigate} />;
   if (currentPath.startsWith('/dashboard')) return <DashboardPage onNavigate={navigate} />;
 

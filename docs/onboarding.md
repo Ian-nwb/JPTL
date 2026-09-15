@@ -165,3 +165,12 @@ docker logs -f client
 | Backend Server | `8000` | http://localhost:8000 | REST API Server |
 | Swagger API Docs | `8000` | http://localhost:8000/api/docs | Interactive API Docs |
 | MongoDB Atlas | — | Hosted Cloud Cluster | Managed Cloud MongoDB |
+
+---
+
+## Cloud Deployment Guides
+
+For deploying to production and setting up environment variables:
+- [Cloud Deployment & Environment Guide (AWS, Vercel, Azure)](file:///home/ian/Desktop/Work/JPTL/docs/cloud-deployment-env-guide.md)
+- [Vercel Deployment Checklist](file:///home/ian/Desktop/Work/JPTL/docs/vercel-deployment-checklist.md)
+- [AWS Deployment Checklist](file:///home/ian/Desktop/Work/JPTL/docs/aws-deployment-checklist.md)

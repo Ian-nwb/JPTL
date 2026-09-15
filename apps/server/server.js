@@ -46,9 +46,9 @@ if (isClusterEnabled && cluster.isPrimary) {
 } else {
   // Worker processes boot Express server and establish DB connection
   connectDB().then(() => {
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       const mode = isClusterEnabled ? `Worker PID ${process.pid}` : `Single PID ${process.pid}`;
-      console.log(`[HTTP Server] Listening on http://localhost:${PORT} (${mode}, env: ${process.env.NODE_ENV || 'development'})`);
+      console.log(`[HTTP Server] Listening on http://0.0.0.0:${PORT} (${mode}, env: ${process.env.NODE_ENV || 'development'})`);
     });
   }).catch((err) => {
     console.error(`[Worker PID ${process.pid}] Database connection failure:`, err.message);
