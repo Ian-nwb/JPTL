@@ -299,7 +299,9 @@ async function updateProfileService(userId, { firstName, middleName, lastName, n
   if (firstName !== undefined && firstName.trim()) user.firstName = firstName.trim();
   if (middleName !== undefined) user.middleName = middleName.trim();
   if (lastName !== undefined && lastName.trim()) user.lastName = lastName.trim();
-  if (phone !== undefined) user.phone = phone.trim();
+if (phone !== undefined && phone !== null) {
+  user.phone = phone.trim();
+}
 
   // If password update was included in profile patch
   if (newPassword) {

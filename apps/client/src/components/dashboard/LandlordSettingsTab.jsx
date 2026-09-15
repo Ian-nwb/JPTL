@@ -42,28 +42,29 @@ export const LandlordSettingsTab = ({
 
   // 1. Landlord Account & Profile state
   const [landlordProfile, setLandlordProfile] = useState({
-    firstName: user?.firstName || 'Julian',
+    firstName: user?.firstName || '',
     middleName: user?.middleName || '',
-    lastName: user?.lastName || 'Thorne',
-    name: user?.name || 'Julian Thorne',
-    email: user?.email || 'landlord@jptl.com',
-    phone: user?.phone || '+1 (555) 100-0001',
-    company: user?.company || 'JPTL Portfolio Group',
-    officePhone: user?.officePhone || '+1 (555) 100-0002',
+    lastName: user?.lastName || '',
+    name: user?.name || [user?.firstName, user?.middleName, user?.lastName].filter(Boolean).join(' ') || '',
+    email: user?.email || '',
+    phone: user?.phone || '',
+    company: user?.company || '',
+    officePhone: user?.officePhone || '',
   });
 
   useEffect(() => {
     if (user) {
+      const computedName = user.name || [user.firstName, user.middleName, user.lastName].filter(Boolean).join(' ');
       setLandlordProfile((prev) => ({
         ...prev,
-        firstName: user.firstName || prev.firstName,
-        middleName: user.middleName || prev.middleName,
-        lastName: user.lastName || prev.lastName,
-        name: user.name || prev.name,
-        email: user.email || prev.email,
-        phone: user.phone || prev.phone,
-        company: user.company || prev.company,
-        officePhone: user.officePhone || prev.officePhone,
+        firstName: user.firstName !== undefined ? user.firstName : prev.firstName,
+        middleName: user.middleName !== undefined ? user.middleName : prev.middleName,
+        lastName: user.lastName !== undefined ? user.lastName : prev.lastName,
+        name: computedName || prev.name,
+        email: user.email !== undefined ? user.email : prev.email,
+        phone: user.phone !== undefined ? user.phone : prev.phone,
+        company: user.company !== undefined ? user.company : prev.company,
+        officePhone: user.officePhone !== undefined ? user.officePhone : prev.officePhone,
       }));
       if (user.avatarUrl !== undefined) setAvatarUrl(user.avatarUrl || null);
     }
@@ -486,7 +487,7 @@ export const LandlordSettingsTab = ({
 
               <div>
                 <h3 className="text-sm font-bold font-grotesk text-slate-900 dark:text-white">
-                  {landlordProfile.name || [landlordProfile.firstName, landlordProfile.middleName, landlordProfile.lastName].filter(Boolean).join(' ')}
+                  {user?.name || [user?.firstName, user?.middleName, user?.lastName].filter(Boolean).join(' ') || landlordProfile.name || [landlordProfile.firstName, landlordProfile.middleName, landlordProfile.lastName].filter(Boolean).join(' ') || 'Landlord'}
                 </h3>
                 <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">Property Owner & Landlord</span>
               </div>

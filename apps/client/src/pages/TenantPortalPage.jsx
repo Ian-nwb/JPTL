@@ -130,7 +130,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
       if (document.visibilityState === 'visible') {
         loadTenantData();
       }
-    }, 10000);
+    }, 30000);
 
     const onVisibilityOrFocus = () => {
       if (document.visibilityState === 'visible') {
@@ -164,11 +164,14 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
     ...unitData,
     id: unitData._id || unitData.id,
     label: unitData.label || 'Unit',
+    propertyName: propertyData?.name || unitData.propertyName,
   } : null;
   const currentProperty = propertyData ? {
     ...propertyData,
     id: propertyData._id || propertyData.id,
     name: propertyData.name || 'Property',
+    landlordName: landlordData?.name || propertyData.landlordName,
+    landlordEmail: landlordData?.email || propertyData.landlordEmail,
   } : null;
 
   const handleTicketSubmitted = async (newTicket) => {
@@ -365,6 +368,9 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
             <TenantSettingsTab
               tenant={currentTenant}
               unit={currentUnit}
+              property={currentProperty}
+              landlord={landlordData}
+              lease={leaseData}
             />
           )}
 
