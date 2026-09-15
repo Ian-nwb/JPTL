@@ -1,0 +1,80 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, prod, dev ]
+  pull_request:
+    branches: [ main, prod, dev ]
+  workflow_dispatch:
+
+jobs:
+  client-ci:
+    name: Client (React JS) CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: client
+        run: bun install --frozen-lockfile
+
+      - name: Run ESLint
+        working-directory: client
+        run: bun run lint
+
+      - name: Build production bundle
+        working-directory: client
+        run: bun run build
+
+  superadmin-ci:
+    name: Superadmin (React JS) CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: superadmin
+        run: bun install --frozen-lockfile
+
+      - name: Run ESLint
+        working-directory: superadmin
+        run: bun run lint
+
+      - name: Build production bundle
+        working-directory: superadmin
+        run: bun run build
+
+  server-ci:
+    name: Server (Express JS) CI
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: server
+        run: bun install --frozen-lockfile
+
+      - name: Run ESLint (optional)
+        working-directory: server
+        run: bun run lint
