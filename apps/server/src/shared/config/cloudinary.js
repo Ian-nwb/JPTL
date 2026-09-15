@@ -93,4 +93,44 @@ export async function uploadTicketPhotoToCloudinary(fileBuffer, originalName = '
   });
 }
 
+/**
+ * Upload a user avatar photo buffer to Cloudinary with face-centering and optimization.
+ */
+export async function uploadAvatarToCloudinary(fileBuffer, originalName = 'avatar.jpg', userId = '') {
+  const client = getCloudinaryClient();
+  const folder = 'jptl_avatars';
+
+  if (!client) {
+    const cleanName = originalName.replace(/[^a-zA-Z0-9_.-]/g, '_');
+    const ts = Date.now();
+    return {
+      secure_url: `https://res.cloudinary.com/demo/image/upload/v${ts}/${folder}/${cleanName}`,
+      public_id: `${folder}/${cleanName}_${ts}`,
+      bytes: fileBuffer ? fileBuffer.length : 0,
+      format: originalName.split('.').pop() || 'jpg',
+      isSimulated: true,
+    };
+  }
+
+  return new Promise((resolve, reject) => {
+    const uploadStream = client.uploader.upload_stream(
+      {
+        folder,
+        resource_type: 'image',
+        public_id: `avatar_${userId || Date.now()}`,
+        overwrite: true,
+        transformation: [
+          { width: 400, height: 400, crop: 'fill', gravity: 'face' },
+          { quality: 'auto', fetch_format: 'auto' },
+        ],
+      },
+      (error, result) => {
+        if (error) return reject(error);
+        resolve(result);
+      }
+    );
+    uploadStream.end(fileBuffer);
+  });
+}
+
 export { cloudinary };

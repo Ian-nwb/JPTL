@@ -669,8 +669,12 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
 
               {/* User Avatar + Name */}
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold font-grotesk">
-                  {(user?.firstName?.[0] || 'J') + (user?.lastName?.[0] || 'T')}
+                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold font-grotesk overflow-hidden shrink-0">
+                  {user?.avatarUrl ? (
+                    <img src={user.avatarUrl} alt={user?.firstName || 'User'} className="w-full h-full object-cover" />
+                  ) : (
+                    (user?.firstName?.[0] || 'J') + (user?.lastName?.[0] || 'T')
+                  )}
                 </div>
                 <div className="text-right hidden md:block">
                   <span className="text-xs font-bold text-slate-900 dark:text-white block leading-tight">

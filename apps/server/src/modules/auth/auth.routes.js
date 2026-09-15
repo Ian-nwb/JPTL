@@ -1,7 +1,19 @@
 import express from 'express';
+import multer from 'multer';
 import * as authController from './auth.controller.js';
 import { requireAuth } from '../../shared/middleware/auth.middleware.js';
 import { authLimiter } from '../../shared/middleware/rateLimiter.middleware.js';
+
+const avatarUpload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 4 * 1024 * 1024 }, // 4MB maximum
+  fileFilter: (_req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files (JPEG, PNG, WebP) are allowed'), false);
+    }
+    cb(null, true);
+  },
+});
 
 const router = express.Router();
 
@@ -141,6 +153,88 @@ router.get('/me', requireAuth, authController.getMe);
  *         description: Validation error
  */
 router.patch('/change-password', requireAuth, authController.changePassword);
+
+/**
+ * @swagger
+ * /api/auth/profile:
+ *   patch:
+ *     summary: Update current user profile
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string }
+ *               firstName: { type: string }
+ *               middleName: { type: string }
+ *               lastName: { type: string }
+ *               phone: { type: string }
+ *               currentPassword: { type: string }
+ *               newPassword: { type: string }
+ *     responses:
+ *       200:
+ *         description: Profile updated successfully
+ *       400:
+ *         description: Validation error
+ */
+router.patch('/profile', requireAuth, authController.updateProfile);
+
+/**
+ * @swagger
+ * /api/auth/avatar:
+ *   post:
+ *     summary: Upload and update user avatar (Max 4MB)
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               avatar:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Avatar updated successfully
+ *       400:
+ *         description: Invalid file or exceeds 4MB
+ *   delete:
+ *     summary: Remove user avatar
+ *     tags: [Auth]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Avatar removed successfully
+ */
+router.post(
+  '/avatar',
+  requireAuth,
+  (req, res, next) => {
+    avatarUpload.single('avatar')(req, res, (err) => {
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ success: false, message: 'Image size exceeds maximum limit of 4MB' });
+        }
+        return res.status(400).json({ success: false, message: err.message });
+      } else if (err) {
+        return res.status(400).json({ success: false, message: err.message });
+      }
+      next();
+    });
+  },
+  authController.uploadAvatar
+);
+
+router.delete('/avatar', requireAuth, authController.removeAvatar);
 
 /**
  * @swagger
