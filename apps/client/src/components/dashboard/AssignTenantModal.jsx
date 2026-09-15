@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Key, Building2, Home, Calendar, DollarSign, Clock, AlertCircle, CheckCircle2, Loader2, Sparkles } from 'lucide-react';
+import { X, Key, Building2, Home, Calendar, DollarSign, Clock, AlertCircle, CheckCircle2, Loader2, Sparkles, Car } from 'lucide-react';
 import { landlordApi } from '../../services/api';
 
 export const AssignTenantModal = ({
@@ -21,6 +21,11 @@ export const AssignTenantModal = ({
   const [hasParking, setHasParking] = useState(false);
   const [parkingSpot, setParkingSpot] = useState('');
   const [parkingFee, setParkingFee] = useState('150');
+
+  // Vehicle state
+  const [hasVehicle, setHasVehicle] = useState(false);
+  const [vehicleMake, setVehicleMake] = useState('');
+  const [vehiclePlate, setVehiclePlate] = useState('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -58,6 +63,11 @@ export const AssignTenantModal = ({
       setHasParking(Boolean(tenant.hasParking));
       setParkingSpot(tenant.parkingSpot || '');
       setParkingFee(tenant.parkingFee !== undefined && tenant.parkingFee !== null ? String(tenant.parkingFee) : '150');
+
+      // 6. Initial vehicle settings
+      setHasVehicle(Boolean(tenant.hasVehicle || (tenant.vehicles && tenant.vehicles.length > 0)));
+      setVehicleMake(tenant.vehicles?.[0]?.make || '');
+      setVehiclePlate(tenant.vehicles?.[0]?.plate || '');
 
       if (tenant.leaseEnd) {
         const end = new Date(tenant.leaseEnd).toISOString().split('T')[0];
@@ -189,6 +199,8 @@ export const AssignTenantModal = ({
           hasParking,
           parkingSpot: hasParking ? parkingSpot : null,
           parkingFee: hasParking ? Number(parkingFee) || 0 : 0,
+          hasVehicle,
+          vehicles: hasVehicle && vehicleMake ? [{ make: vehicleMake.trim(), plate: vehiclePlate.trim(), color: 'Standard' }] : [],
           status: 'active',
         });
         serverUpdated = res.data;
@@ -208,6 +220,8 @@ export const AssignTenantModal = ({
             hasParking,
             parkingSpot: hasParking ? parkingSpot : null,
             parkingFee: hasParking ? Number(parkingFee) || 0 : 0,
+            hasVehicle,
+            vehicles: hasVehicle && vehicleMake ? [{ make: vehicleMake.trim(), plate: vehiclePlate.trim(), color: 'Standard' }] : [],
             tempPassword: 'jptl2026',
           });
           serverUpdated = res.data;
@@ -462,6 +476,53 @@ export const AssignTenantModal = ({
               </span>
             </div>
           )}
+
+          {/* Tenant Vehicle Section */}
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">
+            <label className="flex items-center justify-between cursor-pointer">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={hasVehicle}
+                  onChange={(e) => setHasVehicle(e.target.checked)}
+                  className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300 dark:border-slate-700 cursor-pointer"
+                />
+                <span className="text-xs font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
+                  <Car className="w-3.5 h-3.5 text-indigo-500" />
+                  Tenant Has Vehicle
+                </span>
+              </div>
+              <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${
+                hasVehicle ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20' : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
+              }`}>
+                {hasVehicle ? 'Has Vehicle' : 'No Vehicle Yet'}
+              </span>
+            </label>
+            {hasVehicle && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-slate-200 dark:border-slate-800">
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">Vehicle Make & Model</label>
+                  <input
+                    type="text"
+                    value={vehicleMake}
+                    onChange={(e) => setVehicleMake(e.target.value)}
+                    placeholder="e.g. Toyota Corolla (Silver)"
+                    className="w-full bg-white dark:bg-[#0D111D] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">License Plate #</label>
+                  <input
+                    type="text"
+                    value={vehiclePlate}
+                    onChange={(e) => setVehiclePlate(e.target.value)}
+                    placeholder="e.g. 7XYZ890"
+                    className="w-full bg-white dark:bg-[#0D111D] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
 
           {/* Assigned Parking Section */}
           <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-3">

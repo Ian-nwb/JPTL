@@ -1,5 +1,13 @@
 import mongoose from 'mongoose';
 
+const vehicleSchema = new mongoose.Schema(
+  {
+    model: { type: String, required: true, trim: true },
+    plate: { type: String, required: true, trim: true, uppercase: true },
+  },
+  { timestamps: true }
+);
+
 const tenantProfileSchema = new mongoose.Schema(
   {
     user: {
@@ -31,6 +39,7 @@ const tenantProfileSchema = new mongoose.Schema(
     },
     autoPayEnabled: { type: Boolean, default: true },
     securityDeposit: { type: Number, default: 0 },
+    vehicles: [vehicleSchema],
     paymentMethods: [
       {
         id: { type: String },

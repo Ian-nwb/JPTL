@@ -8,9 +8,7 @@ import {
 import { useAuth } from '../../context/AuthContext';
 import { tenantApi, authApi } from '../../services/api';
 
-const INITIAL_VEHICLES = [
-  { id: 'veh-1', make: 'Tesla Model 3', color: 'Midnight Silver', plate: '7XYZ890', decal: 'DEC-8812' },
-];
+const INITIAL_VEHICLES = [];
 
 const INITIAL_SAVED_PAYMENTS = [
   { id: 'pm-1', type: 'ach', label: 'Chase Checking (•••• 4821)', isDefault: true, icon: 'bank' },
@@ -29,18 +27,20 @@ const INITIAL_DOCUMENTS = [
 export const TenantSettingsTab = ({
   tenant,
   unit,
+  property,
+  landlord,
+  lease,
 }) => {
   const { user, updateUser } = useAuth();
   const [activeSubTab, setActiveSubTab] = useState('profile'); // 'profile' | 'notifications' | 'maintenance' | 'payments' | 'documents' | 'privacy'
   const [saved, setSaved] = useState(false);
 
   // 1. Profile & Account state
-  const [firstName, setFirstName] = useState(tenant?.firstName || user?.firstName || 'Sophia');
+  const [firstName, setFirstName] = useState(tenant?.firstName || user?.firstName || '');
   const [middleName, setMiddleName] = useState(tenant?.middleName || user?.middleName || '');
-  const [lastName, setLastName] = useState(tenant?.lastName || user?.lastName || 'Lin');
-  const [email, setEmail] = useState(tenant?.email || user?.email || 'sophia.lin@example.com');
-  const [phone, setPhone] = useState(user?.phone || '+1 (555) 234-8901');
-  const [emergencyContact, setEmergencyContact] = useState('David Lin (+1 555-901-4432) - Brother');
+  const [lastName, setLastName] = useState(tenant?.lastName || user?.lastName || '');
+  const [email, setEmail] = useState(tenant?.email || user?.email || '');
+  const [phone, setPhone] = useState(tenant?.phone || user?.phone || '');
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || null);
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [avatarError, setAvatarError] = useState('');
@@ -52,16 +52,15 @@ export const TenantSettingsTab = ({
   useEffect(() => {
     if (user) {
       if (user.firstName) setFirstName(user.firstName);
+      if (user.middleName !== undefined) setMiddleName(user.middleName);
       if (user.lastName) setLastName(user.lastName);
       if (user.email) setEmail(user.email);
       if (user.phone) setPhone(user.phone);
       if (user.avatarUrl !== undefined) setAvatarUrl(user.avatarUrl || null);
-      if (user.emergencyContact?.name) {
-        setEmergencyContact(`${user.emergencyContact.name} (${user.emergencyContact.phone || ''})`);
-      }
     }
     tenantApi.getVehicles().then((res) => {
-      if (res.data?.length > 0) setVehicles(res.data);
+      const vList = res?.data || res?.vehicles || (Array.isArray(res) ? res : []);
+      if (Array.isArray(vList)) setVehicles(vList);
     }).catch(() => {});
   }, [user]);
 
@@ -441,8 +440,12 @@ export const TenantSettingsTab = ({
                 <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <Building2 className="w-4 h-4 text-indigo-500" /> Assigned Property & Unit
                 </h3>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-mono font-bold">
-                  Active Occupant
+                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                  unit 
+                    ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400' 
+                    : 'bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400'
+                }`}>
+                  {unit ? 'Active Occupant' : 'Pending Assignment'}
                 </span>
               </div>
 
@@ -450,26 +453,32 @@ export const TenantSettingsTab = ({
                 <div className="p-3 rounded-xl bg-white dark:bg-[#10131F] border border-slate-200 dark:border-slate-800">
                   <span className="text-[10px] text-slate-400 block">Property</span>
                   <strong className="text-slate-900 dark:text-white font-grotesk text-sm block truncate">
-                    {unit?.propertyName || 'Grand Horizon Towers'}
+                    {property?.name || unit?.propertyName || (unit ? 'Assigned Property' : 'None Assigned')}
                   </strong>
                 </div>
                 <div className="p-3 rounded-xl bg-white dark:bg-[#10131F] border border-slate-200 dark:border-slate-800">
                   <span className="text-[10px] text-slate-400 block">Assigned Unit</span>
                   <strong className="text-indigo-600 dark:text-indigo-400 font-grotesk text-sm block">
-                    {unit?.label || 'Unit 4B (2BR)'}
+                    {unit?.label || 'Unassigned'}
                   </strong>
                 </div>
                 <div className="p-3 rounded-xl bg-white dark:bg-[#10131F] border border-slate-200 dark:border-slate-800 col-span-2 sm:col-span-1">
                   <span className="text-[10px] text-slate-400 block">Lease Expiry</span>
                   <strong className="text-slate-900 dark:text-white font-grotesk text-sm block">
-                    Sept 30, 2027
+                    {lease?.leaseEnd || unit?.leaseEnd
+                      ? new Date(lease?.leaseEnd || unit?.leaseEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                      : 'No Active Lease'}
                   </strong>
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-indigo-500/5 border border-indigo-500/15 flex items-center justify-between text-xs font-mono">
-                <span className="text-slate-600 dark:text-slate-400">Assigned Landlord/Manager: <strong>Alexander Vance</strong></span>
-                <span className="text-indigo-600 dark:text-indigo-400 font-bold">pm-contact@horizon.com</span>
+              <div className="p-3.5 rounded-xl bg-indigo-500/5 border border-indigo-500/15 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-xs font-mono">
+                <span className="text-slate-600 dark:text-slate-400">
+                  Assigned Landlord/Manager: <strong className="text-slate-900 dark:text-white">{landlord?.name || property?.landlordName || 'Management Office'}</strong>
+                </span>
+                <span className="text-indigo-600 dark:text-indigo-400 font-bold">
+                  {landlord?.email || property?.landlordEmail || 'contact@jptl.com'}
+                </span>
               </div>
             </div>
 
@@ -478,7 +487,7 @@ export const TenantSettingsTab = ({
           {/* Personal Info Form */}
           <div className="p-6 rounded-3xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-4">
             <h2 className="text-base font-bold font-grotesk text-slate-900 dark:text-white flex items-center gap-2">
-              <User className="w-4 h-4 text-indigo-500" /> Personal & Emergency Details
+              <User className="w-4 h-4 text-indigo-500" /> Personal Details
             </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-sans">
@@ -511,7 +520,7 @@ export const TenantSettingsTab = ({
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-sans">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-sans">
               <div>
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Email Address</label>
                 <input
@@ -530,24 +539,20 @@ export const TenantSettingsTab = ({
                   className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
                 />
               </div>
-              <div>
-                <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Emergency Contact Info</label>
-                <input
-                  type="text"
-                  value={emergencyContact}
-                  onChange={(e) => setEmergencyContact(e.target.value)}
-                  className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
-                />
-              </div>
             </div>
           </div>
 
           {/* Registered Vehicles Manager */}
           <div className="p-6 rounded-3xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold font-grotesk text-slate-900 dark:text-white flex items-center gap-2">
-                <Car className="w-4 h-4 text-indigo-500" /> Registered Vehicles & Parking Permits
-              </h2>
+              <div>
+                <h2 className="text-base font-bold font-grotesk text-slate-900 dark:text-white flex items-center gap-2">
+                  <Car className="w-4 h-4 text-indigo-500" /> Registered Vehicles & Parking Permits
+                </h2>
+                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                  {vehicles.length === 0 ? 'No vehicle on file' : `${vehicles.length} vehicle${vehicles.length > 1 ? 's' : ''} registered`}
+                </span>
+              </div>
               <button
                 type="button"
                 onClick={() => setIsAddingVeh(true)}
@@ -557,26 +562,35 @@ export const TenantSettingsTab = ({
               </button>
             </div>
 
-            <div className="space-y-2">
-              {vehicles.map((v) => (
-                <div
-                  key={v.id}
-                  className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between text-xs font-mono"
-                >
-                  <div className="space-y-0.5">
-                    <strong className="text-slate-900 dark:text-white block font-grotesk text-sm">{v.make} ({v.color})</strong>
-                    <span className="text-slate-500">Plate: <strong className="text-indigo-500">{v.plate}</strong> &bull; Decal: {v.decal}</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleRemoveVehicle(v.id)}
-                    className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 btn-press"
+            {vehicles.length === 0 ? (
+              <div className="p-6 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-dashed border-slate-200 dark:border-slate-800/80 text-center space-y-1">
+                <Car className="w-6 h-6 text-slate-400 mx-auto opacity-50" />
+                <p className="text-xs font-mono text-slate-400">No vehicles registered yet.</p>
+                <p className="text-[11px] text-slate-500">Click &ldquo;+ Register Vehicle&rdquo; above if you have a car or motor vehicle.</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {vehicles.map((v) => (
+                  <div
+                    key={v.id || v._id}
+                    className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60 flex items-center justify-between text-xs font-mono"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
+                    <div className="space-y-0.5">
+                      <strong className="text-slate-900 dark:text-white block font-grotesk text-sm">{v.make} ({v.color || 'Standard'})</strong>
+                      <span className="text-slate-500">Plate: <strong className="text-indigo-500">{v.plate}</strong> &bull; Decal: {v.decal || 'Pending'}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveVehicle(v.id || v._id)}
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 btn-press"
+                      title="Remove Vehicle"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
 
             {isAddingVeh && (
               <div className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 space-y-3 text-xs">

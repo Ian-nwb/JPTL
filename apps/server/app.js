@@ -21,6 +21,7 @@ import tenantTicketRoutes from './src/modules/tenant/tickets/tickets.routes.js';
 import tenantLeaseRoutes from './src/modules/tenant/lease/lease.routes.js';
 import tenantDocumentRoutes from './src/modules/tenant/documents/documents.routes.js';
 import notificationRoutes from './src/modules/notifications/notification.routes.js';
+import vehicleRoutes from './src/modules/tenant/vehicle/vehicle.routes.js';
 import { generalLimiter, authLimiter } from './src/shared/middleware/rateLimiter.middleware.js';
 import { checkMaintenanceMode } from './src/shared/middleware/maintenance.middleware.js';
 import { getMaintenanceState } from './src/shared/services/systemState.service.js';
@@ -87,6 +88,7 @@ app.use('/api/tenant/payments', tenantPaymentsRoutes);
 app.use('/api/tenant/tickets', tenantTicketRoutes);
 app.use('/api/tenant/lease', tenantLeaseRoutes);
 app.use('/api/tenant/documents', tenantDocumentRoutes);
+app.use('/api/tenant/vehicles', vehicleRoutes);
 
 // Shared notification routes (VAPID key + push subscribe)
 app.use('/api/notifications', notificationRoutes);

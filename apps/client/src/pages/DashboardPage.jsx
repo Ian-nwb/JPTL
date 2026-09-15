@@ -472,7 +472,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
       if (document.visibilityState === 'visible') {
         loadLiveDashboardData();
       }
-    }, 10000);
+    }, 30000);
 
     const onVisibilityOrFocus = () => {
       if (document.visibilityState === 'visible') {
@@ -673,12 +673,12 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                   {user?.avatarUrl ? (
                     <img src={user.avatarUrl} alt={user?.firstName || 'User'} className="w-full h-full object-cover" />
                   ) : (
-                    (user?.firstName?.[0] || 'J') + (user?.lastName?.[0] || 'T')
+                    (user?.firstName?.[0] || 'L') + (user?.lastName?.[0] || '')
                   )}
                 </div>
                 <div className="text-right hidden md:block">
                   <span className="text-xs font-bold text-slate-900 dark:text-white block leading-tight">
-                    {user?.name || user?.firstName || 'Julian Thorne'}
+                    {user?.name || [user?.firstName, user?.lastName].filter(Boolean).join(' ') || 'Landlord'}
                   </span>
                   <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
                     {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Landlord'}
@@ -716,7 +716,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
               {/* Hero Greeting */}
               <div>
                 <h1 className="text-3xl sm:text-4xl font-extrabold font-grotesk tracking-tight text-slate-900 dark:text-white leading-tight">
-                  {greeting}, <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">{user?.firstName || 'Julian'}</span> 👋
+                  {greeting}, <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">{user?.firstName || 'Landlord'}</span> 👋
                 </h1>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Here's what's happening with your properties today.</p>
               </div>
