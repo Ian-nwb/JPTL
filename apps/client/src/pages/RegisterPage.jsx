@@ -276,11 +276,11 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-xl shadow-xl hover:border-white/20 transition-all duration-200 ease-out">
               <span className="text-2xl sm:text-3xl font-extrabold font-grotesk text-white block tracking-tight">2,480+</span>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Managed Units</span>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Managed Units</span>
             </div>
             <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-xl shadow-xl hover:border-white/20 transition-all duration-200 ease-out">
               <span className="text-2xl sm:text-3xl font-extrabold font-grotesk text-white block tracking-tight">98.4%</span>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Occupancy Rate</span>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Occupancy Rate</span>
             </div>
           </div>
         </div>
@@ -354,7 +354,7 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                 } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
               />
               {touched.firstName && errors.firstName && (
-                <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+                <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3 h-3 shrink-0" />
                   <span>{errors.firstName}</span>
                 </p>
@@ -381,7 +381,7 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                 } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
               />
               {touched.middleName && errors.middleName && (
-                <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+                <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3 h-3 shrink-0" />
                   <span>{errors.middleName}</span>
                 </p>
@@ -409,7 +409,7 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                 } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
               />
               {touched.lastName && errors.lastName && (
-                <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+                <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3 h-3 shrink-0" />
                   <span>{errors.lastName}</span>
                 </p>
@@ -439,7 +439,7 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                 } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
               />
               {touched.email && errors.email && (
-                <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+                <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3 h-3 shrink-0" />
                   <span>{errors.email}</span>
                 </p>
@@ -494,7 +494,7 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                 </div>
               </div>
               {touched.phone && errors.phone && (
-                <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+                <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3 h-3 shrink-0" />
                   <span>{errors.phone}</span>
                 </p>
@@ -533,7 +533,7 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
             </div>
 
             {/* Password Validation Indicators with smooth transitions */}
-            <div className="flex items-center gap-4 mt-2.5 text-[11px]">
+            <div className="flex items-center gap-4 mt-2.5 text-xs">
               <span
                 className={`flex items-center gap-1.5 font-medium transition-all duration-150 ease-out ${
                   is8Chars ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
@@ -554,7 +554,7 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
             </div>
 
             {touched.password && errors.password && (
-              <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+              <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
                 <AlertCircle className="w-3 h-3 shrink-0" />
                 <span>{errors.password}</span>
               </p>
@@ -591,7 +591,7 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
               </button>
             </div>
             {touched.confirmPassword && errors.confirmPassword && (
-              <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+              <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
                 <AlertCircle className="w-3 h-3 shrink-0" />
                 <span>{errors.confirmPassword}</span>
               </p>

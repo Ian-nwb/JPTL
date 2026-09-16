@@ -643,7 +643,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                 <span className="font-grotesk font-extrabold text-sm tracking-tight text-slate-900 dark:text-white block leading-tight">
                   JPTL<span className="text-indigo-600 dark:text-indigo-400">.SYS</span>
                 </span>
-                <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 block leading-none">
+                <span className="text-xs font-mono text-slate-400 dark:text-slate-500 block leading-none">
                   Console
                 </span>
               </div>
@@ -657,7 +657,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
               >
                 <Search className="w-3.5 h-3.5 mr-2 shrink-0" />
                 <span className="flex-1 text-left">Search…</span>
-                <span className="font-mono text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded">Ctrl K</span>
+                <span className="font-mono text-xs bg-slate-200 dark:bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded">Ctrl K</span>
               </button>
             </div>
 
@@ -680,7 +680,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
               >
                 <Bell className="w-4 h-4" />
                 {pendingTickets > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-[9px] font-bold flex items-center justify-center animate-pulse">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-rose-500 text-white text-xs font-bold flex items-center justify-center animate-pulse">
                     {pendingTickets}
                   </span>
                 )}
@@ -713,7 +713,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                   <span className="text-xs font-bold text-slate-900 dark:text-white block leading-tight">
                     {user?.name || [user?.firstName, user?.lastName].filter(Boolean).join(' ') || 'Landlord'}
                   </span>
-                  <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                  <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
                     {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Landlord'}
                   </span>
                 </div>
@@ -736,7 +736,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                 <div className="relative p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-indigo-500/10 border border-indigo-500/30 flex items-start gap-3 top-shade apple-glass">
                   <Megaphone className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
                   <div className="flex-1 space-y-0.5">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400 block font-mono">Workspace Broadcast</span>
+                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400 block font-mono">Workspace Broadcast</span>
                     <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">{announcement.subject}</h4>
                     <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{announcement.body}</p>
                   </div>
@@ -781,12 +781,12 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                       <div key={t.id} className="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
                         <div className="space-y-0.5">
                           <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">{t.id}</span>
+                            <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">{t.id}</span>
                             <span className="text-xs font-semibold text-slate-900 dark:text-white">{t.title}</span>
                           </div>
-                          <p className="text-[11px] text-slate-500 dark:text-slate-400">{t.propertyName} &bull; {t.unitLabel}</p>
+                          <p className="text-xs text-slate-500 dark:text-slate-400">{t.propertyName} &bull; {t.unitLabel}</p>
                         </div>
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-mono border ${
+                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold font-mono border ${
                           t.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
                           : t.status === 'in_progress' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20'
                           : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
@@ -811,21 +811,21 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                       <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500"><Building2 className="w-4 h-4" /></div>
                       <div>
                         <span className="text-xs font-bold text-slate-900 dark:text-white block">Browse Properties</span>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400">View all units and assign tenants</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">View all units and assign tenants</span>
                       </div>
                     </button>
                     <button onClick={() => { setActiveView('tenants'); }} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
                       <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500"><Users className="w-4 h-4" /></div>
                       <div>
                         <span className="text-xs font-bold text-slate-900 dark:text-white block">Manage Tenants</span>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400">View directory and add new tenants</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">View directory and add new tenants</span>
                       </div>
                     </button>
                     <button onClick={() => { setActiveView('announcements'); }} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
                       <div className="p-2 rounded-xl bg-purple-500/10 text-purple-500"><Megaphone className="w-4 h-4" /></div>
                       <div>
                         <span className="text-xs font-bold text-slate-900 dark:text-white block">Post Broadcast</span>
-                        <span className="text-[11px] text-slate-500 dark:text-slate-400">Publish announcements to all tenants</span>
+                        <span className="text-xs text-slate-500 dark:text-slate-400">Publish announcements to all tenants</span>
                       </div>
                     </button>
                   </div>
@@ -957,11 +957,11 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
                             <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold font-mono uppercase tracking-wider bg-indigo-600/90 text-white backdrop-blur-md shadow-sm">
+                              <span className="px-2.5 py-1 rounded-full text-xs font-bold font-mono uppercase tracking-wider bg-indigo-600/90 text-white backdrop-blur-md shadow-sm">
                                 {p.category || 'Residential'}
                               </span>
                               {p.featured && (
-                                <span className="px-2 py-0.5 rounded-full text-[9px] font-bold font-mono bg-amber-500/90 text-white">
+                                <span className="px-2 py-0.5 rounded-full text-xs font-bold font-mono bg-amber-500/90 text-white">
                                   Featured
                                 </span>
                               )}
@@ -985,7 +985,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                               <h3 className="text-base font-bold font-grotesk text-white truncate drop-shadow-sm">
                                 {p.name}
                               </h3>
-                              <p className="text-[11px] text-slate-300 flex items-center gap-1 mt-0.5 truncate">
+                              <p className="text-xs text-slate-300 flex items-center gap-1 mt-0.5 truncate">
                                 <MapPin className="w-3 h-3 text-indigo-400 shrink-0" /> {p.address}, {p.city}
                               </p>
                             </div>
@@ -995,22 +995,22 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                           <div className="p-4 space-y-3">
                             <div className="grid grid-cols-3 gap-2 text-center">
                               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60">
-                                <span className="text-[10px] font-mono text-slate-500 block">Units</span>
+                                <span className="text-xs font-mono text-slate-500 block">Units</span>
                                 <span className="text-sm font-extrabold font-grotesk text-slate-900 dark:text-white">{propUnits.length}</span>
                               </div>
                               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60">
-                                <span className="text-[10px] font-mono text-slate-500 block">Occupied</span>
+                                <span className="text-xs font-mono text-slate-500 block">Occupied</span>
                                 <span className="text-sm font-extrabold font-grotesk text-emerald-600 dark:text-emerald-400">{occupiedUnits}</span>
                               </div>
                               <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60">
-                                <span className="text-[10px] font-mono text-slate-500 block">Occupancy</span>
+                                <span className="text-xs font-mono text-slate-500 block">Occupancy</span>
                                 <span className="text-sm font-extrabold font-grotesk text-indigo-600 dark:text-indigo-400">{occRate}%</span>
                               </div>
                             </div>
 
                             {/* Occupancy Progress Bar */}
                             <div className="space-y-1">
-                              <div className="flex justify-between text-[10px] font-mono text-slate-500">
+                              <div className="flex justify-between text-xs font-mono text-slate-500">
                                 <span>Occupancy status</span>
                                 <span className="font-bold text-slate-700 dark:text-slate-300">{occupiedUnits} / {propUnits.length} Units</span>
                               </div>
@@ -1061,8 +1061,8 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                       <div key={u.id} className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-5 hover:border-indigo-400 dark:hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 shadow-xs">
                         <div>
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">{u.propertyName}</span>
-                            <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider font-mono ${isVacant ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'}`}>
+                            <span className="text-xs font-mono text-slate-500 dark:text-slate-400">{u.propertyName}</span>
+                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider font-mono ${isVacant ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'}`}>
                               {u.status}
                             </span>
                           </div>
@@ -1148,7 +1148,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                         <div className="space-y-1 min-w-[200px]">
                           <div className="flex items-center gap-2">
                             <h3 className="text-sm font-bold text-slate-900 dark:text-white font-grotesk">{t.name}</h3>
-                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase font-mono ${
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase font-mono ${
                               isAssigned
                                 ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'
                                 : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
@@ -1163,14 +1163,14 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-xs font-mono items-center flex-1">
                           {/* Property & Unit */}
                           <div>
-                            <span className="text-slate-400 block text-[10px] uppercase tracking-wider font-semibold mb-0.5">Property & Unit</span>
+                            <span className="text-slate-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Property & Unit</span>
                             {isAssigned ? (
                               <div className="flex flex-col">
                                 <strong className="text-slate-900 dark:text-white flex items-center gap-1 truncate font-sans text-xs">
                                   <Building2 className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
                                   {t.propertyName || 'Property'}
                                 </strong>
-                                <span className="text-slate-600 dark:text-slate-300 flex items-center gap-1 text-[11px]">
+                                <span className="text-slate-600 dark:text-slate-300 flex items-center gap-1 text-xs">
                                   <Home className="w-3 h-3 text-slate-400 shrink-0" />
                                   {t.unitLabel || 'Unit'}
                                 </span>
@@ -1182,7 +1182,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
 
                           {/* Rent */}
                           <div>
-                            <span className="text-slate-400 block text-[10px] uppercase tracking-wider font-semibold mb-0.5">Rent</span>
+                            <span className="text-slate-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Rent</span>
                             {t.monthlyRent > 0 ? (
                               <strong className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">${t.monthlyRent}/mo</strong>
                             ) : (
@@ -1192,7 +1192,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
 
                           {/* Lease Duration */}
                           <div>
-                            <span className="text-slate-400 block text-[10px] uppercase tracking-wider font-semibold mb-0.5">Lease Duration</span>
+                            <span className="text-slate-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Lease Duration</span>
                             {duration ? (
                               <div className="flex items-center gap-1 text-slate-800 dark:text-slate-200">
                                 <Clock className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
@@ -1205,11 +1205,11 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
 
                           {/* Expiration Date & Status */}
                           <div>
-                            <span className="text-slate-400 block text-[10px] uppercase tracking-wider font-semibold mb-0.5">Expiration</span>
+                            <span className="text-slate-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Expiration</span>
                             {expiration ? (
                               <div className="space-y-1">
                                 <strong className="text-slate-900 dark:text-slate-100 block">{expiration.formattedDate}</strong>
-                                <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold font-mono ${expiration.statusClass}`}>
+                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold font-mono ${expiration.statusClass}`}>
                                   {expiration.badgeText}
                                 </span>
                               </div>

@@ -34,18 +34,18 @@ export const RoleBreakdown = ({ onOpenLogin }) => {
 
   return (
     <section id="roles" className="py-24 bg-slate-50 dark:bg-[#08080C] relative border-t border-slate-200 dark:border-white/10 overflow-hidden z-10 transition-colors duration-300">
-      
+
       {/* Background Ambient Glow */}
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 bg-blue-500/10 dark:bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-96 h-96 bg-purple-500/10 dark:bg-purple-600/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
-          
+
           {/* Left Column: Step Selector Cards */}
           <div className="lg:col-span-5 space-y-6">
-            
+
             {/* Display Title */}
             <div>
               <span className="font-mono text-xs text-blue-600 dark:text-blue-400 font-semibold tracking-widest uppercase mb-2 block">
@@ -69,11 +69,10 @@ export const RoleBreakdown = ({ onOpenLogin }) => {
                     key={step.id}
                     onMouseEnter={() => setActiveStep(idx)}
                     onClick={() => setActiveStep(idx)}
-                    className={`p-6 rounded-2xl border transition-all cursor-pointer relative overflow-hidden ${
-                      isActive
+                    className={`p-6 rounded-2xl border transition-all cursor-pointer relative overflow-hidden ${isActive
                         ? 'bg-white dark:bg-[#141422] border-slate-300 dark:border-white/30 shadow-xl'
                         : 'bg-slate-100/80 dark:bg-[#0E0E16]/80 border-slate-200 dark:border-white/10 hover:border-slate-300 dark:hover:border-white/20 opacity-80 hover:opacity-100'
-                    }`}
+                      }`}
                     whileHover={{ x: 4 }}
                     transition={{ duration: 0.2 }}
                   >
@@ -87,10 +86,10 @@ export const RoleBreakdown = ({ onOpenLogin }) => {
                     )}
 
                     <div className="flex items-center justify-between mb-2">
-                      <span className="font-mono text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      <span className="font-mono text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                         {step.stepNum}
                       </span>
-                      <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full border ${step.badgeColor}`}>
+                      <span className={`text-xs font-mono px-2.5 py-0.5 rounded-full border ${step.badgeColor}`}>
                         {step.subtitle}
                       </span>
                     </div>
@@ -112,7 +111,7 @@ export const RoleBreakdown = ({ onOpenLogin }) => {
           {/* Right Column: macOS Style App Window */}
           <div className="lg:col-span-7 lg:pl-4">
             <div className="rounded-3xl border border-slate-200 dark:border-white/15 bg-slate-100 dark:bg-[#0C0C14] shadow-2xl overflow-hidden spotlight-card glow-card aspect-auto lg:aspect-[4/3] flex flex-col min-h-0 sm:min-h-[460px] transition-colors duration-300">
-              
+
               {/* macOS Window Titlebar */}
               <div className="px-3.5 sm:px-5 py-3 sm:py-3.5 bg-slate-200/80 dark:bg-[#08080E] border-b border-slate-300 dark:border-white/10 flex items-center justify-between shrink-0 gap-2">
                 <div className="flex items-center gap-2 overflow-hidden">
@@ -121,7 +120,7 @@ export const RoleBreakdown = ({ onOpenLogin }) => {
                     <div className="w-3 h-3 rounded-full bg-amber-500/80" />
                     <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
                   </div>
-                  <div className="ml-1 sm:ml-3 px-2 sm:px-3.5 py-1 rounded-lg bg-white dark:bg-[#141420] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-400 font-mono text-[11px] sm:text-xs flex items-center gap-1.5 sm:gap-2 truncate">
+                  <div className="ml-1 sm:ml-3 px-2 sm:px-3.5 py-1 rounded-lg bg-white dark:bg-[#141420] border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-400 font-mono text-xs sm:text-xs flex items-center gap-1.5 sm:gap-2 truncate">
                     <Lock className="w-3 h-3 text-blue-600 dark:text-blue-400 shrink-0" />
                     <span className="truncate">{currentStep.addressUrl}</span>
                   </div>
@@ -129,7 +128,7 @@ export const RoleBreakdown = ({ onOpenLogin }) => {
 
                 <button
                   onClick={() => onOpenLogin && onOpenLogin(currentStep.id)}
-                  className="px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 font-grotesk font-bold text-[11px] sm:text-xs flex items-center gap-1 sm:gap-1.5 btn-press shadow-md transition-all shrink-0"
+                  className="px-2.5 sm:px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-950 font-grotesk font-bold text-xs sm:text-xs flex items-center gap-1 sm:gap-1.5 btn-press shadow-md transition-all shrink-0"
                 >
                   <span>Launch <span className="hidden sm:inline">{currentStep.id.toUpperCase()}</span></span>
                   <ArrowRight className="w-3.5 h-3.5" />
@@ -138,7 +137,7 @@ export const RoleBreakdown = ({ onOpenLogin }) => {
 
               {/* Dynamic Interactive Window Content */}
               <div className="p-3.5 sm:p-8 flex-1 flex items-center justify-center relative overflow-y-auto">
-                
+
                 <AnimatePresence mode="wait">
                   <motion.div
                     key={currentStep.id}
@@ -148,7 +147,7 @@ export const RoleBreakdown = ({ onOpenLogin }) => {
                     transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
                     className="w-full space-y-3.5 sm:space-y-6"
                   >
-                    
+
                     {/* Header Card Inside Showcase */}
                     <div className="p-4 sm:p-6 rounded-2xl bg-white dark:bg-[#141422] border border-slate-200 dark:border-white/10 relative overflow-hidden shadow-xl">
                       <div className="flex items-center justify-between mb-3">
@@ -178,12 +177,12 @@ export const RoleBreakdown = ({ onOpenLogin }) => {
                         <div className="p-4 rounded-xl bg-white dark:bg-[#0E0E18] border border-slate-200 dark:border-white/10 space-y-2">
                           <div className="flex items-center justify-between text-xs font-grotesk text-blue-600 dark:text-blue-400 font-bold">
                             <span className="flex items-center gap-1.5"><Wrench className="w-4 h-4" /> Ticket #402 Submitted</span>
-                            <span className="text-[10px] font-mono text-slate-500">Just Now</span>
+                            <span className="text-xs font-mono text-slate-500">Just Now</span>
                           </div>
                           <p className="text-xs text-slate-700 dark:text-slate-300 font-sans">
                             Leaking Kitchen Sink Faucet with Cloudinary attachment.
                           </p>
-                          <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
+                          <div className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
                             Status: SUBMITTED → LANDLORD NOTIFIED
                           </div>
                         </div>
@@ -191,12 +190,12 @@ export const RoleBreakdown = ({ onOpenLogin }) => {
                         <div className="p-4 rounded-xl bg-white dark:bg-[#0E0E18] border border-slate-200 dark:border-white/10 space-y-2">
                           <div className="flex items-center justify-between text-xs font-grotesk text-emerald-600 dark:text-emerald-400 font-bold">
                             <span className="flex items-center gap-1.5"><CreditCard className="w-4 h-4" /> Rent Charge Paid</span>
-                            <span className="text-[10px] font-mono text-slate-500">Unit 14B</span>
+                            <span className="text-xs font-mono text-slate-500">Unit 14B</span>
                           </div>
                           <div className="text-lg font-grotesk font-bold text-slate-950 dark:text-white">
                             $2,400.00
                           </div>
-                          <div className="text-[10px] font-mono text-slate-500 dark:text-slate-400">
+                          <div className="text-xs font-mono text-slate-500 dark:text-slate-400">
                             Txn ID: TXN_SIM_20268841 (EventEmitter)
                           </div>
                         </div>
@@ -206,9 +205,9 @@ export const RoleBreakdown = ({ onOpenLogin }) => {
                         <div className="p-4 rounded-xl bg-white dark:bg-[#0E0E18] border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs">
                           <div>
                             <div className="font-grotesk font-bold text-slate-950 dark:text-white">Aura Sky Towers • Unit 2B</div>
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-sans">Sophia Lin (Tenant) • Lease Assigned</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400 font-sans">Sophia Lin (Tenant) • Lease Assigned</div>
                           </div>
-                          <span className="px-3 py-1 rounded-full font-mono text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                          <span className="px-3 py-1 rounded-full font-mono text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                             IN_PROGRESS
                           </span>
                         </div>
@@ -216,9 +215,9 @@ export const RoleBreakdown = ({ onOpenLogin }) => {
                         <div className="p-4 rounded-xl bg-white dark:bg-[#0E0E18] border border-slate-200 dark:border-white/10 flex items-center justify-between text-xs">
                           <div>
                             <div className="font-grotesk font-bold text-slate-950 dark:text-white">Zenith Lofts • Unit 4A</div>
-                            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-sans">Alexander Vance (Landlord) • Active Unit</div>
+                            <div className="text-xs text-slate-500 dark:text-slate-400 font-sans">Alexander Vance (Landlord) • Active Unit</div>
                           </div>
-                          <span className="px-3 py-1 rounded-full font-mono text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          <span className="px-3 py-1 rounded-full font-mono text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                             RESOLVED
                           </span>
                         </div>

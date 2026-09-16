@@ -224,7 +224,7 @@ export const PayRentModal = ({
             )}
 
             {/* Security Guarantee Pill */}
-            <div className="flex items-center gap-2 text-[11px] text-slate-500 dark:text-slate-400 mb-5">
+            <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mb-5">
               <Lock className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
               <span>256-bit encrypted bank checkout via Stripe Webhooks.</span>
             </div>

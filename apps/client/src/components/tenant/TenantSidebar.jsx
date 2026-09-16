@@ -47,7 +47,7 @@ export const TenantSidebar = ({
               <span className="font-grotesk font-extrabold text-base tracking-tight text-slate-900 dark:text-white block leading-tight">
                 JPTL<span className="text-indigo-600 dark:text-indigo-400">.TENANT</span>
               </span>
-              <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Resident Portal</span>
+              <span className="text-xs font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wider block">Resident Portal</span>
             </div>
           </div>
         )}

@@ -43,7 +43,7 @@ function LayoutAnimation() {
         {roles.map((role, i) => (
           <div
             key={role}
-            className={`flex-1 py-1.5 rounded-lg text-center font-mono text-[11px] font-semibold transition-all relative z-10 ${
+            className={`flex-1 py-1.5 rounded-lg text-center font-mono text-xs font-semibold transition-all relative z-10 ${
               activeRole === i ? "text-white font-bold" : "text-slate-500"
             }`}
           >

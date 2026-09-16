@@ -121,7 +121,7 @@ export const TenantLeaseTab = ({
             <CheckCircle2 className="w-4 h-4 text-emerald-500" />
             <span>Renewal request pending for <strong>{renewalStatus.term} Months</strong> (Effective {renewalStatus.proposedStartDate})</span>
           </div>
-          <span className="text-[10px] uppercase font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-md">Pending Review</span>
+          <span className="text-xs uppercase font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-md">Pending Review</span>
         </div>
       )}
 
@@ -129,37 +129,37 @@ export const TenantLeaseTab = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         
         <div className="p-5 rounded-2xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-1">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Lease Term</span>
+          <span className="text-xs font-mono text-slate-400 uppercase tracking-wider block">Lease Term</span>
           <strong className="text-sm text-slate-900 dark:text-white font-mono block">
             {leaseTerm ? `${leaseTerm} (Standard)` : '—'}
           </strong>
-          <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono">
+          <p className="text-xs text-emerald-600 dark:text-emerald-400 font-mono">
             {leaseStart ? formatDate(leaseStart) : '—'} → {leaseEnd ? formatDate(leaseEnd) : '—'}
           </p>
         </div>
 
         <div className="p-5 rounded-2xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-1">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Monthly Rent Rate</span>
+          <span className="text-xs font-mono text-slate-400 uppercase tracking-wider block">Monthly Rent Rate</span>
           <strong className="text-xl text-slate-900 dark:text-white font-grotesk block">
             {monthlyRent !== null ? `$${monthlyRent.toLocaleString()}/mo` : '—'}
           </strong>
-          <p className="text-[11px] text-slate-400 font-mono">Due on the 1st of every month</p>
+          <p className="text-xs text-slate-400 font-mono">Due on the 1st of every month</p>
         </div>
 
         <div className="p-5 rounded-2xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-1">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Security Deposit Held</span>
+          <span className="text-xs font-mono text-slate-400 uppercase tracking-wider block">Security Deposit Held</span>
           <strong className="text-xl text-indigo-500 font-grotesk block">
             {securityDeposit !== null ? `$${securityDeposit.toLocaleString()}` : '—'}
           </strong>
-          <p className="text-[11px] text-slate-400 font-mono">Refundable upon move-out</p>
+          <p className="text-xs text-slate-400 font-mono">Refundable upon move-out</p>
         </div>
 
         <div className="p-5 rounded-2xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-1">
-          <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Renewal Window</span>
+          <span className="text-xs font-mono text-slate-400 uppercase tracking-wider block">Renewal Window</span>
           <strong className="text-sm text-slate-900 dark:text-white font-mono block">
             {renewalWindowDate ? `Opens ${renewalWindowDate}` : '—'}
           </strong>
-          <p className="text-[11px] text-indigo-400 font-mono">60-day notice period</p>
+          <p className="text-xs text-indigo-400 font-mono">60-day notice period</p>
         </div>
 
       </div>

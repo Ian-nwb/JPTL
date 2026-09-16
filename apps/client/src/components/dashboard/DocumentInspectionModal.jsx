@@ -122,7 +122,7 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
                 <h3 className="font-grotesk font-extrabold text-lg text-slate-900 dark:text-white leading-tight">
                   {doc.name}
                 </h3>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase tracking-wider ${
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold font-mono uppercase tracking-wider ${
                   doc.status === 'Verified' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' :
                   doc.status === 'Rejected' ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20' :
                   'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 animate-pulse'
@@ -163,7 +163,7 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
             
             {/* Resident Info Box */}
             <div className="p-4 rounded-2xl bg-white dark:bg-[#101426] border border-slate-200 dark:border-slate-800/80 space-y-3">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-600 dark:text-indigo-400 block">
                 Resident & Unit Context
               </span>
               <div className="space-y-2 text-xs font-mono">
@@ -193,7 +193,7 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
                   <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
                   <span>Verified & Approved</span>
                 </div>
-                <p className="text-[11px] leading-relaxed opacity-90">
+                <p className="text-xs leading-relaxed opacity-90">
                   This document was inspected and verified by <strong>{doc.reviewedBy || 'Landlord'}</strong> on {doc.verifiedAt ? new Date(doc.verifiedAt).toLocaleDateString() : doc.date}.
                 </p>
               </div>
@@ -205,11 +205,11 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
                   <AlertCircle className="w-4 h-4 text-rose-500 shrink-0" />
                   <span>Verification Rejected</span>
                 </div>
-                <p className="text-[11px] leading-relaxed">
+                <p className="text-xs leading-relaxed">
                   <strong>Reason:</strong> {doc.rejectionReason || 'Document did not meet compliance requirements.'}
                 </p>
                 {doc.reviewedBy && (
-                  <span className="text-[10px] text-slate-500 dark:text-slate-400 block pt-1">
+                  <span className="text-xs text-slate-500 dark:text-slate-400 block pt-1">
                     Reviewed by {doc.reviewedBy}
                   </span>
                 )}
@@ -222,7 +222,7 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
                 <span className="font-grotesk font-bold text-slate-900 dark:text-white block">
                   Verification Guidelines
                 </span>
-                <ul className="space-y-2 text-[11px] text-slate-500 dark:text-slate-400">
+                <ul className="space-y-2 text-xs text-slate-500 dark:text-slate-400">
                   <li className="flex items-start gap-2">
                     <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0 mt-0.5" />
                     <span>Verify tenant name matches active lease agreement.</span>
@@ -249,14 +249,14 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
                   <button 
                     type="button" 
                     onClick={() => setRejecting(false)} 
-                    className="text-[11px] text-slate-400 hover:text-slate-600 font-mono"
+                    className="text-xs text-slate-400 hover:text-slate-600 font-mono"
                   >
                     Cancel
                   </button>
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[10px] font-mono text-slate-500 dark:text-slate-400 uppercase">
+                  <label className="block text-xs font-mono text-slate-500 dark:text-slate-400 uppercase">
                     Select Quick Reason or Type Below:
                   </label>
                   <div className="space-y-1">
@@ -265,7 +265,7 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
                         key={i}
                         type="button"
                         onClick={() => setRejectionReason(r)}
-                        className={`w-full text-left p-1.5 rounded-lg text-[10px] font-mono border transition-colors ${
+                        className={`w-full text-left p-1.5 rounded-lg text-xs font-mono border transition-colors ${
                           rejectionReason === r 
                             ? 'bg-rose-500/20 border-rose-500/40 text-rose-700 dark:text-rose-300 font-semibold' 
                             : 'bg-white dark:bg-[#101426] border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 dark:hover:border-slate-700'
@@ -312,7 +312,7 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
               >
                 <ZoomOut className="w-3.5 h-3.5" />
               </button>
-              <span className="px-2 text-[11px] font-bold">{zoomLevel}%</span>
+              <span className="px-2 text-xs font-bold">{zoomLevel}%</span>
               <button 
                 onClick={() => setZoomLevel(prev => Math.min(150, prev + 15))}
                 className="p-1.5 rounded-lg hover:bg-white/20 transition-colors btn-press"
@@ -391,12 +391,12 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
                           OFFICIAL RESIDENTIAL DOCUMENT
                         </span>
                       </div>
-                      <p className="text-[10px] font-mono text-slate-500 mt-0.5">
+                      <p className="text-xs font-mono text-slate-500 mt-0.5">
                         JPTL PROPERTY MANAGEMENT VERIFICATION SYSTEM &bull; REF #{String(doc.id || doc._id || '').toUpperCase()}
                       </p>
                     </div>
                     <div className="text-right">
-                      <span className="text-[10px] font-mono text-slate-400 block uppercase">Document Category</span>
+                      <span className="text-xs font-mono text-slate-400 block uppercase">Document Category</span>
                       <span className="text-xs font-mono font-bold text-slate-800">{doc.type}</span>
                     </div>
                   </div>
@@ -404,19 +404,19 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
                   {/* Document Body */}
                   <div className="space-y-4 font-mono text-xs text-slate-700">
                     <div className="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
-                      <div className="flex justify-between border-b border-slate-200 pb-1 text-[11px]">
+                      <div className="flex justify-between border-b border-slate-200 pb-1 text-xs">
                         <span className="text-slate-500">Document Name:</span>
                         <strong className="font-bold">{doc.name}</strong>
                       </div>
-                      <div className="flex justify-between border-b border-slate-200 pb-1 text-[11px]">
+                      <div className="flex justify-between border-b border-slate-200 pb-1 text-xs">
                         <span className="text-slate-500">Resident / Policy Holder:</span>
                         <strong>{doc.tenantName}</strong>
                       </div>
-                      <div className="flex justify-between border-b border-slate-200 pb-1 text-[11px]">
+                      <div className="flex justify-between border-b border-slate-200 pb-1 text-xs">
                         <span className="text-slate-500">Assigned Residence:</span>
                         <strong>{doc.unitLabel} &bull; {doc.propertyName}</strong>
                       </div>
-                      <div className="flex justify-between text-[11px]">
+                      <div className="flex justify-between text-xs">
                         <span className="text-slate-500">Filing Date:</span>
                         <strong>{doc.date}</strong>
                       </div>
@@ -432,7 +432,7 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
                     <div className="pt-4 flex items-center justify-between">
                       <div className="p-3 rounded-xl border-2 border-dashed border-amber-300 bg-amber-50/50 flex items-center gap-2">
                         <AlertTriangle className="w-4 h-4 text-amber-600" />
-                        <span className="text-[10px] font-bold text-amber-700 uppercase">
+                        <span className="text-xs font-bold text-amber-700 uppercase">
                           FILE NOT YET UPLOADED — PENDING SUBMISSION
                         </span>
                       </div>
@@ -448,7 +448,7 @@ This document is digitally registered in the JPTL Resident Compliance Vault.
               <div className="w-full pt-4 mt-2 border-t border-slate-200/80 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white/90 dark:bg-[#0C0F1D]/90 backdrop-blur-md p-4 rounded-2xl border shrink-0">
                 <div className="text-xs font-mono text-slate-500 dark:text-slate-400 flex items-center gap-2">
                   <span>Verification Status:</span>
-                  <strong className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                  <strong className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
                     doc.status === 'Verified' || doc.status === 'Active' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' :
                     doc.status === 'Rejected' ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20' :
                     'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'

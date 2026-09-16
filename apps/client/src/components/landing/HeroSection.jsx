@@ -42,7 +42,7 @@ export const HeroSection = ({ onOpenLogin, theme }) => {
           <div style={stagger(80)}>
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/70 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/10 backdrop-blur-lg shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="font-mono text-[11px] tracking-wide text-slate-600 dark:text-slate-400">
+              <span className="font-mono text-xs tracking-wide text-slate-600 dark:text-slate-400">
                 Smart Property Management • Resident &amp; Landlord Portal
               </span>
             </div>
@@ -107,7 +107,7 @@ export const HeroSection = ({ onOpenLogin, theme }) => {
                 <div className="w-2.5 h-2.5 rounded-full bg-emerald-400/70" />
               </div>
               <div className="flex-1 flex justify-center">
-                <div className="px-4 py-1 rounded-md bg-slate-100 dark:bg-white/[0.05] text-[11px] font-mono text-slate-400 dark:text-slate-500 w-56 text-center truncate">
+                <div className="px-4 py-1 rounded-md bg-slate-100 dark:bg-white/[0.05] text-xs font-mono text-slate-400 dark:text-slate-500 w-56 text-center truncate">
                   app.jptl.io/system-dashboard
                 </div>
               </div>
@@ -137,7 +137,7 @@ export const HeroSection = ({ onOpenLogin, theme }) => {
                     <div className="font-grotesk font-bold text-base text-slate-900 dark:text-white leading-none">
                       {stat.value}
                     </div>
-                    <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 font-sans">
+                    <div className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-sans">
                       {stat.label}
                     </div>
                   </div>
@@ -155,11 +155,11 @@ export const HeroSection = ({ onOpenLogin, theme }) => {
                     className="flex items-center justify-between p-3 rounded-xl bg-slate-50/60 dark:bg-white/[0.02] border border-slate-200/40 dark:border-white/[0.04] group cursor-default"
                   >
                     <div className="flex items-center gap-3 min-w-0">
-                      <span className="font-mono text-[11px] text-slate-400 dark:text-slate-500 shrink-0">{ticket.id}</span>
+                      <span className="font-mono text-xs text-slate-400 dark:text-slate-500 shrink-0">{ticket.id}</span>
                       <span className="font-sans text-sm text-slate-700 dark:text-slate-300 truncate">{ticket.title}</span>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                      <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-semibold border ${ticket.statusColor}`}>
+                      <span className={`px-2 py-0.5 rounded-md text-xs font-mono font-semibold border ${ticket.statusColor}`}>
                         {ticket.status}
                       </span>
                       <ChevronRight className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 opacity-0 group-hover:opacity-100" style={{ transition: 'opacity 150ms ease' }} />

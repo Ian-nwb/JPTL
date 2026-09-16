@@ -81,19 +81,19 @@ export const TicketsTab = ({
     switch (priority) {
       case 'high':
         return (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 flex items-center gap-1">
+          <span className="px-2 py-0.5 rounded-full text-xs font-bold font-mono bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 flex items-center gap-1">
             <ShieldAlert className="w-3 h-3" /> High
           </span>
         );
       case 'medium':
         return (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1">
+          <span className="px-2 py-0.5 rounded-full text-xs font-bold font-mono bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-1">
             <AlertTriangle className="w-3 h-3" /> Medium
           </span>
         );
       default:
         return (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20">
+          <span className="px-2 py-0.5 rounded-full text-xs font-bold font-mono bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20">
             Low Priority
           </span>
         );
@@ -143,7 +143,7 @@ export const TicketsTab = ({
               <button
                 key={filter}
                 onClick={() => setStatusFilter(filter)}
-                className={`px-3 py-1.5 rounded-lg font-mono text-[11px] capitalize btn-press transition-all ${
+                className={`px-3 py-1.5 rounded-lg font-mono text-xs capitalize btn-press transition-all ${
                   statusFilter === filter
                     ? 'bg-indigo-600 text-white shadow-xs font-bold'
                     : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -182,7 +182,7 @@ export const TicketsTab = ({
               <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                    <span className="text-xs font-mono px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                       {t.id}
                     </span>
                     {getPriorityBadge(t.priority)}
@@ -275,7 +275,7 @@ export const TicketsTab = ({
 
                   {/* Status Switcher */}
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">Status:</span>
+                    <span className="text-xs text-slate-400 font-mono hidden sm:inline">Status:</span>
                     <select
                       value={t.status}
                       onChange={(e) => handleUpdateStatus(t.id, e.target.value)}
@@ -292,16 +292,16 @@ export const TicketsTab = ({
               {/* Status History Logs */}
               {t.statusHistory && t.statusHistory.length > 0 && (
                 <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60">
-                  <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
+                  <span className="text-xs font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
                     Technician & Activity Log
                   </span>
                   <div className="space-y-1">
                     {t.statusHistory.slice(-2).map((h, i) => (
-                      <div key={i} className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center justify-between gap-2">
+                      <div key={i} className="text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between gap-2">
                         <span>
                           <strong className="text-slate-700 dark:text-slate-300">{h.changedBy}</strong> updated status to <span className="font-mono text-indigo-500 font-semibold">{h.status}</span> {h.note ? `— "${h.note}"` : ''}
                         </span>
-                        <span className="font-mono text-[10px] text-slate-400 shrink-0">
+                        <span className="font-mono text-xs text-slate-400 shrink-0">
                           {new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                         </span>
                       </div>

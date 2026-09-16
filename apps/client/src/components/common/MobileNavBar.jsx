@@ -44,13 +44,13 @@ export const MobileNavBar = ({
               <div className="relative">
                 <Icon className={`w-5 h-5 transition-transform duration-150 ${isActive ? 'scale-110' : ''}`} />
                 {Boolean(item.badge && item.badge > 0) && (
-                  <span className="absolute -top-1 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-[10px] font-bold font-mono flex items-center justify-center ring-2 ring-white dark:ring-[#0c101c]">
+                  <span className="absolute -top-1 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-rose-500 text-white text-xs font-bold font-mono flex items-center justify-center ring-2 ring-white dark:ring-[#0c101c]">
                     {item.badge}
                   </span>
                 )}
               </div>
 
-              <span className="text-[10px] font-grotesk tracking-tight mt-1 leading-none line-clamp-1">
+              <span className="text-xs font-grotesk tracking-tight mt-1 leading-none line-clamp-1">
                 {item.label}
               </span>
             </button>
@@ -70,7 +70,7 @@ export const MobileNavBar = ({
               <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-indigo-500 ring-2 ring-white dark:ring-[#0c101c]" />
             )}
           </div>
-          <span className="text-[10px] font-grotesk tracking-tight mt-1 leading-none">
+          <span className="text-xs font-grotesk tracking-tight mt-1 leading-none">
             More
           </span>
         </button>

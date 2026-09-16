@@ -99,7 +99,7 @@ export const PaymentsTab = ({ payments: initialPayments = [], searchQuery = '' }
       {/* Financial Summary Top Bar */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <div className="p-4 rounded-2xl apple-glass border border-slate-200 dark:border-slate-800/80 top-shade">
-          <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
+          <span className="text-xs font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
             Total Paid (Current Cycle)
           </span>
           <div className="text-2xl font-extrabold font-grotesk text-emerald-600 dark:text-emerald-400">
@@ -108,7 +108,7 @@ export const PaymentsTab = ({ payments: initialPayments = [], searchQuery = '' }
         </div>
 
         <div className="p-4 rounded-2xl apple-glass border border-slate-200 dark:border-slate-800/80 top-shade">
-          <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
+          <span className="text-xs font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
             Outstanding / Pending
           </span>
           <div className="text-2xl font-extrabold font-grotesk text-amber-600 dark:text-amber-400">
@@ -118,7 +118,7 @@ export const PaymentsTab = ({ payments: initialPayments = [], searchQuery = '' }
 
         <div className="p-4 rounded-2xl apple-glass border border-slate-200 dark:border-slate-800/80 top-shade flex items-center justify-between">
           <div>
-            <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
+            <span className="text-xs font-mono text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-1">
               Automated Receipts
             </span>
             <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
@@ -132,7 +132,7 @@ export const PaymentsTab = ({ payments: initialPayments = [], searchQuery = '' }
             title="Export CSV"
           >
             <Download className="w-4 h-4" />
-            <span className="hidden sm:inline text-[11px] font-mono">Export CSV</span>
+            <span className="hidden sm:inline text-xs font-mono">Export CSV</span>
           </button>
         </div>
       </div>
@@ -154,7 +154,7 @@ export const PaymentsTab = ({ payments: initialPayments = [], searchQuery = '' }
             <button
               key={tab}
               onClick={() => setStatusFilter(tab)}
-              className={`px-3 py-1 rounded-lg capitalize font-mono text-[11px] btn-press transition-all ${
+              className={`px-3 py-1 rounded-lg capitalize font-mono text-xs btn-press transition-all ${
                 statusFilter === tab
                   ? 'bg-indigo-600 text-white font-bold shadow-xs'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -195,7 +195,7 @@ export const PaymentsTab = ({ payments: initialPayments = [], searchQuery = '' }
                 <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-3">
                   <span>Due Date: <strong className="text-slate-700 dark:text-slate-300 font-mono">{p.dueDate || '—'}</strong></span>
                   {p.mockTransactionId && (
-                    <span className="font-mono text-[11px] text-indigo-500">
+                    <span className="font-mono text-xs text-indigo-500">
                       Ref: {p.mockTransactionId}
                     </span>
                   )}

@@ -135,14 +135,14 @@ export const TenantPaymentsTab = ({
         {/* Security & Escrow Card */}
         <div className="space-y-4">
           <div className="p-5 rounded-2xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-1">
-            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Security Deposit Held</span>
+            <span className="text-xs font-mono text-slate-400 uppercase tracking-wider block">Security Deposit Held</span>
             <div className="text-2xl font-extrabold font-grotesk text-indigo-500">${depositAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">FDIC Escrow Account Protected</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">FDIC Escrow Account Protected</p>
           </div>
 
           <div className="p-5 rounded-2xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 flex items-center justify-between">
             <div>
-              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block mb-1">Auto-Pay Schedule</span>
+              <span className="text-xs font-mono text-slate-400 uppercase tracking-wider block mb-1">Auto-Pay Schedule</span>
               <span className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4 text-emerald-500" /> {autoPayEnabled ? 'Active (1st of month)' : 'Disabled'}
               </span>
@@ -183,7 +183,7 @@ export const TenantPaymentsTab = ({
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-slate-900 dark:text-white font-grotesk">{tx.period}</span>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                    <span className="px-2 py-0.5 rounded-full text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Cleared
                     </span>
                   </div>
@@ -198,7 +198,7 @@ export const TenantPaymentsTab = ({
 
                 <div className="flex items-center gap-6 text-xs font-mono">
                   <div className="text-right">
-                    <span className="text-slate-400 text-[10px] uppercase tracking-wider block">Amount Paid</span>
+                    <span className="text-slate-400 text-xs uppercase tracking-wider block">Amount Paid</span>
                     <strong className="text-emerald-600 dark:text-emerald-400 text-sm">${tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</strong>
                   </div>
 

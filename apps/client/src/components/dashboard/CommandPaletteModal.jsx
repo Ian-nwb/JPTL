@@ -132,11 +132,11 @@ export const CommandPaletteModal = ({
                     <div>
                       <div className="text-xs font-bold font-grotesk flex items-center gap-2">
                         <span>{item.title}</span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-500 uppercase">
+                        <span className="text-xs font-mono px-1.5 py-0.2 rounded bg-slate-200/60 dark:bg-slate-800 text-slate-500 uppercase">
                           {item.type}
                         </span>
                       </div>
-                      <p className="text-[11px] text-slate-400 dark:text-slate-500">{item.subtitle}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">{item.subtitle}</p>
                     </div>
                   </div>
 
@@ -148,7 +148,7 @@ export const CommandPaletteModal = ({
         </div>
 
         {/* Footer shortcuts helper */}
-        <div className="px-4 py-2 bg-slate-50 dark:bg-[#080B14] border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-[11px] font-mono text-slate-400">
+        <div className="px-4 py-2 bg-slate-50 dark:bg-[#080B14] border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-mono text-slate-400">
           <div className="flex items-center gap-3">
             <span><strong className="text-slate-600 dark:text-slate-300">↑↓</strong> Navigate</span>
             <span><strong className="text-slate-600 dark:text-slate-300">↵</strong> Select</span>

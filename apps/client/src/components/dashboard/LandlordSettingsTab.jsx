@@ -489,11 +489,11 @@ export const LandlordSettingsTab = ({
                 <h3 className="text-sm font-bold font-grotesk text-slate-900 dark:text-white">
                   {user?.name || [user?.firstName, user?.middleName, user?.lastName].filter(Boolean).join(' ') || landlordProfile.name || [landlordProfile.firstName, landlordProfile.middleName, landlordProfile.lastName].filter(Boolean).join(' ') || 'Landlord'}
                 </h3>
-                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">Property Owner & Landlord</span>
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">Property Owner & Landlord</span>
               </div>
 
               {avatarError && (
-                <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] max-w-[220px]">
+                <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs max-w-[220px]">
                   {avatarError}
                 </div>
               )}
@@ -515,7 +515,7 @@ export const LandlordSettingsTab = ({
                       setAvatarLoading(false);
                     }
                   }}
-                  className="text-[11px] font-mono text-rose-500 hover:underline disabled:opacity-50"
+                  className="text-xs font-mono text-rose-500 hover:underline disabled:opacity-50"
                 >
                   Remove custom photo
                 </button>
@@ -528,28 +528,28 @@ export const LandlordSettingsTab = ({
                 <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <Building2 className="w-4 h-4 text-indigo-500" /> Portfolio Scope & Managed Units
                 </h3>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-mono font-bold">
+                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs font-mono font-bold">
                   Verified Landlord
                 </span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 pt-1">
                 <div className="p-3 rounded-xl bg-white dark:bg-[#10131F] border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] font-mono text-slate-400 block uppercase">Buildings</span>
+                  <span className="text-xs font-mono text-slate-400 block uppercase">Buildings</span>
                   <strong className="text-lg font-bold font-grotesk text-slate-900 dark:text-white">
                     {properties?.length || 3} Properties
                   </strong>
                 </div>
 
                 <div className="p-3 rounded-xl bg-white dark:bg-[#10131F] border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] font-mono text-slate-400 block uppercase">Total Units</span>
+                  <span className="text-xs font-mono text-slate-400 block uppercase">Total Units</span>
                   <strong className="text-lg font-bold font-grotesk text-slate-900 dark:text-white">
                     {units?.length || 18} Units
                   </strong>
                 </div>
 
                 <div className="p-3 rounded-xl bg-white dark:bg-[#10131F] border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] font-mono text-slate-400 block uppercase">Active Tenants</span>
+                  <span className="text-xs font-mono text-slate-400 block uppercase">Active Tenants</span>
                   <strong className="text-lg font-bold font-grotesk text-slate-900 dark:text-white">
                     {tenants?.length || 14} Residents
                   </strong>
@@ -693,12 +693,12 @@ export const LandlordSettingsTab = ({
                     className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
                   />
                   {passwordStatus.error && (
-                    <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px]">
+                    <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs">
                       {passwordStatus.error}
                     </div>
                   )}
                   {passwordStatus.success && (
-                    <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px]">
+                    <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs">
                       {passwordStatus.success}
                     </div>
                   )}
@@ -720,11 +720,11 @@ export const LandlordSettingsTab = ({
                     <strong className="text-slate-900 dark:text-white font-grotesk text-sm flex items-center gap-1.5">
                       <Smartphone className="w-4 h-4 text-indigo-500" /> Two-Factor Authentication (2FA)
                     </strong>
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20">
+                    <span className="px-2 py-0.5 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-600 border border-amber-500/20">
                       Optional
                     </span>
                   </div>
-                  <p className="text-slate-500 text-[11px] leading-relaxed">
+                  <p className="text-slate-500 text-xs leading-relaxed">
                     Protect your property financial ledgers and merchant accounts with TOTP authenticator app verification.
                   </p>
                 </div>
@@ -775,7 +775,7 @@ export const LandlordSettingsTab = ({
 
             {/* Access Codes */}
             <div className="space-y-3">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 block">
                 Access Codes (Visible to Tenants)
               </span>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-sans">
@@ -830,13 +830,13 @@ export const LandlordSettingsTab = ({
             {/* Building Rules */}
             <div className="space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
                   <BookOpen className="w-3 h-3" /> Building Rules &amp; Policies
                 </span>
                 <button
                   type="button"
                   onClick={() => setBuildingRules((r) => [...r, ''])}
-                  className="text-[10px] font-mono text-indigo-500 hover:underline flex items-center gap-1"
+                  className="text-xs font-mono text-indigo-500 hover:underline flex items-center gap-1"
                 >
                   <Plus className="w-3 h-3" /> Add Rule
                 </button>
@@ -844,7 +844,7 @@ export const LandlordSettingsTab = ({
               <div className="space-y-2">
                 {buildingRules.map((rule, i) => (
                   <div key={i} className="flex items-start gap-2">
-                    <span className="shrink-0 mt-2.5 w-5 h-5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold font-mono flex items-center justify-center">
+                    <span className="shrink-0 mt-2.5 w-5 h-5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-bold font-mono flex items-center justify-center">
                       {i + 1}
                     </span>
                     <input
@@ -870,7 +870,7 @@ export const LandlordSettingsTab = ({
                   </div>
                 ))}
               </div>
-              <p className="text-[11px] text-slate-400 font-mono">
+              <p className="text-xs text-slate-400 font-mono">
                 Rules are visible to all tenants on their Overview dashboard.
               </p>
             </div>
@@ -884,15 +884,15 @@ export const LandlordSettingsTab = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs font-mono">
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800">
-                <span className="text-slate-400 block text-[10px] uppercase">Active Properties</span>
+                <span className="text-slate-400 block text-xs uppercase">Active Properties</span>
                 <strong className="text-xl font-extrabold font-grotesk text-slate-900 dark:text-white">
                   {properties?.length || 3} Buildings
                 </strong>
-                <span className="text-[11px] text-slate-500 block mt-1">Multi-property routing active</span>
+                <span className="text-xs text-slate-500 block mt-1">Multi-property routing active</span>
               </div>
 
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800">
-                <span className="text-slate-400 block text-[10px] uppercase">Default Currency</span>
+                <span className="text-slate-400 block text-xs uppercase">Default Currency</span>
                 <select
                   value={defaultCurrency}
                   onChange={(e) => setDefaultCurrency(e.target.value)}
@@ -905,7 +905,7 @@ export const LandlordSettingsTab = ({
               </div>
 
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800">
-                <span className="text-slate-400 block text-[10px] uppercase">Primary Timezone</span>
+                <span className="text-slate-400 block text-xs uppercase">Primary Timezone</span>
                 <select
                   value={defaultTimezone}
                   onChange={(e) => setDefaultTimezone(e.target.value)}
@@ -938,11 +938,11 @@ export const LandlordSettingsTab = ({
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] text-center space-y-3">
                   <div className="w-32 h-32 mx-auto bg-white p-2 rounded-xl flex items-center justify-center border border-slate-300">
                     {/* Simulated QR Code */}
-                    <div className="w-full h-full border-2 border-dashed border-slate-800 flex items-center justify-center text-[10px] font-mono text-slate-800 font-bold">
+                    <div className="w-full h-full border-2 border-dashed border-slate-800 flex items-center justify-center text-xs font-mono text-slate-800 font-bold">
                       [QR CODE SCAN]
                     </div>
                   </div>
-                  <span className="text-[11px] font-mono text-slate-500 block">
+                  <span className="text-xs font-mono text-slate-500 block">
                     Scan with Google Authenticator or 1Password
                   </span>
                 </div>
@@ -995,7 +995,7 @@ export const LandlordSettingsTab = ({
                 <div key={i} className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
                     <span className="text-indigo-600 dark:text-indigo-400 font-bold font-grotesk text-sm block">{v.category} Category</span>
-                    <span className="text-slate-500 text-[11px]">Assigned Vendor: <strong>{v.vendor}</strong> ({v.contact})</span>
+                    <span className="text-slate-500 text-xs">Assigned Vendor: <strong>{v.vendor}</strong> ({v.contact})</span>
                   </div>
 
                   <div className="flex items-center gap-3">
@@ -1031,47 +1031,47 @@ export const LandlordSettingsTab = ({
 
             <div className="grid grid-cols-1 sm:grid-cols-4 gap-3 font-mono text-xs">
               <div className="p-3.5 rounded-2xl bg-rose-500/10 border border-rose-500/20 space-y-1">
-                <span className="text-rose-600 font-bold block uppercase text-[10px]">Emergency SLA</span>
+                <span className="text-rose-600 font-bold block uppercase text-xs">Emergency SLA</span>
                 <input
                   type="text"
                   value={slaSettings.emergencyHours}
                   onChange={(e) => setSlaSettings((s) => ({ ...s, emergencyHours: e.target.value }))}
                   className="w-full bg-white dark:bg-[#10131F] border border-rose-300 dark:border-rose-800 rounded-xl px-2.5 py-1 text-slate-900 dark:text-white font-bold"
                 />
-                <span className="text-[10px] text-slate-500 block">Hours to Acknowledge</span>
+                <span className="text-xs text-slate-500 block">Hours to Acknowledge</span>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-1">
-                <span className="text-amber-600 font-bold block uppercase text-[10px]">High Priority SLA</span>
+                <span className="text-amber-600 font-bold block uppercase text-xs">High Priority SLA</span>
                 <input
                   type="text"
                   value={slaSettings.highHours}
                   onChange={(e) => setSlaSettings((s) => ({ ...s, highHours: e.target.value }))}
                   className="w-full bg-white dark:bg-[#10131F] border border-amber-300 dark:border-amber-800 rounded-xl px-2.5 py-1 text-slate-900 dark:text-white font-bold"
                 />
-                <span className="text-[10px] text-slate-500 block">Hours to Acknowledge</span>
+                <span className="text-xs text-slate-500 block">Hours to Acknowledge</span>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 space-y-1">
-                <span className="text-indigo-600 font-bold block uppercase text-[10px]">Medium Priority SLA</span>
+                <span className="text-indigo-600 font-bold block uppercase text-xs">Medium Priority SLA</span>
                 <input
                   type="text"
                   value={slaSettings.mediumHours}
                   onChange={(e) => setSlaSettings((s) => ({ ...s, mediumHours: e.target.value }))}
                   className="w-full bg-white dark:bg-[#10131F] border border-indigo-300 dark:border-indigo-800 rounded-xl px-2.5 py-1 text-slate-900 dark:text-white font-bold"
                 />
-                <span className="text-[10px] text-slate-500 block">Hours to Acknowledge</span>
+                <span className="text-xs text-slate-500 block">Hours to Acknowledge</span>
               </div>
 
               <div className="p-3.5 rounded-2xl bg-slate-500/10 border border-slate-500/20 space-y-1">
-                <span className="text-slate-600 dark:text-slate-400 font-bold block uppercase text-[10px]">Low Priority SLA</span>
+                <span className="text-slate-600 dark:text-slate-400 font-bold block uppercase text-xs">Low Priority SLA</span>
                 <input
                   type="text"
                   value={slaSettings.lowHours}
                   onChange={(e) => setSlaSettings((s) => ({ ...s, lowHours: e.target.value }))}
                   className="w-full bg-white dark:bg-[#10131F] border border-slate-300 dark:border-slate-800 rounded-xl px-2.5 py-1 text-slate-900 dark:text-white font-bold"
                 />
-                <span className="text-[10px] text-slate-500 block">Hours to Acknowledge</span>
+                <span className="text-xs text-slate-500 block">Hours to Acknowledge</span>
               </div>
             </div>
 
@@ -1079,7 +1079,7 @@ export const LandlordSettingsTab = ({
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
               <div>
                 <strong className="text-slate-900 dark:text-white block font-grotesk">Require My Approval Before Vendor Dispatch</strong>
-                <span className="text-slate-500 text-[11px]">Vendors cannot start non-emergency jobs without your sign-off.</span>
+                <span className="text-slate-500 text-xs">Vendors cannot start non-emergency jobs without your sign-off.</span>
               </div>
               <input
                 type="checkbox"
@@ -1164,13 +1164,13 @@ export const LandlordSettingsTab = ({
                   <strong className="text-slate-900 dark:text-white font-grotesk text-sm flex items-center gap-1.5">
                     💳 Stripe Connect
                   </strong>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-bold">
                     Connected
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-500 font-sans">Direct card & ACH rent deposit to your bank.</p>
+                <p className="text-xs text-slate-500 font-sans">Direct card & ACH rent deposit to your bank.</p>
                 <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-slate-500 text-[10px]">Test Mode</span>
+                  <span className="text-slate-500 text-xs">Test Mode</span>
                   <input
                     type="checkbox"
                     checked={gateways.stripe.testMode}
@@ -1186,13 +1186,13 @@ export const LandlordSettingsTab = ({
                   <strong className="text-slate-900 dark:text-white font-grotesk text-sm flex items-center gap-1.5">
                     🌐 PayMongo
                   </strong>
-                  <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-[10px] font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 text-xs font-bold">
                     Sandbox
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-500 font-sans">Online banking & regional e-wallets.</p>
+                <p className="text-xs text-slate-500 font-sans">Online banking & regional e-wallets.</p>
                 <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-slate-500 text-[10px]">Test Mode</span>
+                  <span className="text-slate-500 text-xs">Test Mode</span>
                   <input
                     type="checkbox"
                     checked={gateways.paymongo.testMode}
@@ -1208,14 +1208,14 @@ export const LandlordSettingsTab = ({
                   <strong className="text-slate-900 dark:text-white font-grotesk text-sm flex items-center gap-1.5">
                     📱 GCash QR
                   </strong>
-                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-bold">
                     Active
                   </span>
                 </div>
-                <p className="text-[11px] text-slate-500 font-sans">Instant mobile QR rent deposits.</p>
+                <p className="text-xs text-slate-500 font-sans">Instant mobile QR rent deposits.</p>
                 <div className="pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                  <span className="text-slate-500 text-[10px]">Merchant ID</span>
-                  <strong className="text-indigo-600 text-[10px]">{gateways.gcash.merchantId}</strong>
+                  <span className="text-slate-500 text-xs">Merchant ID</span>
+                  <strong className="text-indigo-600 text-xs">{gateways.gcash.merchantId}</strong>
                 </div>
               </div>
 
@@ -1244,7 +1244,7 @@ export const LandlordSettingsTab = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <strong className="text-slate-900 dark:text-white block font-grotesk">New Maintenance Requests</strong>
-                  <span className="text-slate-500 text-[11px]">Instant notification when a tenant logs a repair issue.</span>
+                  <span className="text-slate-500 text-xs">Instant notification when a tenant logs a repair issue.</span>
                 </div>
                 <input
                   type="checkbox"
@@ -1257,7 +1257,7 @@ export const LandlordSettingsTab = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <strong className="text-slate-900 dark:text-white block font-grotesk">Overdue Rent Payments</strong>
-                  <span className="text-slate-500 text-[11px]">Get notified when rent passes the grace period deadline.</span>
+                  <span className="text-slate-500 text-xs">Get notified when rent passes the grace period deadline.</span>
                 </div>
                 <input
                   type="checkbox"
@@ -1270,7 +1270,7 @@ export const LandlordSettingsTab = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <strong className="text-slate-900 dark:text-white block font-grotesk">Lease Expiration Reminders</strong>
-                  <span className="text-slate-500 text-[11px]">Advance notice before a tenant's lease is about to expire.</span>
+                  <span className="text-slate-500 text-xs">Advance notice before a tenant's lease is about to expire.</span>
                 </div>
                 <input
                   type="checkbox"
@@ -1283,7 +1283,7 @@ export const LandlordSettingsTab = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <strong className="text-slate-900 dark:text-white block font-grotesk">Daily Property Summary Email</strong>
-                  <span className="text-slate-500 text-[11px]">Morning digest of active leases, open tickets, and incoming rent.</span>
+                  <span className="text-slate-500 text-xs">Morning digest of active leases, open tickets, and incoming rent.</span>
                 </div>
                 <input
                   type="checkbox"
@@ -1296,7 +1296,7 @@ export const LandlordSettingsTab = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono">
                 <div>
                   <strong className="text-slate-900 dark:text-white block font-grotesk text-sm">Ticket Escalation Threshold</strong>
-                  <span className="text-slate-500 text-[11px]">High-priority alert if a maintenance request remains unresolved.</span>
+                  <span className="text-slate-500 text-xs">High-priority alert if a maintenance request remains unresolved.</span>
                 </div>
                 <select
                   value={escalationHours}
@@ -1350,9 +1350,9 @@ export const LandlordSettingsTab = ({
                 <div key={log.id} className="p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 hover:bg-slate-50 dark:hover:bg-slate-900/40">
                   <div>
                     <strong className="text-slate-900 dark:text-white font-grotesk text-xs block">{log.action}: <span className="text-indigo-600 dark:text-indigo-400">{log.target}</span></strong>
-                    <span className="text-[10px] text-slate-500">By {log.user} &bull; IP: {log.ip}</span>
+                    <span className="text-xs text-slate-500">By {log.user} &bull; IP: {log.ip}</span>
                   </div>
-                  <span className="text-[10px] text-slate-400 shrink-0">{log.timestamp}</span>
+                  <span className="text-xs text-slate-400 shrink-0">{log.timestamp}</span>
                 </div>
               ))}
             </div>
@@ -1381,7 +1381,7 @@ export const LandlordSettingsTab = ({
               {/* Session Timeout */}
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800 space-y-2">
                 <strong className="text-slate-900 dark:text-white font-grotesk text-sm block">Session Inactivity Timeout</strong>
-                <span className="text-slate-500 text-[11px] block">Auto-logout after a period of inactivity.</span>
+                <span className="text-slate-500 text-xs block">Auto-logout after a period of inactivity.</span>
                 <select
                   value={sessionTimeoutMins}
                   onChange={(e) => setSessionTimeoutMins(e.target.value)}
@@ -1398,11 +1398,11 @@ export const LandlordSettingsTab = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800 space-y-3">
                 <div className="flex items-center justify-between">
                   <strong className="text-slate-900 dark:text-white font-grotesk text-sm block">Property Data Backup</strong>
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-[10px] font-bold">
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 text-xs font-bold">
                     Active
                   </span>
                 </div>
-                <span className="text-slate-500 text-[11px] block">Last backup: <strong>{lastBackupTime}</strong></span>
+                <span className="text-slate-500 text-xs block">Last backup: <strong>{lastBackupTime}</strong></span>
                 
                 <button
                   type="button"

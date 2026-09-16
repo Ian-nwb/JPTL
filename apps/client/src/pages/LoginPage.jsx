@@ -148,11 +148,11 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
           <div className="grid grid-cols-2 gap-4 pt-2">
             <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-xl shadow-xl">
               <span className="text-2xl sm:text-3xl font-extrabold font-grotesk text-white block tracking-tight">2,480+</span>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Managed Units</span>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Managed Units</span>
             </div>
             <div className="p-4 rounded-2xl bg-white/[0.04] border border-white/[0.08] backdrop-blur-xl shadow-xl">
               <span className="text-2xl sm:text-3xl font-extrabold font-grotesk text-white block tracking-tight">98.4%</span>
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">Occupancy Rate</span>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">Occupancy Rate</span>
             </div>
           </div>
         </div>
@@ -223,7 +223,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
                 } rounded-2xl px-4 py-3 text-xs sm:text-sm text-slate-900 dark:text-white focus:outline-none shadow-sm`}
               />
               {touched.email && errors.email && (
-                <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+                <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3 h-3 shrink-0" />
                   <span>{errors.email}</span>
                 </p>
@@ -239,7 +239,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
                 <button
                   type="button"
                   onClick={() => onNavigate('/forgot-password')}
-                  className="text-[11px] text-indigo-600 dark:text-indigo-400 hover:underline font-medium focus:outline-none"
+                  className="text-xs text-indigo-600 dark:text-indigo-400 hover:underline font-medium focus:outline-none"
                 >
                   Forgot password?
                 </button>
@@ -269,7 +269,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
                 </button>
               </div>
               {touched.password && errors.password && (
-                <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+                <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
                   <AlertCircle className="w-3 h-3 shrink-0" />
                   <span>{errors.password}</span>
                 </p>
@@ -310,7 +310,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
               Create one now
             </button>
           </div>
-          <div className="text-[11px] text-slate-400 dark:text-slate-500">
+          <div className="text-xs text-slate-400 dark:text-slate-500">
             Resident access is granted by your landlord or property management office.
           </div>
         </div>

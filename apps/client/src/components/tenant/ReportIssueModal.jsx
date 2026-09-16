@@ -175,7 +175,7 @@ export const ReportIssueModal = ({
                   type="button"
                   key={p.key}
                   onClick={() => setPriority(p.key)}
-                  className={`p-2 rounded-xl border text-[11px] font-semibold btn-press transition-all ${
+                  className={`p-2 rounded-xl border text-xs font-semibold btn-press transition-all ${
                     priority === p.key
                       ? 'border-indigo-500 bg-indigo-500/10 text-indigo-600 dark:text-indigo-400'
                       : 'border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400'
@@ -243,7 +243,7 @@ export const ReportIssueModal = ({
               <button
                 type="button"
                 onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
-                className="px-3 py-1 rounded-lg bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 font-mono text-[11px] btn-press inline-flex items-center gap-1"
+                className="px-3 py-1 rounded-lg bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20 font-mono text-xs btn-press inline-flex items-center gap-1"
               >
                 <Upload className="w-3 h-3" /> Select Images
               </button>
@@ -262,7 +262,7 @@ export const ReportIssueModal = ({
                       alt={file.name}
                       className="w-full h-20 object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-between p-2 text-white text-[10px]">
+                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-between p-2 text-white text-xs">
                       <span className="truncate max-w-[80px] font-mono">{file.name}</span>
                       <button
                         type="button"

@@ -363,12 +363,12 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
           {/* LIVE CONTEXT CARDS ON LEFT PANEL */}
           {step === 1 && (
             <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md text-xs space-y-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-300 block">Plan Capability Summary</span>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-300 block">Plan Capability Summary</span>
               <div className="flex items-center justify-between text-white font-semibold">
                 <span>Selected Plan:</span>
                 <span className="text-indigo-400 capitalize">{selectedTier} Tier</span>
               </div>
-              <p className="text-slate-300 text-[11px] leading-relaxed">
+              <p className="text-slate-300 text-xs leading-relaxed">
                 {selectedTier === 'pro' && 'Includes up to 25 properties, automated rent collection, & real-time analytics.'}
                 {selectedTier === 'starter' && 'Includes up to 3 properties & tenant self-service portal.'}
                 {selectedTier === 'enterprise' && 'Includes unlimited properties, custom API integrations, & SLA onboarding.'}
@@ -379,23 +379,23 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
           {step === 2 && (
             <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md text-xs space-y-2">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-300">Live Roster Preview</span>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-300">Live Roster Preview</span>
+                <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                   {tenantMembers.filter((m) => m.name.trim()).length} Members
                 </span>
               </div>
 
               <div className="space-y-1.5 pt-1">
                 {tenantMembers.length === 0 ? (
-                  <p className="text-slate-400 text-[11px] italic py-2">No members added yet.</p>
+                  <p className="text-slate-400 text-xs italic py-2">No members added yet.</p>
                 ) : (
                   tenantMembers.map((m, idx) => (
-                    <div key={m.id || idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-white/5 text-[11px]">
+                    <div key={m.id || idx} className="flex items-center justify-between p-2 rounded-xl bg-slate-900/60 border border-white/5 text-xs">
                       <div className="truncate pr-2">
                         <strong className="text-white block truncate">{m.name || [m.firstName, m.lastName].filter(Boolean).join(' ') || 'Unnamed Tenant'}</strong>
-                        <span className="text-slate-400 truncate block text-[10px]">{m.email || 'No email entered'}</span>
+                        <span className="text-slate-400 truncate block text-xs">{m.email || 'No email entered'}</span>
                       </div>
-                      <span className="text-indigo-300 font-mono text-[10px] shrink-0">
+                      <span className="text-indigo-300 font-mono text-xs shrink-0">
                         {m.unitId === 'pre_add_unassigned' ? 'Unassigned' : 'Assigned'}
                       </span>
                     </div>
@@ -407,10 +407,10 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
 
           {step === 3 && (
             <div className="p-4 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md text-xs space-y-2">
-              <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-indigo-300 block">Live Broadcast Preview</span>
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-indigo-300 block">Live Broadcast Preview</span>
               <div className="p-3 rounded-xl bg-slate-900/80 border border-white/10">
                 <strong className="text-white block font-bold mb-1">{announcementSubject || 'Announcement Subject'}</strong>
-                <p className="text-slate-300 text-[11px] line-clamp-3 leading-relaxed">{announcementBody || 'Message content preview...'}</p>
+                <p className="text-slate-300 text-xs line-clamp-3 leading-relaxed">{announcementBody || 'Message content preview...'}</p>
               </div>
             </div>
           )}
@@ -421,7 +421,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
                 <Check className="w-4 h-4" />
                 <span>Portal Ready for Liftoff</span>
               </div>
-              <p className="text-slate-300 text-[11px]">
+              <p className="text-slate-300 text-xs">
                 Your landlord account, initial tenant directory, and welcome broadcast are configured.
               </p>
             </div>
@@ -452,13 +452,13 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
                       : 'bg-white/20'
                   }`}
                 />
-                <span className="text-[10px] font-mono font-bold tracking-tight truncate hidden sm:inline">
+                <span className="text-xs font-mono font-bold tracking-tight truncate hidden sm:inline">
                   {b.num}. {b.label}
                 </span>
               </div>
             ))}
           </div>
-          <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-300 block">
+          <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-300 block">
             Step {step} of 4 &bull; {stepBreadcrumbs[step - 1].label}
           </span>
         </div>
@@ -484,13 +484,13 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono text-[9px] font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
+                    <span className="font-mono text-xs font-bold tracking-wider uppercase text-slate-500 dark:text-slate-400">
                       STARTER
                     </span>
                     <span className="w-2 h-2 rounded-full bg-slate-400 dark:bg-slate-500" />
                   </div>
                   <h3 className="text-lg font-bold font-grotesk mb-0.5">Starter</h3>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400 font-sans mb-3">For independent landlords</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 font-sans mb-3">For independent landlords</p>
                   <div className="text-3xl font-extrabold font-grotesk mb-3">$0 <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">/mo</span></div>
                   <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-6">Start managing your first properties with up to 3 properties & tenant portal.</p>
                 </div>
@@ -510,13 +510,13 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono text-[9px] font-bold tracking-wider uppercase text-orange-400">
+                    <span className="font-mono text-xs font-bold tracking-wider uppercase text-orange-400">
                       RECOMMENDED
                     </span>
                     <span className="w-2 h-2 rounded-full bg-orange-500" />
                   </div>
                   <h3 className="text-lg font-bold font-grotesk mb-0.5">Professional</h3>
-                  <p className="text-[11px] text-slate-600 dark:text-slate-400 font-sans mb-3">For growing portfolios</p>
+                  <p className="text-xs text-slate-600 dark:text-slate-400 font-sans mb-3">For growing portfolios</p>
                   <div className="text-3xl font-extrabold font-grotesk mb-3">$29 <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">/mo</span></div>
                   <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed mb-6">The operational backbone for landlords scaling past a handful of units.</p>
                 </div>
@@ -531,13 +531,13 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
               >
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <span className="font-mono text-[9px] font-bold tracking-wider uppercase text-emerald-500 dark:text-emerald-400">
+                    <span className="font-mono text-xs font-bold tracking-wider uppercase text-emerald-500 dark:text-emerald-400">
                       COMING SOON
                     </span>
                     <span className="w-2 h-2 rounded-full bg-emerald-500" />
                   </div>
                   <h3 className="text-lg font-bold font-grotesk text-slate-500 dark:text-slate-300 mb-0.5">Enterprise</h3>
-                  <p className="text-[11px] text-slate-400 dark:text-slate-500 font-sans mb-3">For property management firms</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500 font-sans mb-3">For property management firms</p>
                   <div className="text-2xl font-extrabold font-grotesk mb-3 text-slate-400 dark:text-slate-400">Coming soon</div>
                   <p className="text-xs text-slate-400 dark:text-slate-500 leading-relaxed mb-6">Multi-team administration, custom API integrations, & SLA onboarding.</p>
                 </div>
@@ -605,7 +605,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
             ) : (
               <>
                 {/* Column Headers */}
-                <div className="hidden lg:grid grid-cols-[1.1fr_0.9fr_1.1fr_1.4fr_1.4fr_auto] gap-2.5 px-3 text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                <div className="hidden lg:grid grid-cols-[1.1fr_0.9fr_1.1fr_1.4fr_1.4fr_auto] gap-2.5 px-3 text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                   <span>First Name</span>
                   <span>Middle Name</span>
                   <span>Last Name</span>
@@ -715,7 +715,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
           <div className="space-y-4 my-auto">
             <div className="p-6 rounded-3xl bg-white dark:bg-[#111625] border border-slate-200 dark:border-slate-800 space-y-4 shadow-xl">
               <div>
-                <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
                   Announcement Subject
                 </label>
                 <input
@@ -727,7 +727,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
               </div>
 
               <div>
-                <label className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
+                <label className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block mb-1.5">
                   Message Body
                 </label>
                 <textarea
@@ -738,7 +738,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
                 />
               </div>
 
-              <p className="text-[11px] text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5 font-medium">
+              <p className="text-xs text-indigo-600 dark:text-indigo-400 flex items-center gap-1.5 font-medium">
                 <span>📣 Will be pinned to your workspace announcement feed immediately.</span>
               </p>
             </div>
@@ -764,7 +764,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                 
                 <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#090C16] border border-slate-200 dark:border-slate-800 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Selected Plan</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Selected Plan</span>
                   <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <DollarSign className="w-3.5 h-3.5 text-indigo-500" />
                     <span className="capitalize">{selectedTier} Tier ({selectedTier === 'pro' ? '$29/mo' : selectedTier === 'starter' ? '$0/mo' : '$149/mo'})</span>
@@ -772,7 +772,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
                 </div>
 
                 <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-[#090C16] border border-slate-200 dark:border-slate-800 space-y-1">
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Tenants Configured</span>
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Tenants Configured</span>
                   <div className="font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                     <Users className="w-3.5 h-3.5 text-indigo-500" />
                     <span>{tenantMembers.filter((m) => m.name.trim()).length} Members Added</span>
@@ -783,7 +783,7 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
 
               {/* Added Tenant Roster Summary */}
               <div className="space-y-2">
-                <span className="text-[11px] font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">Configured Roster</span>
+                <span className="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider block">Configured Roster</span>
                 <div className="divide-y divide-slate-200 dark:divide-slate-800 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden bg-slate-50 dark:bg-[#090C16]">
                   {tenantMembers.filter((m) => (m.name?.trim() || m.firstName?.trim() || m.email?.trim())).length === 0 ? (
                     <div className="p-4 text-center text-xs text-slate-500 font-sans">
@@ -797,9 +797,9 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
                         <div key={m.id} className="p-3 flex items-center justify-between text-xs">
                           <div>
                             <strong className="text-slate-900 dark:text-white block font-bold">{displayName}</strong>
-                            <span className="text-slate-500 dark:text-slate-400 text-[11px]">{m.email}</span>
+                            <span className="text-slate-500 dark:text-slate-400 text-xs">{m.email}</span>
                           </div>
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30">
+                          <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30">
                             {unit ? `${unit.label} ($${unit.monthlyRent}/mo)` : 'Pre-added (Unassigned)'}
                           </span>
                         </div>

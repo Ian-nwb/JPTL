@@ -77,7 +77,7 @@ export const SubmitDocumentModal = ({
               <UploadCloud className="w-5 h-5" />
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-mono font-semibold">
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-mono font-semibold">
                 <ShieldCheck className="w-3 h-3" />
                 <span>Verification Upload</span>
               </div>
@@ -166,7 +166,7 @@ export const SubmitDocumentModal = ({
                       <strong className="text-slate-900 dark:text-white font-grotesk text-xs block truncate">
                         {selectedFile.name}
                       </strong>
-                      <span className="text-[10px] text-slate-500 font-mono">
+                      <span className="text-xs text-slate-500 font-mono">
                         {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB &bull; Selected
                       </span>
                     </div>
@@ -188,7 +188,7 @@ export const SubmitDocumentModal = ({
                     <span className="font-grotesk font-bold text-slate-800 dark:text-slate-200 block text-xs">
                       Click to browse or drag and drop file here
                     </span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">
+                    <span className="text-xs text-slate-400 block mt-0.5">
                       Supports PDF, PNG, JPG (Max file size: 10MB)
                     </span>
                   </div>
@@ -212,7 +212,7 @@ export const SubmitDocumentModal = ({
           </div>
 
           {/* Scope notice */}
-          <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-2">
+          <div className="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
             <ShieldCheck className="w-4 h-4 text-emerald-500 shrink-0" />
             <span>Document will be logged with timestamp and submitted to your property manager's verification queue.</span>
           </div>

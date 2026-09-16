@@ -138,14 +138,14 @@ export const LandlordDocumentsTab = ({
         return (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="p-4 rounded-2xl apple-glass top-shade border border-slate-200 dark:border-slate-800/80 space-y-1">
-              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Total Vault Files</span>
+              <span className="text-xs font-mono text-slate-400 uppercase tracking-wider block">Total Vault Files</span>
               <strong className="text-xl text-slate-900 dark:text-white font-grotesk block">{documents.length}</strong>
-              <span className="text-[11px] text-slate-500 font-mono">Resident & Property Files</span>
+              <span className="text-xs text-slate-500 font-mono">Resident & Property Files</span>
             </div>
 
             <div className="p-4 rounded-2xl apple-glass top-shade border border-amber-500/30 bg-amber-500/5 space-y-1 relative overflow-hidden">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider block">
+                <span className="text-xs font-mono text-amber-600 dark:text-amber-400 font-bold uppercase tracking-wider block">
                   Pending Review
                 </span>
                 {pendingCount > 0 && (
@@ -153,23 +153,23 @@ export const LandlordDocumentsTab = ({
                 )}
               </div>
               <strong className="text-2xl text-amber-600 dark:text-amber-400 font-grotesk block">{pendingCount}</strong>
-              <span className="text-[11px] text-amber-700/80 dark:text-amber-400/80 font-mono">Action Required by Landlord</span>
+              <span className="text-xs text-amber-700/80 dark:text-amber-400/80 font-mono">Action Required by Landlord</span>
             </div>
 
             <div className="p-4 rounded-2xl apple-glass top-shade border border-emerald-500/20 bg-emerald-500/5 space-y-1">
-              <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider block">
+              <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider block">
                 Verified Compliant
               </span>
               <strong className="text-2xl text-emerald-600 dark:text-emerald-400 font-grotesk block">{verifiedCount}</strong>
-              <span className="text-[11px] text-emerald-700/80 dark:text-emerald-400/80 font-mono">Approved Active Files</span>
+              <span className="text-xs text-emerald-700/80 dark:text-emerald-400/80 font-mono">Approved Active Files</span>
             </div>
 
             <div className="p-4 rounded-2xl apple-glass top-shade border border-rose-500/20 bg-rose-500/5 space-y-1">
-              <span className="text-[10px] font-mono text-rose-600 dark:text-rose-400 font-bold uppercase tracking-wider block">
+              <span className="text-xs font-mono text-rose-600 dark:text-rose-400 font-bold uppercase tracking-wider block">
                 Rejected / Flagged
               </span>
               <strong className="text-2xl text-rose-600 dark:text-rose-400 font-grotesk block">{rejectedCount}</strong>
-              <span className="text-[11px] text-rose-700/80 dark:text-rose-400/80 font-mono">Awaiting Resident Re-upload</span>
+              <span className="text-xs text-rose-700/80 dark:text-rose-400/80 font-mono">Awaiting Resident Re-upload</span>
             </div>
           </div>
         );
@@ -273,16 +273,16 @@ export const LandlordDocumentsTab = ({
                           <strong className="font-grotesk font-bold text-sm text-slate-900 dark:text-white truncate">
                             {docItem.name}
                           </strong>
-                          <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-mono border border-slate-200 dark:border-slate-700">
+                          <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-mono border border-slate-200 dark:border-slate-700">
                             {docItem.type}
                           </span>
                         </div>
 
-                        <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
                           Resident: <strong className="text-slate-800 dark:text-slate-200">{docItem.tenantName}</strong> &bull; {docItem.unitLabel} ({docItem.propertyName})
                         </p>
 
-                        <div className="flex items-center gap-3 text-[10px] text-slate-400">
+                        <div className="flex items-center gap-3 text-xs text-slate-400">
                           <span>Submitted: {docItem.date}</span>
                           <span>&bull;</span>
                           <span>Size: {docItem.size}</span>
@@ -295,7 +295,7 @@ export const LandlordDocumentsTab = ({
                         </div>
 
                         {docItem.status === 'Rejected' && docItem.rejectionReason && (
-                          <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-[11px] text-rose-700 dark:text-rose-300 mt-1 flex items-start gap-1.5">
+                          <div className="p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs text-rose-700 dark:text-rose-300 mt-1 flex items-start gap-1.5">
                             <AlertTriangle className="w-3.5 h-3.5 shrink-0 mt-0.5" />
                             <span>Rejection Feedback: <em>{docItem.rejectionReason}</em></span>
                           </div>
@@ -305,7 +305,7 @@ export const LandlordDocumentsTab = ({
 
                     {/* Status & Action Buttons */}
                     <div className="flex items-center gap-2.5 shrink-0 justify-end">
-                      <span className={`px-3 py-1 rounded-full text-[11px] font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 ${
+                      <span className={`px-3 py-1 rounded-full text-xs font-bold font-mono uppercase tracking-wider flex items-center gap-1.5 ${
                         docItem.status === 'Verified' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' :
                         docItem.status === 'Rejected' ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20' :
                         'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
@@ -352,7 +352,7 @@ export const LandlordDocumentsTab = ({
         <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-mono">
           <div>
             <strong className="text-slate-900 dark:text-white block font-grotesk text-sm">Expiration Reminder Notice Lead Time</strong>
-            <span className="text-slate-500 text-[11px]">Automatically notify residents before their renter insurance policies or occupancy permits expire.</span>
+            <span className="text-slate-500 text-xs">Automatically notify residents before their renter insurance policies or occupancy permits expire.</span>
           </div>
           <select
             value={docExpirationReminderDays}

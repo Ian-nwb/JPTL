@@ -237,7 +237,7 @@ export const AddPropertyOrUnitModal = ({
                 />
               </div>
               {errors.propertyName && (
-                <p className="text-[11px] text-rose-500 mt-1 flex items-center gap-1">
+                <p className="text-xs text-rose-500 mt-1 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" /> {errors.propertyName}
                 </p>
               )}
@@ -258,7 +258,7 @@ export const AddPropertyOrUnitModal = ({
                 />
               </div>
               {errors.propertyAddress && (
-                <p className="text-[11px] text-rose-500 mt-1 flex items-center gap-1">
+                <p className="text-xs text-rose-500 mt-1 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" /> {errors.propertyAddress}
                 </p>
               )}
@@ -327,7 +327,7 @@ export const AddPropertyOrUnitModal = ({
                 <button
                   type="button"
                   onClick={() => setActiveTab('property')}
-                  className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
+                  className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
                 >
                   <Plus className="w-3 h-3" /> Add new property
                 </button>
@@ -350,7 +350,7 @@ export const AddPropertyOrUnitModal = ({
                 </select>
               </div>
               {errors.selectedPropertyId && (
-                <p className="text-[11px] text-rose-500 mt-1 flex items-center gap-1">
+                <p className="text-xs text-rose-500 mt-1 flex items-center gap-1">
                   <AlertCircle className="w-3 h-3" /> {errors.selectedPropertyId}
                 </p>
               )}
@@ -372,7 +372,7 @@ export const AddPropertyOrUnitModal = ({
                   />
                 </div>
                 {errors.unitLabel && (
-                  <p className="text-[11px] text-rose-500 mt-1">{errors.unitLabel}</p>
+                  <p className="text-xs text-rose-500 mt-1">{errors.unitLabel}</p>
                 )}
               </div>
 
@@ -391,7 +391,7 @@ export const AddPropertyOrUnitModal = ({
                   />
                 </div>
                 {errors.monthlyRent && (
-                  <p className="text-[11px] text-rose-500 mt-1">{errors.monthlyRent}</p>
+                  <p className="text-xs text-rose-500 mt-1">{errors.monthlyRent}</p>
                 )}
               </div>
             </div>

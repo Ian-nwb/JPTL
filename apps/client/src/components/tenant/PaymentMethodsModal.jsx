@@ -106,7 +106,7 @@ export const PaymentMethodsModal = ({
                     </div>
                     <div>
                       <strong className="text-slate-900 dark:text-white block font-grotesk">{m.brand} •••• {m.last4}</strong>
-                      <span className="text-[11px] text-slate-400 font-mono">
+                      <span className="text-xs text-slate-400 font-mono">
                         {m.type === 'card' ? `Expires ${m.exp}` : 'Direct Bank ACH'}
                       </span>
                     </div>
@@ -114,14 +114,14 @@ export const PaymentMethodsModal = ({
 
                   <div className="flex items-center gap-2">
                     {m.isDefault ? (
-                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
+                      <span className="px-2.5 py-0.5 rounded-full text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
                         <CheckCircle2 className="w-3 h-3" /> Default
                       </span>
                     ) : (
                       <button
                         type="button"
                         onClick={() => handleSetDefault(m.id)}
-                        className="text-[11px] font-mono text-slate-400 hover:text-indigo-500 underline btn-press"
+                        className="text-xs font-mono text-slate-400 hover:text-indigo-500 underline btn-press"
                       >
                         Set default
                       </button>

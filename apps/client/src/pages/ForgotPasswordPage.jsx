@@ -43,7 +43,7 @@ function ForgotPasswordForm({ onNavigate, onEmailSent }) {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-[11px] font-mono font-bold uppercase tracking-widest text-indigo-400 mb-2">
+        <p className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-400 mb-2">
           Account Recovery
         </p>
         <h2 className="text-2xl sm:text-3xl font-bold font-grotesk text-slate-900 dark:text-white tracking-tight">
@@ -78,7 +78,7 @@ function ForgotPasswordForm({ onNavigate, onEmailSent }) {
             />
           </div>
           {touched && error && (
-            <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+            <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
               <AlertCircle className="w-3 h-3 shrink-0" />
               <span>{error}</span>
             </p>
@@ -229,7 +229,7 @@ function ResetPasswordForm({ token, onNavigate }) {
   return (
     <div className="space-y-6">
       <div>
-        <p className="text-[11px] font-mono font-bold uppercase tracking-widest text-indigo-400 mb-2">
+        <p className="text-xs font-mono font-bold uppercase tracking-widest text-indigo-400 mb-2">
           Set New Password
         </p>
         <h2 className="text-2xl sm:text-3xl font-bold font-grotesk text-slate-900 dark:text-white tracking-tight">
@@ -281,7 +281,7 @@ function ResetPasswordForm({ token, onNavigate }) {
             </button>
           </div>
           {touched.newPassword && errors.newPassword && (
-            <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+            <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
               <AlertCircle className="w-3 h-3 shrink-0" /><span>{errors.newPassword}</span>
             </p>
           )}
@@ -317,7 +317,7 @@ function ResetPasswordForm({ token, onNavigate }) {
             </button>
           </div>
           {touched.confirm && errors.confirm && (
-            <p className="text-[11px] text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
+            <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
               <AlertCircle className="w-3 h-3 shrink-0" /><span>{errors.confirm}</span>
             </p>
           )}

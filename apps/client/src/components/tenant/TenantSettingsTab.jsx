@@ -401,11 +401,11 @@ export const TenantSettingsTab = ({
 
               <div>
                 <h3 className="text-sm font-bold font-grotesk text-slate-900 dark:text-white">{fullName}</h3>
-                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">Resident Account</span>
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">Resident Account</span>
               </div>
 
               {avatarError && (
-                <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px] max-w-[220px]">
+                <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs max-w-[220px]">
                   {avatarError}
                 </div>
               )}
@@ -427,7 +427,7 @@ export const TenantSettingsTab = ({
                       setAvatarLoading(false);
                     }
                   }}
-                  className="text-[11px] font-mono text-rose-500 hover:underline disabled:opacity-50"
+                  className="text-xs font-mono text-rose-500 hover:underline disabled:opacity-50"
                 >
                   Remove custom photo
                 </button>
@@ -440,7 +440,7 @@ export const TenantSettingsTab = ({
                 <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
                   <Building2 className="w-4 h-4 text-indigo-500" /> Assigned Property & Unit
                 </h3>
-                <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                <span className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${
                   unit 
                     ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400' 
                     : 'bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400'
@@ -451,19 +451,19 @@ export const TenantSettingsTab = ({
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs font-mono">
                 <div className="p-3 rounded-xl bg-white dark:bg-[#10131F] border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] text-slate-400 block">Property</span>
+                  <span className="text-xs text-slate-400 block">Property</span>
                   <strong className="text-slate-900 dark:text-white font-grotesk text-sm block truncate">
                     {property?.name || unit?.propertyName || (unit ? 'Assigned Property' : 'None Assigned')}
                   </strong>
                 </div>
                 <div className="p-3 rounded-xl bg-white dark:bg-[#10131F] border border-slate-200 dark:border-slate-800">
-                  <span className="text-[10px] text-slate-400 block">Assigned Unit</span>
+                  <span className="text-xs text-slate-400 block">Assigned Unit</span>
                   <strong className="text-indigo-600 dark:text-indigo-400 font-grotesk text-sm block">
                     {unit?.label || 'Unassigned'}
                   </strong>
                 </div>
                 <div className="p-3 rounded-xl bg-white dark:bg-[#10131F] border border-slate-200 dark:border-slate-800 col-span-2 sm:col-span-1">
-                  <span className="text-[10px] text-slate-400 block">Lease Expiry</span>
+                  <span className="text-xs text-slate-400 block">Lease Expiry</span>
                   <strong className="text-slate-900 dark:text-white font-grotesk text-sm block">
                     {lease?.leaseEnd || unit?.leaseEnd
                       ? new Date(lease?.leaseEnd || unit?.leaseEnd).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -549,7 +549,7 @@ export const TenantSettingsTab = ({
                 <h2 className="text-base font-bold font-grotesk text-slate-900 dark:text-white flex items-center gap-2">
                   <Car className="w-4 h-4 text-indigo-500" /> Registered Vehicles & Parking Permits
                 </h2>
-                <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">
+                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">
                   {vehicles.length === 0 ? 'No vehicle on file' : `${vehicles.length} vehicle${vehicles.length > 1 ? 's' : ''} registered`}
                 </span>
               </div>
@@ -566,7 +566,7 @@ export const TenantSettingsTab = ({
               <div className="p-6 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-dashed border-slate-200 dark:border-slate-800/80 text-center space-y-1">
                 <Car className="w-6 h-6 text-slate-400 mx-auto opacity-50" />
                 <p className="text-xs font-mono text-slate-400">No vehicles registered yet.</p>
-                <p className="text-[11px] text-slate-500">Click &ldquo;+ Register Vehicle&rdquo; above if you have a car or motor vehicle.</p>
+                <p className="text-xs text-slate-500">Click &ldquo;+ Register Vehicle&rdquo; above if you have a car or motor vehicle.</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -674,16 +674,16 @@ export const TenantSettingsTab = ({
                     }`}
                   />
                   {passwordForm.confirm && passwordForm.newPass !== passwordForm.confirm && (
-                    <p className="text-rose-500 text-[11px] mt-1 font-mono">Passwords do not match</p>
+                    <p className="text-rose-500 text-xs mt-1 font-mono">Passwords do not match</p>
                   )}
                 </div>
                 {passwordStatus.error && (
-                  <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-[11px]">
+                  <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs">
                     {passwordStatus.error}
                   </div>
                 )}
                 {passwordStatus.success && (
-                  <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-[11px]">
+                  <div className="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs">
                     {passwordStatus.success}
                   </div>
                 )}
@@ -704,11 +704,11 @@ export const TenantSettingsTab = ({
                     <h3 className="font-grotesk font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
                       <Smartphone className="w-4 h-4 text-indigo-500" /> Two-Factor Authentication (2FA)
                     </h3>
-                    <span className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${enable2FA ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-slate-500/10 text-slate-400'}`}>
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-mono font-bold ${enable2FA ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : 'bg-slate-500/10 text-slate-400'}`}>
                       {enable2FA ? 'ENABLED' : 'DISABLED'}
                     </span>
                   </div>
-                  <p className="text-slate-500 text-[11px] leading-relaxed">
+                  <p className="text-slate-500 text-xs leading-relaxed">
                     Protect your resident portal account with an authenticator app (Google Authenticator, Authy, or Passkey).
                   </p>
                 </div>
@@ -751,7 +751,7 @@ export const TenantSettingsTab = ({
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-mono">
                 <thead>
-                  <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-[11px] uppercase tracking-wider">
+                  <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 text-xs uppercase tracking-wider">
                     <th className="py-3 px-4 font-normal">Notification Type</th>
                     <th className="py-3 px-4 text-center font-normal">Push Notification</th>
                     <th className="py-3 px-4 text-center font-normal">Email Digest</th>
@@ -763,7 +763,7 @@ export const TenantSettingsTab = ({
                   <tr>
                     <td className="py-4 px-4 font-sans font-semibold text-slate-900 dark:text-white">
                       Maintenance Request Updates
-                      <span className="block text-[11px] font-mono text-slate-500 font-normal">Technician assigned, arrival times, ticket status changes</span>
+                      <span className="block text-xs font-mono text-slate-500 font-normal">Technician assigned, arrival times, ticket status changes</span>
                     </td>
                     <td className="py-4 px-4 text-center">
                       <input
@@ -787,7 +787,7 @@ export const TenantSettingsTab = ({
                   <tr>
                     <td className="py-4 px-4 font-sans font-semibold text-slate-900 dark:text-white">
                       Payment & Billing Reminders
-                      <span className="block text-[11px] font-mono text-slate-500 font-normal">Upcoming rent due dates, payment receipts, auto-pay notices</span>
+                      <span className="block text-xs font-mono text-slate-500 font-normal">Upcoming rent due dates, payment receipts, auto-pay notices</span>
                     </td>
                     <td className="py-4 px-4 text-center">
                       <input
@@ -811,7 +811,7 @@ export const TenantSettingsTab = ({
                   <tr>
                     <td className="py-4 px-4 font-sans font-semibold text-slate-900 dark:text-white">
                       Lease Renewal Alerts
-                      <span className="block text-[11px] font-mono text-slate-500 font-normal">90-day renewal windows, rate updates, contract signatures</span>
+                      <span className="block text-xs font-mono text-slate-500 font-normal">90-day renewal windows, rate updates, contract signatures</span>
                     </td>
                     <td className="py-4 px-4 text-center">
                       <input
@@ -835,7 +835,7 @@ export const TenantSettingsTab = ({
                   <tr>
                     <td className="py-4 px-4 font-sans font-semibold text-slate-900 dark:text-white">
                       Landlord Announcements
-                      <span className="block text-[11px] font-mono text-slate-500 font-normal">Building maintenance notices, amenity updates, community rules</span>
+                      <span className="block text-xs font-mono text-slate-500 font-normal">Building maintenance notices, amenity updates, community rules</span>
                     </td>
                     <td className="py-4 px-4 text-center">
                       <input
@@ -943,7 +943,7 @@ export const TenantSettingsTab = ({
                     `}
                   >
                     <strong className="block font-grotesk">{m.label}</strong>
-                    <span className="text-[11px] font-mono text-slate-500 block mt-0.5">{m.desc}</span>
+                    <span className="text-xs font-mono text-slate-500 block mt-0.5">{m.desc}</span>
                   </button>
                 ))}
               </div>
@@ -965,7 +965,7 @@ export const TenantSettingsTab = ({
                   />
                   <div>
                     <strong className="text-slate-900 dark:text-white block font-grotesk">OK to enter if not home</strong>
-                    <span className="text-slate-500 text-[11px]">Technicians may use master key / smart lock code during standard work hours (8 AM - 5 PM).</span>
+                    <span className="text-slate-500 text-xs">Technicians may use master key / smart lock code during standard work hours (8 AM - 5 PM).</span>
                   </div>
                 </label>
 
@@ -979,7 +979,7 @@ export const TenantSettingsTab = ({
                   />
                   <div>
                     <strong className="text-slate-900 dark:text-white block font-grotesk">Tenant MUST be present</strong>
-                    <span className="text-slate-500 text-[11px]">Requires scheduled appointment time window confirmation before entry.</span>
+                    <span className="text-slate-500 text-xs">Requires scheduled appointment time window confirmation before entry.</span>
                   </div>
                 </label>
 
@@ -993,7 +993,7 @@ export const TenantSettingsTab = ({
                   />
                   <div className="w-full">
                     <strong className="text-slate-900 dark:text-white block font-grotesk">Custom entry instructions</strong>
-                    <span className="text-slate-500 text-[11px] block mb-2">Specify pet safety notes, gate codes, or specific timing requirements.</span>
+                    <span className="text-slate-500 text-xs block mb-2">Specify pet safety notes, gate codes, or specific timing requirements.</span>
                     {accessInstructions === 'custom' && (
                       <textarea
                         rows={2}
@@ -1011,7 +1011,7 @@ export const TenantSettingsTab = ({
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
               <div>
                 <strong className="text-slate-900 dark:text-white block font-grotesk">Photo & Video Upload Permission</strong>
-                <span className="text-slate-500 text-[11px]">Allow camera access when submitting issues so technicians can diagnose plumbing/electrical items faster.</span>
+                <span className="text-slate-500 text-xs">Allow camera access when submitting issues so technicians can diagnose plumbing/electrical items faster.</span>
               </div>
               <input
                 type="checkbox"
@@ -1064,12 +1064,12 @@ export const TenantSettingsTab = ({
                       <div className="flex items-center gap-2">
                         <strong className="text-slate-900 dark:text-white font-grotesk text-sm">{pm.label}</strong>
                         {pm.isDefault && (
-                          <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold">
+                          <span className="px-2 py-0.5 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-bold">
                             Default
                           </span>
                         )}
                       </div>
-                      <span className="text-slate-500 text-[11px] uppercase tracking-wider">{pm.type} Payment</span>
+                      <span className="text-slate-500 text-xs uppercase tracking-wider">{pm.type} Payment</span>
                     </div>
                   </div>
 
@@ -1078,7 +1078,7 @@ export const TenantSettingsTab = ({
                       <button
                         type="button"
                         onClick={() => handleSetDefaultPayment(pm.id)}
-                        className="px-2.5 py-1 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-500/10 text-[11px] font-sans btn-press"
+                        className="px-2.5 py-1 rounded-lg text-slate-500 hover:text-indigo-600 hover:bg-indigo-500/10 text-xs font-sans btn-press"
                       >
                         Set Default
                       </button>
@@ -1148,7 +1148,7 @@ export const TenantSettingsTab = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <strong className="text-slate-900 dark:text-white block font-grotesk text-sm">Automatic Rent Payment (Auto-Pay)</strong>
-                  <span className="text-slate-500 text-[11px]">Automatically deduct full monthly rent balance on the 1st of every month using default payment method.</span>
+                  <span className="text-slate-500 text-xs">Automatically deduct full monthly rent balance on the 1st of every month using default payment method.</span>
                 </div>
                 <input
                   type="checkbox"
@@ -1162,7 +1162,7 @@ export const TenantSettingsTab = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono">
                 <div>
                   <strong className="text-slate-900 dark:text-white block font-grotesk text-sm">Payment Reminder Lead Time</strong>
-                  <span className="text-slate-500 text-[11px]">Receive advance alert notification before rent due date.</span>
+                  <span className="text-slate-500 text-xs">Receive advance alert notification before rent due date.</span>
                 </div>
                 <select
                   value={reminderLeadDays}
@@ -1180,7 +1180,7 @@ export const TenantSettingsTab = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <strong className="text-slate-900 dark:text-white block font-grotesk">Auto-Generate Annual Rent Tax Receipts</strong>
-                  <span className="text-slate-500 text-[11px]">Automatically generate official tax deductible receipts upon every successful payment.</span>
+                  <span className="text-slate-500 text-xs">Automatically generate official tax deductible receipts upon every successful payment.</span>
                 </div>
                 <input
                   type="checkbox"
@@ -1216,7 +1216,7 @@ export const TenantSettingsTab = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <strong className="text-slate-900 dark:text-white block font-grotesk">Phone Number Visible to Landlord</strong>
-                  <span className="text-slate-500 text-[11px]">Allow your landlord to view your direct mobile phone in the tenant directory.</span>
+                  <span className="text-slate-500 text-xs">Allow your landlord to view your direct mobile phone in the tenant directory.</span>
                 </div>
                 <input
                   type="checkbox"
@@ -1229,7 +1229,7 @@ export const TenantSettingsTab = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <strong className="text-slate-900 dark:text-white block font-grotesk">Third-Party Vendor Contact Sharing Consent</strong>
-                  <span className="text-slate-500 text-[11px]">Allow sharing your contact number with assigned external vendors (plumbing, electrician) during active maintenance jobs.</span>
+                  <span className="text-slate-500 text-xs">Allow sharing your contact number with assigned external vendors (plumbing, electrician) during active maintenance jobs.</span>
                 </div>
                 <input
                   type="checkbox"
@@ -1242,7 +1242,7 @@ export const TenantSettingsTab = ({
               <div className="p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div>
                   <strong className="text-slate-900 dark:text-white block font-grotesk">Vehicle Registration Details Sharing</strong>
-                  <span className="text-slate-500 text-[11px]">Share vehicle license plate with security desk & parking enforcement staff.</span>
+                  <span className="text-slate-500 text-xs">Share vehicle license plate with security desk & parking enforcement staff.</span>
                 </div>
                 <input
                   type="checkbox"
@@ -1272,10 +1272,10 @@ export const TenantSettingsTab = ({
             </div>
 
             <div className="p-4 bg-white rounded-2xl border border-slate-200 flex flex-col items-center justify-center space-y-2">
-              <div className="w-32 h-32 bg-slate-900 flex items-center justify-center text-white text-[10px] font-mono p-2 text-center rounded-xl">
+              <div className="w-32 h-32 bg-slate-900 flex items-center justify-center text-white text-xs font-mono p-2 text-center rounded-xl">
                 [QR CODE SIMULATOR]
               </div>
-              <span className="text-[10px] font-mono text-slate-500">Secret: JPTL-8820-AUTH-2FA</span>
+              <span className="text-xs font-mono text-slate-500">Secret: JPTL-8820-AUTH-2FA</span>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">

@@ -41,7 +41,7 @@ export const UnitDetailModal = ({
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span
-                className={`px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider ${
+                className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
                   isVacant
                     ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                     : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'
@@ -59,17 +59,17 @@ export const UnitDetailModal = ({
         <div className="grid grid-cols-3 gap-3 mb-6 p-4 rounded-2xl bg-slate-900/80 border border-slate-800">
           <div className="flex flex-col items-center justify-center text-center p-2">
             <DollarSign className="w-4 h-4 text-emerald-400 mb-1" />
-            <span className="text-[11px] text-slate-400 font-medium">Rent</span>
+            <span className="text-xs text-slate-400 font-medium">Rent</span>
             <span className="text-sm font-bold text-white">${unit.monthlyRent}/mo</span>
           </div>
           <div className="flex flex-col items-center justify-center text-center p-2 border-x border-slate-800">
             <Bed className="w-4 h-4 text-blue-400 mb-1" />
-            <span className="text-[11px] text-slate-400 font-medium">Beds / Baths</span>
+            <span className="text-xs text-slate-400 font-medium">Beds / Baths</span>
             <span className="text-sm font-bold text-white">{unit.bedrooms} bd / {unit.bathrooms} ba</span>
           </div>
           <div className="flex flex-col items-center justify-center text-center p-2">
             <Maximize2 className="w-4 h-4 text-purple-400 mb-1" />
-            <span className="text-[11px] text-slate-400 font-medium">Area</span>
+            <span className="text-xs text-slate-400 font-medium">Area</span>
             <span className="text-sm font-bold text-white">{unit.sqft} sqft</span>
           </div>
         </div>

@@ -360,7 +360,7 @@ export const AssignTenantModal = ({
               </select>
             </div>
             {availableUnits.length === 0 && (
-              <p className="text-[11px] text-amber-500 dark:text-amber-400 mt-1 flex items-center gap-1">
+              <p className="text-xs text-amber-500 dark:text-amber-400 mt-1 flex items-center gap-1">
                 <AlertCircle className="w-3.5 h-3.5" /> No vacant units available in this property.
               </p>
             )}
@@ -390,7 +390,7 @@ export const AssignTenantModal = ({
                 <Clock className="w-3.5 h-3.5 text-indigo-500" />
                 Lease Duration Presets
               </label>
-              <span className="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold">
+              <span className="text-xs font-mono text-indigo-600 dark:text-indigo-400 font-semibold">
                 {durationMonths} Months ({durationMonths >= 12 ? `${(durationMonths / 12).toFixed(durationMonths % 12 === 0 ? 0 : 1)} Year` : ''})
               </span>
             </div>
@@ -454,7 +454,7 @@ export const AssignTenantModal = ({
           {expirationPreview && (
             <div className="p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 text-xs flex items-center justify-between">
               <div className="space-y-0.5">
-                <span className="text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-bold block">
+                <span className="text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-bold block">
                   Lease Term & Expiration
                 </span>
                 <span className="font-bold text-slate-900 dark:text-white">
@@ -462,7 +462,7 @@ export const AssignTenantModal = ({
                 </span>
               </div>
               <span
-                className={`px-2.5 py-1 rounded-full text-[11px] font-bold font-mono ${
+                className={`px-2.5 py-1 rounded-full text-xs font-bold font-mono ${
                   expirationPreview.isExpired
                     ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
                     : expirationPreview.isExpiringSoon
@@ -492,7 +492,7 @@ export const AssignTenantModal = ({
                   Tenant Has Vehicle
                 </span>
               </div>
-              <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${
+              <span className={`text-xs font-mono font-semibold px-2 py-0.5 rounded-full ${
                 hasVehicle ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20' : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
               }`}>
                 {hasVehicle ? 'Has Vehicle' : 'No Vehicle Yet'}
@@ -501,7 +501,7 @@ export const AssignTenantModal = ({
             {hasVehicle && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-slate-200 dark:border-slate-800">
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">Vehicle Make & Model</label>
+                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">Vehicle Make & Model</label>
                   <input
                     type="text"
                     value={vehicleMake}
@@ -511,7 +511,7 @@ export const AssignTenantModal = ({
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">License Plate #</label>
+                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">License Plate #</label>
                   <input
                     type="text"
                     value={vehiclePlate}
@@ -538,7 +538,7 @@ export const AssignTenantModal = ({
                   Assign Parking Space (+ Monthly Fee)
                 </span>
               </div>
-              <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${
+              <span className={`text-xs font-mono font-semibold px-2 py-0.5 rounded-full ${
                 hasParking ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20' : 'text-slate-400'
               }`}>
                 {hasParking ? 'Included' : 'None ($0/mo)'}
@@ -548,7 +548,7 @@ export const AssignTenantModal = ({
             {hasParking && (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-slate-200 dark:border-slate-800">
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                     Parking Bay / Slot
                   </label>
                   <input
@@ -560,7 +560,7 @@ export const AssignTenantModal = ({
                   />
                 </div>
                 <div>
-                  <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                  <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                     Monthly Parking Fee ($)
                   </label>
                   <input

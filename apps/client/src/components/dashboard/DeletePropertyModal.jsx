@@ -79,7 +79,7 @@ export const DeletePropertyModal = ({
               <Building2 className="w-4 h-4 text-indigo-500" />
               {property.name}
             </span>
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+            <span className="text-xs font-mono px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
               {property.category || 'Residential'}
             </span>
           </div>
@@ -99,7 +99,7 @@ export const DeletePropertyModal = ({
             <ShieldAlert className="w-5 h-5 shrink-0 text-rose-500 mt-0.5" />
             <div className="space-y-1">
               <p className="font-bold">Active Tenants Detected</p>
-              <p className="text-[11px] leading-relaxed text-rose-600/80 dark:text-rose-300/80">
+              <p className="text-xs leading-relaxed text-rose-600/80 dark:text-rose-300/80">
                 This property has <strong>{occupiedUnits.length} active tenant(s)</strong> assigned to units. You must reassign or end their leases before deleting this property.
               </p>
             </div>
@@ -109,7 +109,7 @@ export const DeletePropertyModal = ({
             <AlertTriangle className="w-5 h-5 shrink-0 text-amber-500 mt-0.5" />
             <div className="space-y-1">
               <p className="font-bold">Are you sure you want to delete this property?</p>
-              <p className="text-[11px] leading-relaxed text-amber-800/80 dark:text-amber-300/80">
+              <p className="text-xs leading-relaxed text-amber-800/80 dark:text-amber-300/80">
                 All <strong>{propUnits.length} vacant unit(s)</strong>, historical associations, and property configurations will be permanently removed from your portfolio.
               </p>
             </div>

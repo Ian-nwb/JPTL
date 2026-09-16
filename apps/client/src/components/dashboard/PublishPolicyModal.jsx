@@ -75,7 +75,7 @@ export const PublishPolicyModal = ({
               <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-mono font-semibold">
+              <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 text-xs font-mono font-semibold">
                 <FileCheck className="w-3 h-3" />
                 <span>Landlord Document Publisher</span>
               </div>
@@ -180,7 +180,7 @@ export const PublishPolicyModal = ({
                       <strong className="text-slate-900 dark:text-white font-grotesk text-xs block truncate">
                         {selectedFile.name}
                       </strong>
-                      <span className="text-[10px] text-slate-500 font-mono">
+                      <span className="text-xs text-slate-500 font-mono">
                         {(selectedFile.size / (1024 * 1024)).toFixed(2)} MB &bull; Selected
                       </span>
                     </div>
@@ -202,7 +202,7 @@ export const PublishPolicyModal = ({
                     <span className="font-grotesk font-bold text-slate-800 dark:text-slate-200 block text-xs">
                       Click to browse or drag and drop official document PDF
                     </span>
-                    <span className="text-[10px] text-slate-400 block mt-0.5">
+                    <span className="text-xs text-slate-400 block mt-0.5">
                       Supports PDF, PNG, JPG (Max file size: 15MB)
                     </span>
                   </div>

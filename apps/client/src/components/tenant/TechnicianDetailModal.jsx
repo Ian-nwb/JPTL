@@ -60,25 +60,25 @@ export const TechnicianDetailModal = ({
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold font-grotesk text-slate-900 dark:text-white">{tech.name}</h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                <span className="px-2 py-0.5 rounded-full text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                   {tech.rating}
                 </span>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-400">{tech.title}</p>
-              <p className="text-[11px] font-mono text-slate-400">{tech.company}</p>
+              <p className="text-xs font-mono text-slate-400">{tech.company}</p>
             </div>
           </div>
 
           <div className="pt-3 border-t border-slate-200 dark:border-slate-800/60 grid grid-cols-2 gap-2 text-xs font-mono">
             <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60">
-              <span className="text-slate-400 text-[10px] block uppercase">Estimated Arrival</span>
+              <span className="text-slate-400 text-xs block uppercase">Estimated Arrival</span>
               <strong className="text-amber-500 flex items-center gap-1 mt-0.5">
                 <Clock className="w-3 h-3" /> {tech.eta}
               </strong>
             </div>
 
             <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900/60 border border-slate-200/60 dark:border-slate-800/60">
-              <span className="text-slate-400 text-[10px] block uppercase">Verification Badge</span>
+              <span className="text-slate-400 text-xs block uppercase">Verification Badge</span>
               <strong className="text-emerald-500 flex items-center gap-1 mt-0.5">
                 <ShieldCheck className="w-3 h-3" /> Background Cleared
               </strong>
@@ -88,7 +88,7 @@ export const TechnicianDetailModal = ({
 
         {/* Technician Contact Details Card */}
         <div className="mt-6 p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60 space-y-2 text-xs font-mono">
-          <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">
+          <span className="text-xs uppercase font-bold text-slate-400 block tracking-wider">
             Direct Technician Contact Info
           </span>
           <div className="flex justify-between items-center">

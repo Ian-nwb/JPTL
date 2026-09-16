@@ -79,32 +79,32 @@ export const TenantReceiptModal = ({
                   JPTL<span className="text-indigo-600 dark:text-indigo-400 print:text-indigo-600">.SYSTEM</span>
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono">
+              <p className="text-xs text-slate-500 dark:text-slate-400 print:text-slate-600 font-mono">
                 Property Management & Leasing Services LLC
               </p>
-              <p className="text-[10px] text-slate-400 print:text-slate-500 font-mono">
+              <p className="text-xs text-slate-400 print:text-slate-500 font-mono">
                 EIN: 84-2901452 &bull; License #PM-992014
               </p>
             </div>
 
             <div className="sm:text-right font-mono text-xs">
-              <span className="px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 inline-flex items-center gap-1 mb-1">
+              <span className="px-2.5 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 inline-flex items-center gap-1 mb-1">
                 <CheckCircle2 className="w-3 h-3" /> Paid & Cleared
               </span>
-              <p className="text-slate-400 font-mono text-[11px]">Date: {transaction.paidAt || 'Aug 1, 2026'}</p>
-              <p className="text-indigo-500 font-bold text-[11px]">Receipt #: {transaction.id || transaction.transactionId}</p>
+              <p className="text-slate-400 font-mono text-xs">Date: {transaction.paidAt || 'Aug 1, 2026'}</p>
+              <p className="text-indigo-500 font-bold text-xs">Receipt #: {transaction.id || transaction.transactionId}</p>
             </div>
           </div>
 
           {/* Tenant & Unit Info */}
           <div className="grid grid-cols-2 gap-4 p-4 rounded-2xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60 text-xs font-mono">
             <div>
-              <span className="text-slate-400 uppercase text-[10px] block">Resident / Billed To</span>
+              <span className="text-slate-400 uppercase text-xs block">Resident / Billed To</span>
               <strong className="text-slate-900 dark:text-white text-sm">{tenant?.name || 'Sophia Lin'}</strong>
               <p className="text-slate-500">{tenant?.email || 'sophia.lin@example.com'}</p>
             </div>
             <div>
-              <span className="text-slate-400 uppercase text-[10px] block">Property & Unit</span>
+              <span className="text-slate-400 uppercase text-xs block">Property & Unit</span>
               <strong className="text-slate-900 dark:text-white text-sm">{unit?.label || 'Unit 14B'}</strong>
               <p className="text-slate-500">{property?.name || 'Aura Sky Towers'}</p>
             </div>
@@ -112,7 +112,7 @@ export const TenantReceiptModal = ({
 
           {/* Itemized Charge Ledger Table */}
           <div className="space-y-2">
-            <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-400">
               Itemized Line Items
             </span>
 
@@ -152,12 +152,12 @@ export const TenantReceiptModal = ({
 
           {/* Legal Manager Signature */}
           <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs font-mono">
-            <div className="flex items-center gap-2 text-slate-400 text-[11px]">
+            <div className="flex items-center gap-2 text-slate-400 text-xs">
               <ShieldCheck className="w-4 h-4 text-emerald-500" />
               <span>Electronically signed & verified by JPTL Property Management.</span>
             </div>
             <div className="text-right">
-              <span className="text-slate-400 text-[10px] block">Authorized Signature</span>
+              <span className="text-slate-400 text-xs block">Authorized Signature</span>
               <span className="font-bold font-grotesk text-slate-900 dark:text-white">Alexander Vance</span>
             </div>
           </div>

@@ -70,7 +70,7 @@ export const MobileNavDrawer = ({
               <h3 className="text-sm font-bold font-grotesk text-slate-900 dark:text-white truncate">
                 {displayName}
               </h3>
-              <p className="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 truncate">
+              <p className="text-xs font-mono text-indigo-600 dark:text-indigo-400 truncate">
                 {roleTitle} {metaInfo ? `• ${metaInfo}` : ''}
               </p>
             </div>
@@ -116,7 +116,7 @@ export const MobileNavDrawer = ({
 
                 <div className="flex items-center gap-2">
                   {item.badge && (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold font-mono bg-indigo-500/20 text-indigo-400">
+                    <span className="px-2 py-0.5 rounded-full text-xs font-bold font-mono bg-indigo-500/20 text-indigo-400">
                       {item.badge}
                     </span>
                   )}

@@ -66,7 +66,7 @@ export const TenantMaintenanceTab = ({
           <button
             key={filter}
             onClick={() => setStatusFilter(filter)}
-            className={`px-3 py-1.5 rounded-xl font-mono text-[11px] capitalize btn-press transition-all ${
+            className={`px-3 py-1.5 rounded-xl font-mono text-xs capitalize btn-press transition-all ${
               statusFilter === filter
                 ? 'bg-indigo-600 text-white font-bold shadow-sm'
                 : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
@@ -97,10 +97,10 @@ export const TenantMaintenanceTab = ({
                 <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[11px] font-mono px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                      <span className="text-xs font-mono px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                         {t.id}
                       </span>
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono border ${
+                      <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold font-mono border ${
                         t.priority === 'high'
                           ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20'
                           : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
@@ -159,11 +159,11 @@ export const TenantMaintenanceTab = ({
 
                 {/* ─── 4-STEP PROGRESS STEPPER ─── */}
                 <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-[#080B14]/80 border border-slate-200/60 dark:border-slate-800/60 space-y-3">
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-slate-400 font-bold block">
+                  <span className="text-xs font-mono uppercase tracking-wider text-slate-400 font-bold block">
                     Dispatch Lifecycle Progress
                   </span>
 
-                  <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-mono">
+                  <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono">
                     {[
                       { step: 1, label: 'Submitted' },
                       { step: 2, label: 'Dispatched' },
@@ -203,7 +203,7 @@ export const TenantMaintenanceTab = ({
                           <Clock className="w-3 h-3" /> ETA: {t.assignedTechnician?.eta || 'Pending dispatch confirmation'}
                         </span>
                         {t.assignedTechnician?.phone && (
-                          <span className="text-slate-500 dark:text-slate-400 font-mono text-[11px] block mt-0.5">
+                          <span className="text-slate-500 dark:text-slate-400 font-mono text-xs block mt-0.5">
                             Direct: {t.assignedTechnician.phone}
                           </span>
                         )}

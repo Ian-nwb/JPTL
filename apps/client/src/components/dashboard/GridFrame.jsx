@@ -66,7 +66,7 @@ export const GridSeparator = ({ label, action }) => {
       </div>
 
       {(label || action) && (
-        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-50 dark:bg-[#070A12] px-4 text-[11px] font-mono text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-slate-50 dark:bg-[#070A12] px-4 text-xs font-mono text-slate-400 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
           {label}
           {action}
         </div>

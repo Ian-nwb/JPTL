@@ -107,7 +107,7 @@ export const Footer = () => {
           <div className="md:col-span-8 grid grid-cols-2 sm:grid-cols-3 gap-8 font-grotesk text-xs">
 
             <div>
-              <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-widest text-[11px] mb-4">
+              <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-widest text-xs mb-4">
                 Platform Roles
               </h4>
               <ul className="space-y-3 font-sans text-slate-600 dark:text-slate-400 text-xs">
@@ -118,7 +118,7 @@ export const Footer = () => {
             </div>
 
             <div>
-              <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-widest text-[11px] mb-4">
+              <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-widest text-xs mb-4">
                 Architecture Specs
               </h4>
               <ul className="space-y-3 font-sans text-slate-600 dark:text-slate-400 text-xs">
@@ -129,7 +129,7 @@ export const Footer = () => {
             </div>
 
             <div>
-              <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-widest text-[11px] mb-4">
+              <h4 className="font-bold text-slate-900 dark:text-white uppercase tracking-widest text-xs mb-4">
                 Quick Navigation
               </h4>
               <ul className="space-y-3 font-sans text-slate-600 dark:text-slate-400 text-xs">
@@ -148,7 +148,7 @@ export const Footer = () => {
           <div>
             &copy; {new Date().getFullYear()} JPTL Living System &bull; All Rights Reserved
           </div>
-          <div className="flex items-center gap-6 text-[11px]">
+          <div className="flex items-center gap-6 text-xs">
             <span>Privacy Policy</span>
             <span>Terms of Service</span>
             <span>Security Architecture</span>

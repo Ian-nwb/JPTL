@@ -516,7 +516,7 @@ export const AddTenantModal = ({
                 <Users className="w-3.5 h-3.5" />
                 <span>Existing / Pre-added</span>
                 {preAddedTenants.length > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-mono font-bold">
+                  <span className="px-1.5 py-0.2 rounded-full text-xs bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-mono font-bold">
                     {preAddedTenants.length}
                   </span>
                 )}
@@ -593,10 +593,10 @@ export const AddTenantModal = ({
                         </div>
                         <div>
                           <strong className="text-slate-900 dark:text-white block font-grotesk">{selectedExistingTenant.name}</strong>
-                          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">{selectedExistingTenant.email}</span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">{selectedExistingTenant.email}</span>
                         </div>
                       </div>
-                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold font-mono uppercase ${
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-bold font-mono uppercase ${
                         selectedExistingTenant.status === 'active'
                           ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                           : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
@@ -628,7 +628,7 @@ export const AddTenantModal = ({
                         className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                       {touched.firstName && errors.firstName && (
-                        <p className="text-[11px] text-rose-500 mt-1">{errors.firstName}</p>
+                        <p className="text-xs text-rose-500 mt-1">{errors.firstName}</p>
                       )}
                     </div>
 
@@ -660,7 +660,7 @@ export const AddTenantModal = ({
                         className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl px-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                       />
                       {touched.lastName && errors.lastName && (
-                        <p className="text-[11px] text-rose-500 mt-1">{errors.lastName}</p>
+                        <p className="text-xs text-rose-500 mt-1">{errors.lastName}</p>
                       )}
                     </div>
                   </div>
@@ -682,7 +682,7 @@ export const AddTenantModal = ({
                       />
                     </div>
                     {touched.tenantEmail && errors.tenantEmail && (
-                      <p className="text-[11px] text-rose-500 mt-1">{errors.tenantEmail}</p>
+                      <p className="text-xs text-rose-500 mt-1">{errors.tenantEmail}</p>
                     )}
                   </div>
 
@@ -769,7 +769,7 @@ export const AddTenantModal = ({
                     </select>
                   </div>
                   {vacantUnits.length === 0 && !isPreAdd && (
-                    <p className="text-[11px] text-amber-500 mt-1 flex items-center gap-1">
+                    <p className="text-xs text-amber-500 mt-1 flex items-center gap-1">
                       <AlertCircle className="w-3.5 h-3.5" /> No vacant units in this property
                     </p>
                   )}
@@ -821,7 +821,7 @@ export const AddTenantModal = ({
                         <Clock className="w-3.5 h-3.5 text-indigo-500" />
                         Lease Duration Presets
                       </label>
-                      <span className="text-[11px] font-mono text-indigo-600 dark:text-indigo-400 font-semibold">
+                      <span className="text-xs font-mono text-indigo-600 dark:text-indigo-400 font-semibold">
                         {durationMonths} Months ({durationMonths >= 12 ? `${(durationMonths / 12).toFixed(durationMonths % 12 === 0 ? 0 : 1)} Year` : ''})
                       </span>
                     </div>
@@ -868,14 +868,14 @@ export const AddTenantModal = ({
                   {expirationPreview && (
                     <div className="p-3 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 text-xs flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <span className="text-[10px] uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-bold block">
+                        <span className="text-xs uppercase tracking-wider text-indigo-600 dark:text-indigo-400 font-bold block">
                           Term & Expiration
                         </span>
                         <span className="font-bold text-slate-900 dark:text-white">
                           {durationMonths} Months Lease • Expires {expirationPreview.formatted}
                         </span>
                       </div>
-                      <span className={`px-2.5 py-1 rounded-full text-[11px] font-bold font-mono ${
+                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold font-mono ${
                         expirationPreview.isExpired
                           ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20'
                           : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
@@ -900,7 +900,7 @@ export const AddTenantModal = ({
                           Tenant Has Vehicle
                         </span>
                       </div>
-                      <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${
+                      <span className={`text-xs font-mono font-semibold px-2 py-0.5 rounded-full ${
                         hasVehicle ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20' : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
                       }`}>
                         {hasVehicle ? 'Has Vehicle' : 'No Vehicle Yet'}
@@ -910,7 +910,7 @@ export const AddTenantModal = ({
                     {hasVehicle && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-slate-200 dark:border-slate-800">
                         <div>
-                          <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                             Vehicle Make & Model
                           </label>
                           <input
@@ -922,7 +922,7 @@ export const AddTenantModal = ({
                           />
                         </div>
                         <div>
-                          <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                             License Plate #
                           </label>
                           <input
@@ -951,7 +951,7 @@ export const AddTenantModal = ({
                           Assign Parking Space (+ Monthly Fee)
                         </span>
                       </div>
-                      <span className={`text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full ${
+                      <span className={`text-xs font-mono font-semibold px-2 py-0.5 rounded-full ${
                         hasParking ? 'bg-indigo-500/10 text-indigo-500 border border-indigo-500/20' : 'text-slate-400'
                       }`}>
                         {hasParking ? 'Included' : 'None ($0/mo)'}
@@ -961,7 +961,7 @@ export const AddTenantModal = ({
                     {hasParking && (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1 border-t border-slate-200 dark:border-slate-800">
                         <div>
-                          <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                             Parking Bay / Slot
                           </label>
                           <input
@@ -973,7 +973,7 @@ export const AddTenantModal = ({
                           />
                         </div>
                         <div>
-                          <label className="text-[11px] font-semibold text-slate-600 dark:text-slate-400 block mb-1">
+                          <label className="text-xs font-semibold text-slate-600 dark:text-slate-400 block mb-1">
                             Monthly Parking Fee ($)
                           </label>
                           <input
@@ -1035,15 +1035,15 @@ export const AddTenantModal = ({
 
             <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-left space-y-3">
               <div>
-                <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider block">Resident Name</span>
+                <span className="text-xs text-slate-400 uppercase font-mono tracking-wider block">Resident Name</span>
                 <span className="text-xs font-bold text-slate-900 dark:text-white">{successData.tenant.name}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider block">Portal Username / Email</span>
+                <span className="text-xs text-slate-400 uppercase font-mono tracking-wider block">Portal Username / Email</span>
                 <span className="text-xs font-mono text-indigo-600 dark:text-indigo-400 font-bold">{successData.tenant.email}</span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider block">Temporary Password</span>
+                <span className="text-xs text-slate-400 uppercase font-mono tracking-wider block">Temporary Password</span>
                 <div className="flex items-center justify-between mt-1">
                   <span className="text-sm font-mono font-extrabold text-amber-500 bg-amber-500/10 px-3 py-1 rounded-lg border border-amber-500/20">
                     {successData.tempPassword}

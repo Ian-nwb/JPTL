@@ -20,11 +20,11 @@ export const KpiMetricsSection = ({ units = [], tenants = [], tickets = [], onAd
       <div className="group relative top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-3.5 sm:p-5 transition-all hover:border-indigo-500/50 dark:hover:border-indigo-500/30 overflow-hidden flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <span className="text-[11px] sm:text-xs font-mono font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1 sm:gap-1.5 truncate">
+            <span className="text-xs sm:text-xs font-mono font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1 sm:gap-1.5 truncate">
               <DollarSign className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
               <span className="truncate">Revenue</span>
             </span>
-            <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-0.5 sm:gap-1 shrink-0">
+            <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-xs sm:text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-0.5 sm:gap-1 shrink-0">
               <TrendingUp className="w-2.5 h-2.5" />
               +12.4%
             </span>
@@ -34,7 +34,7 @@ export const KpiMetricsSection = ({ units = [], tenants = [], tickets = [], onAd
             <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold font-grotesk text-slate-900 dark:text-white tracking-tight">
               ${totalMonthlyRevenue.toLocaleString()}
             </h3>
-            <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+            <p className="text-xs sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
               {occupiedUnits} active leases
             </p>
           </div>
@@ -56,7 +56,7 @@ export const KpiMetricsSection = ({ units = [], tenants = [], tickets = [], onAd
       <div className="group relative top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-3.5 sm:p-5 transition-all hover:border-indigo-500/50 dark:hover:border-indigo-500/30 overflow-hidden flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <span className="text-[11px] sm:text-xs font-mono font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1 sm:gap-1.5 truncate">
+            <span className="text-xs sm:text-xs font-mono font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1 sm:gap-1.5 truncate">
               <Home className="w-3.5 h-3.5 text-blue-500 shrink-0" />
               <span className="truncate">Occupancy</span>
             </span>
@@ -77,7 +77,7 @@ export const KpiMetricsSection = ({ units = [], tenants = [], tickets = [], onAd
               style={{ width: `${occupancyPercentage}%` }}
             />
           </div>
-          <div className="flex items-center justify-between text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 font-mono">
+          <div className="flex items-center justify-between text-xs sm:text-xs text-slate-500 dark:text-slate-400 font-mono">
             <span>{occupiedUnits} Occupied</span>
             <span className="text-emerald-600 dark:text-emerald-400">{vacantUnits} Vacant</span>
           </div>
@@ -88,11 +88,11 @@ export const KpiMetricsSection = ({ units = [], tenants = [], tickets = [], onAd
       <div className="group relative top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-3.5 sm:p-5 transition-all hover:border-emerald-500/50 dark:hover:border-emerald-500/30 overflow-hidden flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <span className="text-[11px] sm:text-xs font-mono font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1 sm:gap-1.5 truncate">
+            <span className="text-xs sm:text-xs font-mono font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1 sm:gap-1.5 truncate">
               <Users className="w-3.5 h-3.5 text-emerald-500 shrink-0" />
               <span className="truncate">Placement</span>
             </span>
-            <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-xs sm:text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
               Ready
             </span>
           </div>
@@ -100,7 +100,7 @@ export const KpiMetricsSection = ({ units = [], tenants = [], tickets = [], onAd
           <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold font-grotesk text-slate-900 dark:text-white tracking-tight">
             {vacantUnits} <span className="text-xs sm:text-sm font-normal text-slate-500 dark:text-slate-400">Vacant</span>
           </h3>
-          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+          <p className="text-xs sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
             Immediate lease opportunities
           </p>
         </div>
@@ -108,7 +108,7 @@ export const KpiMetricsSection = ({ units = [], tenants = [], tickets = [], onAd
         <button
           type="button"
           onClick={onAddTenant}
-          className="mt-2.5 sm:mt-3 w-full py-1.5 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] sm:text-xs font-bold font-grotesk btn-press flex items-center justify-center gap-1 shadow-sm min-h-[36px]"
+          className="mt-2.5 sm:mt-3 w-full py-1.5 px-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs sm:text-xs font-bold font-grotesk btn-press flex items-center justify-center gap-1 shadow-sm min-h-[36px]"
         >
           <span>Assign Tenant</span>
           <ArrowUpRight className="w-3.5 h-3.5" />
@@ -119,17 +119,17 @@ export const KpiMetricsSection = ({ units = [], tenants = [], tickets = [], onAd
       <div className="group relative top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-3.5 sm:p-5 transition-all hover:border-amber-500/50 dark:hover:border-amber-500/30 overflow-hidden flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between mb-2 sm:mb-3">
-            <span className="text-[11px] sm:text-xs font-mono font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1 sm:gap-1.5 truncate">
+            <span className="text-xs sm:text-xs font-mono font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1 sm:gap-1.5 truncate">
               <Wrench className="w-3.5 h-3.5 text-amber-500 shrink-0" />
               <span className="truncate">Repairs</span>
             </span>
             {pendingTickets > 0 ? (
-              <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold font-mono bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-0.5">
+              <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-xs sm:text-xs font-bold font-mono bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex items-center gap-0.5">
                 <AlertCircle className="w-2.5 h-2.5" />
                 {pendingTickets}
               </span>
             ) : (
-              <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-0.5">
+              <span className="px-1.5 sm:px-2 py-0.5 rounded-full text-xs sm:text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-0.5">
                 <CheckCircle2 className="w-2.5 h-2.5" />
                 Clear
               </span>
@@ -139,7 +139,7 @@ export const KpiMetricsSection = ({ units = [], tenants = [], tickets = [], onAd
           <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold font-grotesk text-slate-900 dark:text-white tracking-tight">
             {tickets.length} <span className="text-xs sm:text-sm font-normal text-slate-500 dark:text-slate-400">Total</span>
           </h3>
-          <p className="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 truncate">
+          <p className="text-xs sm:text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">
             {pendingTickets > 0 ? `${pendingTickets} in pipeline` : 'Zero bottlenecks'}
           </p>
         </div>
@@ -147,7 +147,7 @@ export const KpiMetricsSection = ({ units = [], tenants = [], tickets = [], onAd
         <button
           type="button"
           onClick={onNavigateTickets}
-          className="mt-2.5 sm:mt-3 w-full py-1.5 px-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-[11px] sm:text-xs font-semibold btn-press flex items-center justify-center gap-1 min-h-[36px]"
+          className="mt-2.5 sm:mt-3 w-full py-1.5 px-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs sm:text-xs font-semibold btn-press flex items-center justify-center gap-1 min-h-[36px]"
         >
           <span>Manage Queue</span>
           <ArrowUpRight className="w-3.5 h-3.5" />

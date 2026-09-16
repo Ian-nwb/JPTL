@@ -96,7 +96,7 @@ export const PricingSection = ({ onNavigate = () => {} }) => {
               {['No hidden fees', 'Monthly billing', 'Cancel anytime'].map((pill) => (
                 <span
                   key={pill}
-                  className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/[0.04] font-mono text-[11px] tracking-wide uppercase text-slate-600 dark:text-slate-400"
+                  className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-white/[0.04] font-mono text-xs tracking-wide uppercase text-slate-600 dark:text-slate-400"
                 >
                   {pill}
                 </span>
@@ -120,7 +120,7 @@ export const PricingSection = ({ onNavigate = () => {} }) => {
             >
               {/* Top row: label + dot */}
               <div className="flex items-center justify-between mb-4">
-                <span className="font-mono text-[10px] tracking-[0.15em] uppercase text-slate-500 dark:text-slate-400 font-semibold">
+                <span className="font-mono text-xs tracking-[0.15em] uppercase text-slate-500 dark:text-slate-400 font-semibold">
                   {tier.label}
                 </span>
                 <span className={`w-2.5 h-2.5 rounded-full ${tier.dotColor}`} />
@@ -185,7 +185,7 @@ export const PricingSection = ({ onNavigate = () => {} }) => {
               </ul>
 
               {/* Tagline */}
-              <p className="font-mono text-[10px] tracking-wide uppercase text-slate-400 dark:text-slate-500 mb-5 leading-relaxed">
+              <p className="font-mono text-xs tracking-wide uppercase text-slate-400 dark:text-slate-500 mb-5 leading-relaxed">
                 {tier.tagline}
               </p>
 
@@ -224,7 +224,7 @@ export const PricingSection = ({ onNavigate = () => {} }) => {
           ].map((text) => (
             <div
               key={text}
-              className="reveal-init px-5 py-3.5 rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100/50 dark:bg-white/[0.02] font-mono text-[10px] tracking-wide uppercase text-slate-400 dark:text-slate-500 text-center"
+              className="reveal-init px-5 py-3.5 rounded-xl border border-slate-200 dark:border-white/[0.06] bg-slate-100/50 dark:bg-white/[0.02] font-mono text-xs tracking-wide uppercase text-slate-400 dark:text-slate-500 text-center"
             >
               {text}
             </div>

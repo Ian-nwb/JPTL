@@ -263,7 +263,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
                 <span className="font-grotesk font-extrabold text-sm tracking-tight text-slate-900 dark:text-white block leading-tight">
                   JPTL<span className="text-indigo-600 dark:text-indigo-400">.RESIDENT</span>
                 </span>
-                <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 block leading-none">
+                <span className="text-xs font-mono text-slate-400 dark:text-slate-500 block leading-none">
                   {unitLabel}
                 </span>
               </div>
@@ -277,7 +277,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
               >
                 <Search className="w-3.5 h-3.5 mr-2 shrink-0" />
                 <span className="flex-1 text-left">Search…</span>
-                <span className="font-mono text-[10px] bg-slate-200 dark:bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded">Ctrl K</span>
+                <span className="font-mono text-xs bg-slate-200 dark:bg-slate-800 text-slate-500 px-1.5 py-0.5 rounded">Ctrl K</span>
               </button>
             </div>
 
@@ -319,7 +319,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
                 </div>
                 <div className="text-right hidden sm:block">
                   <span className="text-xs font-bold text-slate-900 dark:text-white block leading-tight">{displayName}</span>
-                  <span className="text-[10px] font-mono text-indigo-600 dark:text-indigo-400">{unitLabel}</span>
+                  <span className="text-xs font-mono text-indigo-600 dark:text-indigo-400">{unitLabel}</span>
                 </div>
               </button>
 

@@ -77,7 +77,7 @@ export const CountryCodeDropdown = ({
         aria-expanded={isOpen}
       >
         <span className="text-base leading-none select-none">{selectedCountry.flag}</span>
-        <span className="font-mono text-[11px] text-slate-600 dark:text-slate-300">
+        <span className="font-mono text-xs text-slate-600 dark:text-slate-300">
           {selectedCountry.dialCode}
         </span>
         <ChevronDown
@@ -137,13 +137,13 @@ export const CountryCodeDropdown = ({
                     <div className="flex items-center gap-2.5 min-w-0 pr-2">
                       <span className="text-base shrink-0 select-none">{country.flag}</span>
                       <span className="truncate">{country.name}</span>
-                      <span className="text-[10px] font-mono text-slate-400 shrink-0 uppercase">
+                      <span className="text-xs font-mono text-slate-400 shrink-0 uppercase">
                         {country.code}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-1.5 shrink-0">
-                      <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">
+                      <span className="font-mono text-xs text-slate-500 dark:text-slate-400">
                         {country.dialCode}
                       </span>
                       {isSelected && <Check className="w-3.5 h-3.5 text-indigo-500 shrink-0" />}

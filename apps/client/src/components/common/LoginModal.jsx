@@ -231,7 +231,7 @@ export const LoginModal = ({ isOpen, initialRole = 'tenant', onClose, onLoginSuc
                       </div>
 
                       <div>
-                        <label className="text-xs text-slate-300 font-medium mb-1.5 block">Middle Name <span className="text-slate-500 text-[10px]">(Opt)</span></label>
+                        <label className="text-xs text-slate-300 font-medium mb-1.5 block">Middle Name <span className="text-slate-500 text-xs">(Opt)</span></label>
                         <input
                           type="text"
                           placeholder="e.g. J."
@@ -352,7 +352,7 @@ export const LoginModal = ({ isOpen, initialRole = 'tenant', onClose, onLoginSuc
             </AnimatePresence>
 
             <div className="mt-4 text-center">
-              <p className="text-[11px] text-slate-500">
+              <p className="text-xs text-slate-500">
                 FR-001 Compliant: Role-based JWT Auth simulation
               </p>
             </div>

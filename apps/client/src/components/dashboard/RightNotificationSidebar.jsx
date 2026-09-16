@@ -116,7 +116,7 @@ export const RightNotificationSidebar = ({
           
           {/* Controls: Mark Read + Filter */}
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-[10px] font-mono">
+            <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800 text-xs font-mono">
               <button
                 onClick={() => setFilter('all')}
                 className={`px-2.5 py-1 rounded-lg transition-all ${filter === 'all' ? 'bg-indigo-600 text-white font-bold' : 'text-slate-400 hover:text-white'}`}
@@ -134,7 +134,7 @@ export const RightNotificationSidebar = ({
             {unreadCount > 0 && (
               <button
                 onClick={markAllRead}
-                className="text-[10px] font-mono text-indigo-500 hover:underline flex items-center gap-1 btn-press"
+                className="text-xs font-mono text-indigo-500 hover:underline flex items-center gap-1 btn-press"
               >
                 <Check className="w-3 h-3" /> Mark all read
               </button>
@@ -143,7 +143,7 @@ export const RightNotificationSidebar = ({
             {notifs.length > 0 && (
               <button
                 onClick={clearAll}
-                className="text-[10px] font-mono text-rose-400 hover:underline flex items-center gap-1 btn-press"
+                className="text-xs font-mono text-rose-400 hover:underline flex items-center gap-1 btn-press"
               >
                 <Trash2 className="w-3 h-3" /> Clear all
               </button>
@@ -163,7 +163,7 @@ export const RightNotificationSidebar = ({
                   <Sparkles className="w-5 h-5" />
                 </div>
                 <h4 className="text-xs font-bold font-grotesk text-slate-800 dark:text-slate-200">All caught up!</h4>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed font-sans">
+                <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-sans">
                   No notifications to display right now.
                 </p>
               </div>
@@ -178,7 +178,7 @@ export const RightNotificationSidebar = ({
                       : 'border-slate-200 dark:border-slate-800/80 opacity-75 hover:opacity-100'
                   }`}
                 >
-                  <div className="flex items-center justify-between text-[10px] font-mono">
+                  <div className="flex items-center justify-between text-xs font-mono">
                     <span className="text-indigo-400 font-semibold uppercase">{n.type}</span>
                     <span className="text-slate-400">{n.time}</span>
                   </div>
@@ -188,7 +188,7 @@ export const RightNotificationSidebar = ({
                     {n.title}
                   </h5>
 
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-normal">
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-normal">
                     {n.body}
                   </p>
                 </div>

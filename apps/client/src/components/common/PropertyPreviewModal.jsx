@@ -31,7 +31,7 @@ export const PropertyPreviewModal = ({ property, onClose, onOpenLogin }) => {
 
           <div className="absolute bottom-4 left-6 right-6 flex justify-between items-end">
             <div>
-              <span className="px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-indigo-600 text-white rounded-md mb-1 inline-block">
+              <span className="px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider bg-indigo-600 text-white rounded-md mb-1 inline-block">
                 {property.category}
               </span>
               <h3 className="text-2xl font-bold text-white font-heading">{property.name}</h3>
@@ -41,7 +41,7 @@ export const PropertyPreviewModal = ({ property, onClose, onOpenLogin }) => {
             </div>
 
             <div className="text-right">
-              <span className="text-[10px] text-slate-400 font-semibold block">OCCUPANCY RATE</span>
+              <span className="text-xs text-slate-400 font-semibold block">OCCUPANCY RATE</span>
               <span className="text-lg font-bold text-emerald-400 font-heading">{property.occupancyRate}%</span>
             </div>
           </div>
@@ -53,15 +53,15 @@ export const PropertyPreviewModal = ({ property, onClose, onOpenLogin }) => {
           {/* Key Overview Bar */}
           <div className="grid grid-cols-3 gap-3 p-3.5 bg-slate-900/90 rounded-2xl border border-slate-800 text-center text-xs">
             <div>
-              <div className="text-slate-500 text-[10px]">TOTAL UNITS</div>
+              <div className="text-slate-500 text-xs">TOTAL UNITS</div>
               <div className="text-sm font-bold text-white mt-0.5">{property.unitsCount} Units</div>
             </div>
             <div>
-              <div className="text-slate-500 text-[10px]">LANDLORD</div>
+              <div className="text-slate-500 text-xs">LANDLORD</div>
               <div className="text-sm font-bold text-indigo-400 mt-0.5">{property.landlordName}</div>
             </div>
             <div>
-              <div className="text-slate-500 text-[10px]">PWA STATUS</div>
+              <div className="text-slate-500 text-xs">PWA STATUS</div>
               <div className="text-sm font-bold text-emerald-400 mt-0.5">VAPID Push Ready</div>
             </div>
           </div>
@@ -83,7 +83,7 @@ export const PropertyPreviewModal = ({ property, onClose, onOpenLogin }) => {
                     <div>
                       <div className="flex items-center gap-2">
                         <span className="font-bold text-white text-sm font-heading">{unit.label}</span>
-                        <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full uppercase ${
+                        <span className={`px-2 py-0.5 text-xs font-bold rounded-full uppercase ${
                           unit.status === 'occupied' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'bg-amber-500/10 text-amber-400 border border-amber-500/20'
                         }`}>
                           {unit.status}
@@ -100,7 +100,7 @@ export const PropertyPreviewModal = ({ property, onClose, onOpenLogin }) => {
                     <div className="flex items-center justify-between sm:justify-end gap-4 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-800">
                       <div className="text-left sm:text-right">
                         <div className="text-sm font-bold text-white font-heading">${unit.monthlyRent.toLocaleString()}<span className="text-xs font-normal text-slate-400">/mo</span></div>
-                        <div className="text-[10px] text-slate-400">{unit.tenantName ? `Tenant: ${unit.tenantName}` : 'Available for Lease'}</div>
+                        <div className="text-xs text-slate-400">{unit.tenantName ? `Tenant: ${unit.tenantName}` : 'Available for Lease'}</div>
                       </div>
 
                       <button

@@ -6,6 +6,7 @@ import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { TenantPortalPage } from './pages/TenantPortalPage';
 import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { NotFoundPage } from './pages/NotFoundPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { notificationApi, systemApi } from './services/api';
 
@@ -77,7 +78,7 @@ class ErrorBoundary extends Component {
             <p className="text-xs text-slate-300 font-mono leading-relaxed">
               {this.state.error?.toString()}
             </p>
-            <pre className="p-3 rounded-xl bg-black text-[10px] text-rose-300 font-mono overflow-x-auto max-h-48">
+            <pre className="p-3 rounded-xl bg-black text-xs text-rose-300 font-mono overflow-x-auto max-h-48">
               {this.state.error?.stack}
             </pre>
             <button
@@ -166,7 +167,9 @@ function AppRouter() {
       const publicPaths = ['/login', '/', '/register', '/forgot-password'];
       const isPublic =
         publicPaths.includes(currentPath) || currentPath.startsWith('/reset-password');
-      if (!isPublic) {
+      const protectedPrefixes = ['/dashboard', '/tenant', '/onboarding'];
+      const isProtected = protectedPrefixes.some(p => currentPath.startsWith(p));
+      if (!isPublic && isProtected) {
         window.history.replaceState({}, '', '/login');
         setCurrentPath('/login');
       }
@@ -204,7 +207,7 @@ function AppRouter() {
             </svg>
           </div>
           <div className="space-y-2">
-            <span className="px-3 py-1 rounded-full text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <span className="px-3 py-1 rounded-full text-xs font-mono font-bold uppercase tracking-wider bg-amber-500/10 text-amber-400 border border-amber-500/20">
               System Lockdown
             </span>
             <h1 className="text-xl font-extrabold font-grotesk tracking-tight text-white">
@@ -236,9 +239,12 @@ function AppRouter() {
   }
 
   // 3. Unauthenticated user on protected route
-  if (!isAuthenticated && currentPath !== '/' && currentPath !== '/register' &&
-      currentPath !== '/forgot-password' && !currentPath.startsWith('/reset-password')) {
-    return <LoginPage onNavigate={navigate} />;
+  if (!isAuthenticated) {
+    const protectedPrefixes = ['/dashboard', '/tenant', '/onboarding'];
+    const isProtected = protectedPrefixes.some(p => currentPath.startsWith(p));
+    if (isProtected) {
+      return <LoginPage onNavigate={navigate} />;
+    }
   }
 
   // 4. Render matched route
@@ -248,8 +254,10 @@ function AppRouter() {
   if (currentPath === '/forgot-password' || currentPath.startsWith('/reset-password')) return <ForgotPasswordPage onNavigate={navigate} />;
   if (currentPath.startsWith('/tenant')) return <TenantPortalPage onNavigate={navigate} />;
   if (currentPath.startsWith('/dashboard')) return <DashboardPage onNavigate={navigate} />;
+  if (currentPath === '/') return <LandingPage onNavigate={navigate} />;
 
-  return <LandingPage onNavigate={navigate} />;
+  // Catch-all: 404
+  return <NotFoundPage onNavigate={navigate} />;
 }
 
 /* ─────────────────────────────────────────────
