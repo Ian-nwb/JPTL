@@ -150,14 +150,14 @@ function GlobalNetwork() {
   const [pulses] = useState([0, 1, 2, 3, 4]);
 
   return (
-    <div className="flex items-center justify-center h-full relative">
-      <Globe className="w-16 h-16 text-blue-600 dark:text-blue-400 z-10" />
+    <div className="flex items-center justify-center h-full relative py-4 sm:py-6">
+      <Globe className="w-12 h-12 sm:w-14 sm:h-14 text-blue-600 dark:text-blue-400 z-10" />
       {pulses.map((pulse) => (
         <motion.div
           key={pulse}
-          className="absolute w-16 h-16 border-2 border-blue-500/40 rounded-full"
+          className="absolute w-12 h-12 sm:w-14 sm:h-14 border-2 border-blue-500/40 rounded-full"
           initial={{ scale: 0.5, opacity: 1 }}
-          animate={{ scale: 3, opacity: 0 }}
+          animate={{ scale: 2.4, opacity: 0 }}
           transition={{
             duration: 3,
             repeat: Infinity,
@@ -172,10 +172,10 @@ function GlobalNetwork() {
 
 export function BentoGrid01() {
   return (
-    <section id="features" className="bg-slate-50 dark:bg-[#08080C] px-6 py-24 border-t border-slate-200 dark:border-white/10 transition-colors duration-300">
+    <section id="features" className="bg-slate-50 dark:bg-[#08080C] px-4 sm:px-6 py-16 sm:py-24 border-t border-slate-200 dark:border-white/10 transition-colors duration-300">
       <div className="max-w-7xl w-full mx-auto">
         
-        <div className="mb-12 text-center">
+        <div className="mb-10 sm:mb-12 text-center">
           <motion.span
             className="inline-block text-blue-600 dark:text-blue-400 font-mono text-xs uppercase tracking-widest px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 mb-3"
             initial={{ opacity: 0, y: 20 }}
@@ -195,37 +195,37 @@ export function BentoGrid01() {
           </motion.h2>
         </div>
 
-        {/* Bento Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 auto-rows-[200px]">
+        {/* Bento Grid: Responsive auto-rows so mobile cards never clip or overlap */}
+        <div className="grid grid-cols-1 md:grid-cols-6 gap-4 auto-rows-auto md:auto-rows-[200px]">
           
           {/* 1. Maintenance Workflow - Tall (2x2) */}
           <motion.div
-            className="md:col-span-2 md:row-span-2 bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 rounded-2xl p-8 flex flex-col hover:border-blue-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-md shadow-md"
+            className="md:col-span-2 md:row-span-2 bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 sm:p-8 flex flex-col hover:border-blue-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-md shadow-md min-h-[260px] md:min-h-0"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <div className="flex-1">
+            <div className="flex-1 py-4">
               <TypeTester />
             </div>
             <div className="mt-4">
-              <h3 className="font-grotesk text-xl text-slate-900 dark:text-white font-bold flex items-center gap-2">
-                <Wrench className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <h3 className="font-grotesk text-lg sm:text-xl text-slate-900 dark:text-white font-bold flex items-center gap-2">
+                <Wrench className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
                 Ticket Workflow Engine
               </h3>
-              <p className="text-slate-600 dark:text-gray-400 text-sm mt-1">Cascading status transitions with automatic side-effect history logging.</p>
+              <p className="text-slate-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Cascading status transitions with automatic side-effect history logging.</p>
             </div>
           </motion.div>
 
           {/* 2. Multi-Role RBAC - Standard (2x1) */}
           <motion.div
-            className="md:col-span-2 bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 flex flex-col justify-between hover:border-purple-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-md shadow-md"
+            className="md:col-span-2 bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 flex flex-col justify-between hover:border-purple-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-md shadow-md min-h-[190px] md:min-h-0"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            whileHover={{ scale: 0.98 }}
+            whileTap={{ scale: 0.98 }}
           >
             <div>
               <LayoutAnimation />
@@ -235,93 +235,95 @@ export function BentoGrid01() {
                 <Building2 className="w-5 h-5 text-purple-600 dark:text-purple-400 shrink-0" />
                 Multi-Role Scoped Access
               </h3>
-              <p className="text-slate-600 dark:text-gray-400 text-xs sm:text-sm mt-0.5 leading-snug">Server-side MongoDB query scoping per tenant & landlord.</p>
+              <p className="text-slate-600 dark:text-gray-400 text-xs sm:text-sm mt-0.5 leading-snug">Server-side MongoDB query scoping per tenant &amp; landlord.</p>
             </div>
           </motion.div>
 
           {/* 3. VAPID Push Network - Tall (2x2) */}
           <motion.div
-            className="md:col-span-2 md:row-span-2 bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 rounded-2xl p-6 flex flex-col hover:border-blue-400/50 transition-all cursor-pointer overflow-hidden backdrop-blur-md shadow-md"
+            className="md:col-span-2 md:row-span-2 bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 flex flex-col hover:border-blue-400/50 transition-all cursor-pointer overflow-hidden backdrop-blur-md shadow-md min-h-[300px] md:min-h-0"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <div className="flex-1 flex items-center justify-center">
+            <div className="flex-1 flex items-center justify-center min-h-[140px] sm:min-h-[180px]">
               <div className="relative">
                 <GlobalNetwork />
               </div>
             </div>
-            <div className="mt-auto relative z-20 bg-slate-50 dark:bg-zinc-950/80 backdrop-blur-sm rounded-xl p-3 border border-slate-200 dark:border-white/10">
-              <h3 className="font-grotesk text-xl text-slate-900 dark:text-white flex items-center gap-2 font-bold">
-                <Globe className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div className="mt-auto relative z-20 bg-slate-50 dark:bg-zinc-950/80 backdrop-blur-sm rounded-xl p-3 sm:p-3.5 border border-slate-200 dark:border-white/10">
+              <h3 className="font-grotesk text-base sm:text-xl text-slate-900 dark:text-white flex items-center gap-2 font-bold">
+                <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400 shrink-0" />
                 VAPID Push Notification Network
               </h3>
-              <p className="text-slate-600 dark:text-gray-400 text-sm mt-1">Instant real-time web-push alerts on ticket updates & rent checkout.</p>
+              <p className="text-slate-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Instant real-time web-push alerts on ticket updates &amp; rent checkout.</p>
             </div>
           </motion.div>
 
           {/* 4. Express Speed - Standard (2x1) */}
           <motion.div
-            className="md:col-span-2 bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 rounded-2xl p-8 flex flex-col hover:border-emerald-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-md shadow-md"
+            className="md:col-span-2 bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 md:p-8 flex flex-col justify-between hover:border-emerald-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-md shadow-md min-h-[190px] md:min-h-0"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3 }}
-            whileHover={{ scale: 0.98 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <div className="flex-1">
+            <div className="flex-1 py-1">
               <SpeedIndicator />
             </div>
-            <div className="mt-4">
-              <h3 className="font-grotesk text-xl text-slate-900 dark:text-white font-bold flex items-center gap-2">
-                <Zap className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <div className="mt-2 sm:mt-4">
+              <h3 className="font-grotesk text-lg sm:text-xl text-slate-900 dark:text-white font-bold flex items-center gap-2">
+                <Zap className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                 Synchronous Execution
               </h3>
-              <p className="text-slate-600 dark:text-gray-400 text-sm mt-1">Single request-cycle guarantees zero event drops.</p>
+              <p className="text-slate-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Single request-cycle guarantees zero event drops.</p>
             </div>
           </motion.div>
 
           {/* 5. Enterprise Audit Security - Wide (3x1) */}
           <motion.div
-            className="md:col-span-3 bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 rounded-2xl p-8 flex flex-col hover:border-pink-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-md shadow-md"
+            className="md:col-span-3 bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 md:p-8 flex flex-col justify-between hover:border-pink-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-md shadow-md min-h-[200px] md:min-h-0"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.4 }}
-            whileHover={{ scale: 0.98 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <div className="flex-1">
+            <div className="flex-1 py-1">
               <SecurityBadge />
             </div>
-            <div className="mt-4">
-              <h3 className="font-grotesk text-xl text-slate-900 dark:text-white flex items-center gap-2 font-bold">
-                <Lock className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+            <div className="mt-2 sm:mt-4">
+              <h3 className="font-grotesk text-lg sm:text-xl text-slate-900 dark:text-white flex items-center gap-2 font-bold">
+                <Lock className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0" />
                 Persistent Audit Trail
               </h3>
-              <p className="text-slate-600 dark:text-gray-400 text-sm mt-1">Centralized MongoDB audit logging middleware tracks every administrative, ticket, and payment action.</p>
+              <p className="text-slate-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Centralized MongoDB audit logging middleware tracks every administrative, ticket, and payment action.</p>
             </div>
           </motion.div>
 
           {/* 6. Multi-Unit Property Management - Wide (3x1) */}
           <motion.div
-            className="md:col-span-3 bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 rounded-2xl p-8 flex flex-col hover:border-amber-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-md shadow-md"
+            className="md:col-span-3 bg-white dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 rounded-2xl p-5 sm:p-6 md:p-8 flex flex-col justify-between hover:border-amber-500/50 transition-all cursor-pointer overflow-hidden backdrop-blur-md shadow-md min-h-[200px] md:min-h-0"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.5 }}
-            whileHover={{ scale: 0.98 }}
+            whileTap={{ scale: 0.98 }}
           >
-            <div className="flex-1 flex items-center justify-center">
-              <Home className="w-16 h-16 text-amber-500 dark:text-amber-400" />
+            <div className="flex-1 flex items-center justify-center py-2">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+                <Home className="w-8 h-8 sm:w-9 sm:h-9 text-amber-500 dark:text-amber-400" />
+              </div>
             </div>
-            <div className="mt-4">
-              <h3 className="font-grotesk text-xl text-slate-900 dark:text-white font-bold flex items-center gap-2">
-                <Home className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+            <div className="mt-2 sm:mt-4">
+              <h3 className="font-grotesk text-lg sm:text-xl text-slate-900 dark:text-white font-bold flex items-center gap-2">
+                <Home className="w-5 h-5 text-amber-500 dark:text-amber-400 shrink-0 md:hidden" />
                 Multi-Unit Property Management
               </h3>
-              <p className="text-slate-600 dark:text-gray-400 text-sm mt-1">Portfolio management, lease agreements, and automated tenant maintenance tracking.</p>
+              <p className="text-slate-600 dark:text-gray-400 text-xs sm:text-sm mt-1">Portfolio management, lease agreements, and automated tenant maintenance tracking.</p>
             </div>
           </motion.div>
 

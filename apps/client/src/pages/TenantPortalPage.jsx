@@ -23,6 +23,9 @@ import { TenantDocumentsTab } from '../components/tenant/TenantDocumentsTab';
 import { PayRentModal } from '../components/tenant/PayRentModal';
 import { ReportIssueModal } from '../components/tenant/ReportIssueModal';
 import { RightNotificationSidebar } from '../components/dashboard/RightNotificationSidebar';
+import { MobileNavBar } from '../components/common/MobileNavBar';
+import { MobileNavDrawer } from '../components/common/MobileNavDrawer';
+import { FileCheck, LayoutDashboard, Settings } from 'lucide-react';
 
 const MOCK_RESIDENT_ANNOUNCEMENTS = [
   {
@@ -76,6 +79,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
   const [isPayRentOpen, setIsPayRentOpen] = useState(false);
   const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // Load live data from server on mount + auto-refresh polling
   useEffect(() => {
@@ -247,11 +251,26 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
       <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
 
         {/* ─── TOP BAR ─── */}
-        <header className="sticky top-0 z-30 apple-glass border-b border-slate-200 dark:border-slate-800 px-6 py-3">
-          <div className="flex items-center justify-between gap-4">
+        <header className="sticky top-0 z-30 apple-glass border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-2.5 sm:py-3">
+          <div className="flex items-center justify-between gap-3">
 
-            {/* Search (⌘K) */}
-            <div className="flex items-center gap-3 w-full max-w-md">
+            {/* Mobile Brand Identity */}
+            <div className="flex items-center gap-2 md:hidden">
+              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/30 shrink-0">
+                <Home className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="font-grotesk font-extrabold text-sm tracking-tight text-slate-900 dark:text-white block leading-tight">
+                  JPTL<span className="text-indigo-600 dark:text-indigo-400">.RESIDENT</span>
+                </span>
+                <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 block leading-none">
+                  {unitLabel}
+                </span>
+              </div>
+            </div>
+
+            {/* Desktop Search (⌘K) */}
+            <div className="hidden md:flex items-center gap-3 w-full max-w-md">
               <button
                 type="button"
                 className="flex items-center w-full bg-slate-100 dark:bg-[#10131F] border border-slate-200 dark:border-slate-800 rounded-xl pl-3 pr-2 py-2 text-xs text-slate-400 hover:border-indigo-500/50 transition-colors cursor-pointer btn-press"
@@ -263,7 +282,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
             </div>
 
             {/* Right Controls */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
               
               {/* Notification Bell */}
               <button
@@ -284,9 +303,14 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
                 {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
               </button>
 
-              {/* User Avatar + Unit Pill */}
-              <div className="flex items-center gap-2.5 pl-2 border-l border-slate-200 dark:border-slate-800">
-                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold font-grotesk overflow-hidden">
+              {/* User Avatar + Unit Pill (opens MobileNavDrawer on mobile) */}
+              <button
+                type="button"
+                onClick={() => setIsMobileNavOpen(true)}
+                className="flex items-center gap-2.5 pl-1 sm:pl-2 border-l border-slate-200 dark:border-slate-800 btn-press cursor-pointer"
+                aria-label="Open menu"
+              >
+                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold font-grotesk overflow-hidden shadow-sm">
                   {user?.avatarUrl ? (
                     <img src={user.avatarUrl} alt={displayName} className="w-full h-full object-cover" />
                   ) : (
@@ -297,7 +321,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
                   <span className="text-xs font-bold text-slate-900 dark:text-white block leading-tight">{displayName}</span>
                   <span className="text-[10px] font-mono text-indigo-600 dark:text-indigo-400">{unitLabel}</span>
                 </div>
-              </div>
+              </button>
 
             </div>
 
@@ -305,7 +329,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
         </header>
 
         {/* ─── SCROLLABLE MAIN TAB CONTENT ─── */}
-        <main className="flex-1 px-6 py-6 space-y-6 overflow-y-auto">
+        <main className="flex-1 px-3 py-4 sm:px-6 sm:py-6 space-y-5 sm:space-y-6 overflow-y-auto pb-28 md:pb-8">
           
           {activeTab === 'overview' && (
             <TenantOverviewTab
@@ -398,6 +422,42 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
         tenant={currentTenant}
         unit={currentUnit}
         onTicketSubmitted={handleTicketSubmitted}
+      />
+
+      {/* ─── MOBILE BOTTOM NAVIGATION BAR ─── */}
+      <MobileNavBar
+        items={[
+          { key: 'overview', label: 'Home', icon: LayoutDashboard },
+          { key: 'payments', label: 'Rent', icon: CreditCard },
+          { key: 'maintenance', label: 'Repairs', icon: Wrench, badge: tickets.filter((t) => t.status !== 'resolved').length || undefined },
+          { key: 'lease', label: 'My Lease', icon: FileText },
+        ]}
+        activeKey={activeTab}
+        onSelect={(tab) => setActiveTab(tab)}
+        onOpenMore={() => setIsMobileNavOpen(true)}
+      />
+
+      {/* ─── MOBILE NAV DRAWER (MORE SHEET) ─── */}
+      <MobileNavDrawer
+        isOpen={isMobileNavOpen}
+        onClose={() => setIsMobileNavOpen(false)}
+        user={currentTenant}
+        roleTitle="Resident"
+        metaInfo={unitLabel}
+        items={[
+          { key: 'overview', label: 'Home Overview', icon: LayoutDashboard },
+          { key: 'payments', label: 'Rent & Payments', icon: CreditCard },
+          { key: 'maintenance', label: 'Maintenance Requests', icon: Wrench, badge: tickets.filter((t) => t.status !== 'resolved').length || undefined },
+          { key: 'lease', label: 'My Lease Agreement', icon: FileText },
+          { key: 'announcements', label: 'Building Announcements', icon: Megaphone },
+          { key: 'documents', label: 'Documents & Verification', icon: FileCheck },
+          { key: 'settings', label: 'Account & Settings', icon: Settings },
+        ]}
+        activeKey={activeTab}
+        onSelect={(tab) => setActiveTab(tab)}
+        onLogout={handleLogout}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
 
     </div>

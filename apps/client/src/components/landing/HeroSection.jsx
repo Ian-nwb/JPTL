@@ -43,7 +43,7 @@ export const HeroSection = ({ onOpenLogin, theme }) => {
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/70 dark:bg-white/[0.06] border border-slate-200/80 dark:border-white/10 backdrop-blur-lg shadow-sm">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               <span className="font-mono text-[11px] tracking-wide text-slate-600 dark:text-slate-400">
-                Course Prototype • Systems Integration
+                Smart Property Management • Resident &amp; Landlord Portal
               </span>
             </div>
           </div>
@@ -57,16 +57,16 @@ export const HeroSection = ({ onOpenLogin, theme }) => {
               Property Operations
             </span>
             <span className="block" style={stagger(230)}>
-              Integration <span className="gradient-shimmer">Engine</span>
+              Made <span className="gradient-shimmer">Effortless</span>
             </span>
           </h1>
 
           {/* Subtitle */}
           <p
-            className="mt-6 max-w-lg font-sans text-base sm:text-lg text-slate-500 dark:text-slate-400 leading-relaxed"
+            className="mt-6 max-w-xl font-sans text-base sm:text-lg text-slate-500 dark:text-slate-400 leading-relaxed"
             style={stagger(320)}
           >
-            3-tier RBAC access, maintenance status cascades, MongoDB audit logs, and VAPID push notifications — pre-loaded for course demonstration.
+            Streamline your multi-unit properties, track repair tickets in real time, collect seamless online rent payments, and give tenants a premium mobile living experience.
           </p>
 
           {/* CTA row */}
@@ -77,7 +77,7 @@ export const HeroSection = ({ onOpenLogin, theme }) => {
               style={{ transition: 'all 200ms cubic-bezier(0.23,1,0.32,1)' }}
             >
               <span className="flex items-center gap-2">
-                Launch Portal Demo
+                Resident Portal
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5" style={{ transition: 'transform 200ms cubic-bezier(0.23,1,0.32,1)' }} />
               </span>
             </button>

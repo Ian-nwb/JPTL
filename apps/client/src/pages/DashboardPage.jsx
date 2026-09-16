@@ -30,6 +30,9 @@ import { LandlordSettingsTab } from '../components/dashboard/LandlordSettingsTab
 import { LandlordDocumentsTab } from '../components/dashboard/LandlordDocumentsTab';
 import { DeletePropertyModal } from '../components/dashboard/DeletePropertyModal';
 import { AddPropertyOrUnitModal } from '../components/dashboard/AddPropertyOrUnitModal';
+import { MobileNavBar } from '../components/common/MobileNavBar';
+import { MobileNavDrawer } from '../components/common/MobileNavDrawer';
+import { LayoutDashboard, FileCheck, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { landlordApi } from '../services/api';
 
@@ -38,6 +41,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
   const { user, logout } = useAuth();
 
   const [activeView, setActiveView] = useState('overview');
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   const [properties, setProperties] = useState(() => {
     try {
@@ -627,11 +631,26 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
       <div className="flex-1 flex flex-col min-h-screen overflow-x-hidden">
 
         {/* ─── TOP BAR ─── */}
-        <header className="sticky top-0 z-30 apple-glass border-b border-slate-200 dark:border-slate-800 px-6 py-3">
-          <div className="flex items-center justify-between gap-4">
+        <header className="sticky top-0 z-30 apple-glass border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-2.5 sm:py-3">
+          <div className="flex items-center justify-between gap-3">
 
-            {/* Search (⌘K) */}
-            <div className="flex items-center gap-3 w-full max-w-md">
+            {/* Mobile Brand Identity */}
+            <div className="flex items-center gap-2 md:hidden">
+              <div className="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/30 shrink-0">
+                <Building2 className="w-4 h-4" />
+              </div>
+              <div>
+                <span className="font-grotesk font-extrabold text-sm tracking-tight text-slate-900 dark:text-white block leading-tight">
+                  JPTL<span className="text-indigo-600 dark:text-indigo-400">.SYS</span>
+                </span>
+                <span className="text-[10px] font-mono text-slate-400 dark:text-slate-500 block leading-none">
+                  Console
+                </span>
+              </div>
+            </div>
+
+            {/* Desktop Search (⌘K) */}
+            <div className="hidden md:flex items-center gap-3 w-full max-w-md">
               <button
                 onClick={() => setIsCommandPaletteOpen(true)}
                 className="flex items-center w-full bg-slate-100 dark:bg-[#10131F] border border-slate-200 dark:border-slate-800 rounded-xl pl-3 pr-2 py-2 text-xs text-slate-400 hover:border-indigo-500/50 transition-colors cursor-pointer btn-press"
@@ -643,7 +662,16 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
             </div>
 
             {/* Right Controls */}
-            <div className="flex items-center gap-3 shrink-0">
+            <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+              {/* Mobile Quick Search Button */}
+              <button
+                onClick={() => setIsCommandPaletteOpen(true)}
+                aria-label="Search"
+                className="p-2 rounded-xl bg-slate-100 dark:bg-[#10131F] hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 md:hidden btn-press"
+              >
+                <Search className="w-4 h-4" />
+              </button>
+
               {/* Notification Bell */}
               <button
                 onClick={() => setIsNotificationOpen(true)}
@@ -667,16 +695,21 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                 {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-indigo-600" />}
               </button>
 
-              {/* User Avatar + Name */}
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold font-grotesk overflow-hidden shrink-0">
+              {/* User Avatar + Name (opens MobileNavDrawer on mobile) */}
+              <button
+                type="button"
+                onClick={() => setIsMobileNavOpen(true)}
+                className="flex items-center gap-2.5 pl-1 sm:pl-2 border-l border-slate-200 dark:border-slate-800 btn-press cursor-pointer"
+                aria-label="Open menu"
+              >
+                <div className="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs font-bold font-grotesk overflow-hidden shrink-0 shadow-sm">
                   {user?.avatarUrl ? (
                     <img src={user.avatarUrl} alt={user?.firstName || 'User'} className="w-full h-full object-cover" />
                   ) : (
                     (user?.firstName?.[0] || 'L') + (user?.lastName?.[0] || '')
                   )}
                 </div>
-                <div className="text-right hidden md:block">
+                <div className="text-right hidden sm:block">
                   <span className="text-xs font-bold text-slate-900 dark:text-white block leading-tight">
                     {user?.name || [user?.firstName, user?.lastName].filter(Boolean).join(' ') || 'Landlord'}
                   </span>
@@ -684,14 +717,14 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                     {user?.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Landlord'}
                   </span>
                 </div>
-              </div>
+              </button>
             </div>
 
           </div>
         </header>
 
         {/* ─── SCROLLABLE MAIN CONTENT ─── */}
-        <main className="flex-1 px-6 py-6 space-y-6 overflow-y-auto">
+        <main className="flex-1 px-3 py-4 sm:px-6 sm:py-6 space-y-5 sm:space-y-6 overflow-y-auto pb-28 md:pb-8">
 
           {/* ═══════════════════════════════════════════ */}
           {/* ─── VIEW 1: OVERVIEW (informational only) ─── */}
@@ -715,10 +748,10 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
 
               {/* Hero Greeting */}
               <div>
-                <h1 className="text-3xl sm:text-4xl font-extrabold font-grotesk tracking-tight text-slate-900 dark:text-white leading-tight">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-grotesk tracking-tight text-slate-900 dark:text-white leading-tight break-words">
                   {greeting}, <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">{user?.firstName || 'Landlord'}</span> 👋
                 </h1>
-                <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Here's what's happening with your properties today.</p>
+                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Here's what's happening with your properties today.</p>
               </div>
 
               {/* KPI Stat Cards (informational — link to sidebar pages) */}
@@ -1308,6 +1341,43 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
         properties={properties}
         units={units}
         onTenantAssigned={handleTenantAssigned}
+      />
+
+      {/* ─── MOBILE BOTTOM NAVIGATION BAR ─── */}
+      <MobileNavBar
+        items={[
+          { key: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+          { key: 'units', label: 'Units', icon: Building2 },
+          { key: 'tickets', label: 'Repairs', icon: Wrench, badge: pendingTickets || undefined },
+          { key: 'payments', label: 'Rent Roll', icon: DollarSign },
+        ]}
+        activeKey={activeView}
+        onSelect={(view) => { setActiveView(view); setSearchQuery(''); setFilterStatus('all'); }}
+        onOpenMore={() => setIsMobileNavOpen(true)}
+      />
+
+      {/* ─── MOBILE NAV DRAWER (MORE SHEET) ─── */}
+      <MobileNavDrawer
+        isOpen={isMobileNavOpen}
+        onClose={() => setIsMobileNavOpen(false)}
+        user={user}
+        roleTitle="Landlord"
+        metaInfo="Property Admin"
+        items={[
+          { key: 'overview', label: 'Executive Dashboard', icon: LayoutDashboard },
+          { key: 'units', label: 'Properties & Units', icon: Building2 },
+          { key: 'tenants', label: 'Tenants Directory', icon: Users },
+          { key: 'payments', label: 'Rent Roll & Financials', icon: DollarSign },
+          { key: 'tickets', label: 'Maintenance Pipeline', icon: Wrench, badge: pendingTickets || undefined },
+          { key: 'announcements', label: 'Announcements Broadcast', icon: Megaphone },
+          { key: 'documents', label: 'Documents & Verification', icon: FileCheck, badge: documents.filter((d) => d.status === 'Pending Review').length || undefined },
+          { key: 'settings', label: 'Console Settings', icon: Settings },
+        ]}
+        activeKey={activeView}
+        onSelect={(view) => { setActiveView(view); setSearchQuery(''); setFilterStatus('all'); }}
+        onLogout={handleLogout}
+        theme={theme}
+        toggleTheme={toggleTheme}
       />
 
     </div>

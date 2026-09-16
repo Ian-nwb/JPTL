@@ -19,9 +19,10 @@
     --accent-pink: #EC4899;
     --accent-cyan: #06B6D4;
 
-    /* Easings from animate skill */
+    /* Easings from animate & emil-design-eng skills */
     --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
     --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+    --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
   }
 }
 
@@ -221,6 +222,26 @@
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+/* Mobile Safe Area and Bottom Navigation Utilities */
+.pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+}
+
+.bottom-sheet-enter {
+  animation: bottomSheetEnter 220ms var(--ease-drawer) forwards;
+}
+
+@keyframes bottomSheetEnter {
+  from {
+    opacity: 0;
+    transform: translateY(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 

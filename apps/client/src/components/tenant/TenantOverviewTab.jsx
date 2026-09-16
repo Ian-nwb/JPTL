@@ -34,15 +34,15 @@ export const TenantOverviewTab = ({
     <div className="space-y-6">
       
       {/* ─── 1. HERO RESIDENT LEASE BANNER ─── */}
-      <div className="relative overflow-hidden rounded-3xl apple-glass top-shade p-6 sm:p-8 border border-slate-200 dark:border-slate-800/90 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-        <div className="space-y-2">
+      <div className="relative overflow-hidden rounded-3xl apple-glass top-shade p-5 sm:p-8 border border-slate-200 dark:border-slate-800/90 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
+        <div className="space-y-2 w-full md:w-auto">
           
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-mono font-medium">
             <Home className="w-3.5 h-3.5 text-indigo-500" />
-            <span>{property?.name || 'JPTL Property Management'}</span>
+            <span className="truncate max-w-[240px] sm:max-w-none">{property?.name || 'JPTL Property Management'}</span>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold font-grotesk tracking-tight text-slate-900 dark:text-white leading-tight">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-grotesk tracking-tight text-slate-900 dark:text-white leading-tight break-words">
             Welcome, <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">{tenant?.name || tenant?.firstName || 'Resident'}</span> 👋
           </h1>
 
@@ -54,51 +54,49 @@ export const TenantOverviewTab = ({
               <span className="text-slate-500">Your unit will be assigned by your landlord.</span>
             </p>
           ) : (
-            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-mono flex items-center gap-3 flex-wrap">
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 font-mono flex items-center gap-2 sm:gap-3 flex-wrap">
               <span className="text-slate-900 dark:text-white font-bold">{unit?.label}</span>
               <span>&bull;</span>
               <span>{unit?.bedrooms} Bed &bull; {unit?.bathrooms} Bath{unit?.sqft ? ` (${unit.sqft} sqft)` : ''}</span>
               {diffDays !== null && (
                 <>
-                  <span>&bull;</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">{diffDays} days remaining on lease</span>
+                  <span className="hidden sm:inline">&bull;</span>
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold block sm:inline">{diffDays} days remaining on lease</span>
                 </>
               )}
             </p>
           )}
         </div>
 
-        {/* Action CTAs */}
-        <div className="flex items-center gap-3 shrink-0">
-          {!isPreAdded && (
+        {/* Action CTAs: 2-column full-width touch grid on mobile, inline flex on desktop */}
+        {!isPreAdded && (
+          <div className="grid grid-cols-2 gap-2.5 w-full md:w-auto md:flex md:items-center shrink-0">
             <button
               type="button"
               onClick={onRequestRepairClick}
-              className="px-4 py-3 rounded-2xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-grotesk font-semibold text-xs border border-slate-200 dark:border-slate-800 flex items-center gap-2 btn-press"
+              className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 rounded-2xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 font-grotesk font-semibold text-xs border border-slate-200 dark:border-slate-800 flex items-center justify-center gap-2 btn-press"
             >
               <Wrench className="w-4 h-4 text-amber-500" />
               <span>Report Repair</span>
             </button>
-          )}
 
-          {!isPreAdded && (
             <button
               type="button"
               onClick={onPayRentClick}
-              className="px-5 py-3 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-grotesk font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center gap-2 btn-press"
+              className="w-full sm:w-auto min-h-[44px] px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-grotesk font-bold text-xs shadow-lg shadow-emerald-600/20 flex items-center justify-center gap-2 btn-press"
             >
               <CreditCard className="w-4 h-4" />
               <span>Pay Rent</span>
             </button>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {/* ─── 2. KEY STATS & ACTION WIDGETS ─── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         
         {/* WIDGET 1: Rent Payment Card */}
-        <div className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-5 space-y-3 flex flex-col justify-between">
+        <div className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-4 sm:p-5 space-y-3 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
@@ -118,7 +116,7 @@ export const TenantOverviewTab = ({
 
             {isPreAdded ? (
               <>
-                <h3 className="text-3xl font-extrabold font-grotesk text-slate-400 dark:text-slate-500 tracking-tight mt-2">
+                <h3 className="text-2xl sm:text-3xl font-extrabold font-grotesk text-slate-400 dark:text-slate-500 tracking-tight mt-2">
                   —<span className="text-xs font-normal font-mono">/mo</span>
                 </h3>
                 <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
@@ -127,7 +125,7 @@ export const TenantOverviewTab = ({
               </>
             ) : (
               <>
-                <h3 className="text-3xl font-extrabold font-grotesk text-slate-900 dark:text-white tracking-tight mt-2">
+                <h3 className="text-2xl sm:text-3xl font-extrabold font-grotesk text-slate-900 dark:text-white tracking-tight mt-2">
                   ${monthlyRent !== null ? monthlyRent.toLocaleString() : '—'}<span className="text-xs font-normal text-slate-400 font-mono">/mo</span>
                 </h3>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
@@ -145,7 +143,7 @@ export const TenantOverviewTab = ({
                 </span>
                 <button
                   onClick={onPayRentClick}
-                  className="text-xs font-bold font-grotesk text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 btn-press"
+                  className="text-xs font-bold font-grotesk text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 min-h-[36px] btn-press"
                 >
                   Pay Rent <ArrowRight className="w-3 h-3" />
                 </button>
@@ -159,7 +157,7 @@ export const TenantOverviewTab = ({
         </div>
 
         {/* WIDGET 2: Active Maintenance Tracker */}
-        <div className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-5 space-y-3 flex flex-col justify-between">
+        <div className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-4 sm:p-5 space-y-3 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
@@ -186,7 +184,7 @@ export const TenantOverviewTab = ({
               </div>
             ) : (
               <div className="mt-3">
-                <h3 className="text-2xl font-extrabold font-grotesk text-slate-900 dark:text-white">0 Active Issues</h3>
+                <h3 className="text-xl sm:text-2xl font-extrabold font-grotesk text-slate-900 dark:text-white">0 Active Issues</h3>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Need a repair? Submit a request anytime.</p>
               </div>
             )}
@@ -195,13 +193,13 @@ export const TenantOverviewTab = ({
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between">
             <button
               onClick={onRequestRepairClick}
-              className="text-xs font-bold font-grotesk text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 btn-press"
+              className="text-xs font-bold font-grotesk text-amber-600 dark:text-amber-400 hover:underline flex items-center gap-1 min-h-[36px] btn-press"
             >
               + New Request
             </button>
             <button
               onClick={() => onNavigateTab('maintenance')}
-              className="text-xs font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 btn-press"
+              className="text-xs font-medium text-slate-500 hover:text-slate-900 dark:hover:text-white flex items-center gap-1 min-h-[36px] btn-press"
             >
               History <ArrowRight className="w-3 h-3" />
             </button>
@@ -209,7 +207,7 @@ export const TenantOverviewTab = ({
         </div>
 
         {/* WIDGET 3: Quick Building & Access Codes */}
-        <div className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-5 space-y-3 flex flex-col justify-between">
+        <div className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-4 sm:p-5 space-y-3 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-mono text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
@@ -219,16 +217,16 @@ export const TenantOverviewTab = ({
             </div>
 
             <div className="mt-3 space-y-2 text-xs font-mono">
-              <div className="flex justify-between items-center p-2 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60">
-                <span className="text-slate-400 flex items-center gap-1"><Key className="w-3 h-3" /> Gate / Front Code:</span>
-                <strong className="text-slate-900 dark:text-white tracking-widest">
+              <div className="flex justify-between items-center p-2 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60 gap-2">
+                <span className="text-slate-400 flex items-center gap-1 text-[11px] shrink-0"><Key className="w-3 h-3" /> Gate / Front Code:</span>
+                <strong className="text-slate-900 dark:text-white tracking-widest text-right">
                   {property?.accessCodes?.gateCode || '—'}
                 </strong>
               </div>
-              <div className="flex justify-between items-center p-2 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60">
-                <span className="text-slate-400 flex items-center gap-1"><Car className="w-3 h-3" /> Assigned Parking:</span>
+              <div className="flex justify-between items-center p-2 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/60 dark:border-slate-800/60 gap-2">
+                <span className="text-slate-400 flex items-center gap-1 text-[11px] shrink-0"><Car className="w-3 h-3" /> Assigned Parking:</span>
                 {Boolean(tenant?.hasParking ?? unit?.hasParking) ? (
-                  <strong className="text-indigo-500">{tenant?.parkingSpot || unit?.parkingSpot || 'Assigned Slot'}</strong>
+                  <strong className="text-indigo-500 truncate text-right">{tenant?.parkingSpot || unit?.parkingSpot || 'Assigned Slot'}</strong>
                 ) : (
                   <span className="text-slate-400 font-mono italic text-[11px]">None assigned</span>
                 )}
@@ -236,10 +234,10 @@ export const TenantOverviewTab = ({
             </div>
           </div>
 
-          <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 text-[11px] font-mono text-slate-400 flex items-center justify-between">
+          <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 text-[11px] font-mono text-slate-400 flex flex-wrap items-center justify-between gap-1">
             <span className="flex items-center gap-1">
-              <Wifi className="w-3 h-3 text-indigo-400" />
-              {property?.accessCodes?.wifiSsid || 'WiFi not configured'}
+              <Wifi className="w-3 h-3 text-indigo-400 shrink-0" />
+              <span className="truncate max-w-[150px]">{property?.accessCodes?.wifiSsid || 'WiFi not configured'}</span>
             </span>
             {property?.accessCodes?.wifiPassword ? (
               <span>Key: <strong className="text-slate-700 dark:text-slate-300">{property.accessCodes.wifiPassword}</strong></span>

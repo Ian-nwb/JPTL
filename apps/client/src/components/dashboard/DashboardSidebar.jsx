@@ -30,7 +30,7 @@ export const DashboardSidebar = ({
   return (
     <aside
       className={`
-        sticky top-0 z-30 h-screen flex flex-col
+        sticky top-0 z-30 h-screen hidden md:flex flex-col
         apple-glass
         border-r border-slate-200 dark:border-slate-800/80
         transition-all duration-200
