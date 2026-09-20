@@ -4,6 +4,8 @@ import {
   Calendar, ArrowRight, UserCheck, Star, MessageSquare, Phone, ChevronDown, Paperclip, Trash2 
 } from 'lucide-react';
 import { TechnicianDetailModal } from './TechnicianDetailModal';
+import { ConfirmationModal } from '../common/ConfirmationModal';
+import { useToast } from '../../context/ToastContext';
 
 export const TenantMaintenanceTab = ({
   tickets = [],
@@ -12,9 +14,11 @@ export const TenantMaintenanceTab = ({
   onRequestRepairClick,
   onDeleteTicket,
 }) => {
+  const toast = useToast();
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedTechTicket, setSelectedTechTicket] = useState(null);
   const [ratings, setRatings] = useState({});
+  const [deletingTicket, setDeletingTicket] = useState(null);
 
   const tenantTickets = Array.isArray(tickets) ? tickets : [];
 
@@ -143,13 +147,9 @@ export const TenantMaintenanceTab = ({
                     {onDeleteTicket && (
                       <button
                         type="button"
-                        onClick={() => {
-                          if (window.confirm(`Are you sure you want to delete maintenance ticket ${t.id || t.title}?`)) {
-                            onDeleteTicket(t.id || t._id);
-                          }
-                        }}
+                        onClick={() => setDeletingTicket(t)}
                         title="Delete ticket"
-                        className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-500 hover:border-rose-500/30 btn-press transition-colors"
+                        className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-500 hover:border-rose-500/30 btn-press transition-colors cursor-pointer"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -271,6 +271,23 @@ export const TenantMaintenanceTab = ({
         isOpen={Boolean(selectedTechTicket)}
         onClose={() => setSelectedTechTicket(null)}
         ticket={selectedTechTicket}
+      />
+
+      {/* Delete Ticket Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={Boolean(deletingTicket)}
+        onClose={() => setDeletingTicket(null)}
+        onConfirm={() => {
+          if (deletingTicket) {
+            onDeleteTicket(deletingTicket.id || deletingTicket._id);
+            toast.success(`Maintenance ticket "${deletingTicket.title || deletingTicket.id}" deleted.`);
+            setDeletingTicket(null);
+          }
+        }}
+        title="Delete Repair Ticket?"
+        description={`Are you sure you want to delete repair ticket "${deletingTicket?.title || deletingTicket?.id}"? This will cancel the maintenance request.`}
+        confirmText="Delete Ticket"
+        variant="danger"
       />
 
     </div>

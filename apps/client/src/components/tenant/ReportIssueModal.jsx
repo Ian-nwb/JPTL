@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { X, Wrench, AlertTriangle, ShieldAlert, Sparkles, CheckCircle2, Clock, Camera, Upload, Paperclip, Loader2, Trash2 } from 'lucide-react';
 import { tenantApi } from '../../services/api';
+import { useToast } from '../../context/ToastContext';
 
 const ISSUE_CATEGORIES = [
   { key: 'Plumbing', label: 'Plumbing / Leak' },
@@ -18,6 +19,7 @@ export const ReportIssueModal = ({
   unit,
   onTicketSubmitted = () => {},
 }) => {
+  const toast = useToast();
   const [category, setCategory] = useState('Plumbing');
   const [priority, setPriority] = useState('medium');
   const [title, setTitle] = useState('');
@@ -105,6 +107,7 @@ export const ReportIssueModal = ({
 
     setIsSubmitting(false);
     onTicketSubmitted(newTicket);
+    toast.success(`Repair ticket "${newTicket.title}" submitted successfully!`);
     onClose();
   };
 

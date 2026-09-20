@@ -8,7 +8,9 @@ import {
 import { MOCK_DOCUMENTS } from '../../data/mockData';
 import { DocumentInspectionModal } from './DocumentInspectionModal';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { landlordApi, authApi } from '../../services/api';
+import { onlyPhoneDigits, onlyDecimal, onlyDigits, handleNumericKeyDown } from '../../utils/numberSanitizers';
 
 const INITIAL_VENDORS = [
   { category: 'Plumbing', vendor: 'Apex Plumbing Services', autoAssign: true, contact: '+1 (555) 991-0022' },
@@ -33,6 +35,7 @@ export const LandlordSettingsTab = ({
   initialSubTab = 'account',
 }) => {
   const { user, updateUser } = useAuth();
+  const toast = useToast();
   const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
 
   useEffect(() => {
@@ -151,8 +154,10 @@ export const LandlordSettingsTab = ({
           buildingRules,
         });
       }
+      toast.success('Building Access Saved', 'Community access codes & guidelines updated.');
     } catch (err) {
       console.warn('Building access save notice:', err.message);
+      toast.success('Building Access Saved', 'Access codes updated locally.');
     }
     setAccessSaved(true);
     setTimeout(() => setAccessSaved(false), 2500);
@@ -326,8 +331,10 @@ export const LandlordSettingsTab = ({
         company: landlordProfile.company,
         officePhone: landlordProfile.officePhone,
       });
+      toast.success('Settings Saved', 'Landlord profile & preferences updated successfully.');
     } catch (err) {
       console.warn('Profile save notice:', err.message);
+      toast.success('Settings Saved', 'Landlord settings saved locally.');
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
@@ -337,14 +344,17 @@ export const LandlordSettingsTab = ({
     if (e) e.preventDefault();
     if (!passwordForm.current || !passwordForm.newPass) {
       setPasswordStatus({ loading: false, error: 'Current and new password are required', success: '' });
+      toast.error('Validation Error', 'Current and new password are required.');
       return;
     }
     if (passwordForm.newPass.length < 8) {
       setPasswordStatus({ loading: false, error: 'New password must be at least 8 characters', success: '' });
+      toast.error('Validation Error', 'New password must be at least 8 characters.');
       return;
     }
     if (passwordForm.confirm && passwordForm.newPass !== passwordForm.confirm) {
       setPasswordStatus({ loading: false, error: 'New passwords do not match', success: '' });
+      toast.error('Validation Error', 'New passwords do not match.');
       return;
     }
     setPasswordStatus({ loading: true, error: '', success: '' });
@@ -355,9 +365,11 @@ export const LandlordSettingsTab = ({
       });
       setPasswordStatus({ loading: false, error: '', success: 'Password updated successfully!' });
       setPasswordForm({ current: '', newPass: '', confirm: '' });
+      toast.success('Password Updated', 'Your security password has been changed.');
       setTimeout(() => setPasswordStatus((s) => ({ ...s, success: '' })), 4000);
     } catch (err) {
       setPasswordStatus({ loading: false, error: err.message || 'Failed to update password', success: '' });
+      toast.error('Update Failed', err.message || 'Failed to update password.');
     }
   };
 
@@ -366,7 +378,7 @@ export const LandlordSettingsTab = ({
     setTimeout(() => {
       setIsBackingUp(false);
       setLastBackupTime(new Date().toLocaleString());
-      alert('Property database snapshot saved successfully!');
+      toast.success('Backup Completed', 'Property database snapshot saved successfully.');
     }, 1500);
   };
 
@@ -632,8 +644,10 @@ export const LandlordSettingsTab = ({
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Direct Mobile</label>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={landlordProfile.phone}
-                  onChange={(e) => setLandlordProfile((p) => ({ ...p, phone: e.target.value }))}
+                  onKeyDown={(e) => handleNumericKeyDown(e, false)}
+                  onChange={(e) => setLandlordProfile((p) => ({ ...p, phone: onlyPhoneDigits(e.target.value) }))}
                   className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
                 />
               </div>
@@ -952,7 +966,11 @@ export const LandlordSettingsTab = ({
                   <label className="block text-slate-700 dark:text-slate-300 font-semibold">Enter 6-digit Code</label>
                   <input
                     type="text"
+                    inputMode="numeric"
                     placeholder="123456"
+                    maxLength={6}
+                    onKeyDown={(e) => handleNumericKeyDown(e, false)}
+                    onChange={(e) => { e.target.value = onlyDigits(e.target.value); }}
                     className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-center font-mono text-base font-bold tracking-widest text-indigo-600 dark:text-indigo-400"
                   />
                 </div>
@@ -1035,8 +1053,10 @@ export const LandlordSettingsTab = ({
                 <span className="text-rose-600 font-bold block uppercase text-xs">Emergency SLA</span>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={slaSettings.emergencyHours}
-                  onChange={(e) => setSlaSettings((s) => ({ ...s, emergencyHours: e.target.value }))}
+                  onKeyDown={(e) => handleNumericKeyDown(e, false)}
+                  onChange={(e) => setSlaSettings((s) => ({ ...s, emergencyHours: onlyDigits(e.target.value) }))}
                   className="w-full bg-white dark:bg-[#10131F] border border-rose-300 dark:border-rose-800 rounded-xl px-2.5 py-1 text-slate-900 dark:text-white font-bold"
                 />
                 <span className="text-xs text-slate-500 block">Hours to Acknowledge</span>
@@ -1046,8 +1066,10 @@ export const LandlordSettingsTab = ({
                 <span className="text-amber-600 font-bold block uppercase text-xs">High Priority SLA</span>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={slaSettings.highHours}
-                  onChange={(e) => setSlaSettings((s) => ({ ...s, highHours: e.target.value }))}
+                  onKeyDown={(e) => handleNumericKeyDown(e, false)}
+                  onChange={(e) => setSlaSettings((s) => ({ ...s, highHours: onlyDigits(e.target.value) }))}
                   className="w-full bg-white dark:bg-[#10131F] border border-amber-300 dark:border-amber-800 rounded-xl px-2.5 py-1 text-slate-900 dark:text-white font-bold"
                 />
                 <span className="text-xs text-slate-500 block">Hours to Acknowledge</span>
@@ -1057,8 +1079,10 @@ export const LandlordSettingsTab = ({
                 <span className="text-indigo-600 font-bold block uppercase text-xs">Medium Priority SLA</span>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={slaSettings.mediumHours}
-                  onChange={(e) => setSlaSettings((s) => ({ ...s, mediumHours: e.target.value }))}
+                  onKeyDown={(e) => handleNumericKeyDown(e, false)}
+                  onChange={(e) => setSlaSettings((s) => ({ ...s, mediumHours: onlyDigits(e.target.value) }))}
                   className="w-full bg-white dark:bg-[#10131F] border border-indigo-300 dark:border-indigo-800 rounded-xl px-2.5 py-1 text-slate-900 dark:text-white font-bold"
                 />
                 <span className="text-xs text-slate-500 block">Hours to Acknowledge</span>
@@ -1068,8 +1092,10 @@ export const LandlordSettingsTab = ({
                 <span className="text-slate-600 dark:text-slate-400 font-bold block uppercase text-xs">Low Priority SLA</span>
                 <input
                   type="text"
+                  inputMode="numeric"
                   value={slaSettings.lowHours}
-                  onChange={(e) => setSlaSettings((s) => ({ ...s, lowHours: e.target.value }))}
+                  onKeyDown={(e) => handleNumericKeyDown(e, false)}
+                  onChange={(e) => setSlaSettings((s) => ({ ...s, lowHours: onlyDigits(e.target.value) }))}
                   className="w-full bg-white dark:bg-[#10131F] border border-slate-300 dark:border-slate-800 rounded-xl px-2.5 py-1 text-slate-900 dark:text-white font-bold"
                 />
                 <span className="text-xs text-slate-500 block">Hours to Acknowledge</span>
@@ -1122,9 +1148,11 @@ export const LandlordSettingsTab = ({
               <div>
                 <label className="block text-slate-500 mb-1">Grace Period (Days)</label>
                 <input
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
                   value={paymentRules.gracePeriodDays}
-                  onChange={(e) => setPaymentRules((p) => ({ ...p, gracePeriodDays: e.target.value }))}
+                  onKeyDown={(e) => handleNumericKeyDown(e, false)}
+                  onChange={(e) => setPaymentRules((p) => ({ ...p, gracePeriodDays: onlyDigits(e.target.value) }))}
                   className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white"
                 />
               </div>
@@ -1133,9 +1161,11 @@ export const LandlordSettingsTab = ({
                 <label className="block text-slate-500 mb-1">Late Fee Calculation</label>
                 <div className="flex gap-2">
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={paymentRules.lateFeeAmount}
-                    onChange={(e) => setPaymentRules((p) => ({ ...p, lateFeeAmount: e.target.value }))}
+                    onKeyDown={(e) => handleNumericKeyDown(e, true)}
+                    onChange={(e) => setPaymentRules((p) => ({ ...p, lateFeeAmount: onlyDecimal(e.target.value) }))}
                     className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white"
                   />
                   <select

@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
 import { X, CreditCard, Building, Plus, Trash2, CheckCircle2, ShieldCheck, Lock } from 'lucide-react';
+import { ConfirmationModal } from '../common/ConfirmationModal';
+import { useToast } from '../../context/ToastContext';
+import { onlyDigits, handleNumericKeyDown } from '../../utils/numberSanitizers';
 
 const INITIAL_METHODS = [
   {
@@ -23,11 +26,14 @@ export const PaymentMethodsModal = ({
   isOpen,
   onClose,
 }) => {
+  const toast = useToast();
   const [methods, setMethods] = useState(INITIAL_METHODS);
   const [isAddingNew, setIsAddingNew] = useState(false);
   const [newType, setNewType] = useState('card');
   const [cardNumber, setCardNumber] = useState('');
   const [cardExp, setCardExp] = useState('');
+  const [cardCvc, setCardCvc] = useState('');
+  const [deletingMethodId, setDeletingMethodId] = useState(null);
 
   if (!isOpen) return null;
 
@@ -35,10 +41,14 @@ export const PaymentMethodsModal = ({
     setMethods((prev) =>
       prev.map((m) => ({ ...m, isDefault: m.id === id }))
     );
+    toast.success('Default payment method updated!');
   };
 
-  const handleDelete = (id) => {
-    setMethods((prev) => prev.filter((m) => m.id !== id));
+  const handleConfirmDelete = () => {
+    if (!deletingMethodId) return;
+    setMethods((prev) => prev.filter((m) => m.id !== deletingMethodId));
+    setDeletingMethodId(null);
+    toast.success('Payment method removed successfully.');
   };
 
   const handleAddSubmit = (e) => {
@@ -58,6 +68,8 @@ export const PaymentMethodsModal = ({
     setIsAddingNew(false);
     setCardNumber('');
     setCardExp('');
+    setCardCvc('');
+    toast.success(`${newType === 'card' ? 'Payment card' : 'Bank ACH'} saved securely!`);
   };
 
   return (
@@ -130,7 +142,7 @@ export const PaymentMethodsModal = ({
                     {!m.isDefault && (
                       <button
                         type="button"
-                        onClick={() => handleDelete(m.id)}
+                        onClick={() => setDeletingMethodId(m.id)}
                         className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 btn-press"
                         title="Remove method"
                       >
@@ -188,10 +200,12 @@ export const PaymentMethodsModal = ({
               </label>
               <input
                 type="text"
+                inputMode="numeric"
                 required
                 placeholder={newType === 'card' ? '4532 •••• •••• 8812' : '981204882109'}
                 value={cardNumber}
-                onChange={(e) => setCardNumber(e.target.value)}
+                onKeyDown={(e) => handleNumericKeyDown(e, false)}
+                onChange={(e) => setCardNumber(onlyDigits(e.target.value))}
                 className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
               />
             </div>
@@ -202,9 +216,11 @@ export const PaymentMethodsModal = ({
                   <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Expiration</label>
                   <input
                     type="text"
+                    inputMode="numeric"
                     placeholder="MM/YY"
+                    maxLength={5}
                     value={cardExp}
-                    onChange={(e) => setCardExp(e.target.value)}
+                    onChange={(e) => setCardExp(e.target.value.replace(/[^0-9/]/g, ''))}
                     className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
                   />
                 </div>
@@ -212,7 +228,12 @@ export const PaymentMethodsModal = ({
                   <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">CVC Code</label>
                   <input
                     type="text"
+                    inputMode="numeric"
+                    maxLength={4}
                     placeholder="123"
+                    value={cardCvc}
+                    onKeyDown={(e) => handleNumericKeyDown(e, false)}
+                    onChange={(e) => setCardCvc(onlyDigits(e.target.value))}
                     className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
                   />
                 </div>
@@ -238,6 +259,17 @@ export const PaymentMethodsModal = ({
         )}
 
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={Boolean(deletingMethodId)}
+        onClose={() => setDeletingMethodId(null)}
+        onConfirm={handleConfirmDelete}
+        title="Remove Payment Method?"
+        description="Are you sure you want to delete this payment instrument? You will need to re-add it to use it for future payments."
+        confirmText="Remove Method"
+        variant="danger"
+      />
     </div>
   );
 };

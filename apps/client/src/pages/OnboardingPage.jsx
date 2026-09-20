@@ -4,6 +4,7 @@ import { useTheme } from '../hooks/useTheme';
 import { MOCK_PROPERTIES, MOCK_UNITS } from '../data/mockData';
 import { AddPropertyOrUnitModal } from '../components/dashboard/AddPropertyOrUnitModal';
 import { landlordApi } from '../services/api';
+import { onlyDecimal, handleNumericKeyDown } from '../utils/numberSanitizers';
 
 export const OnboardingPage = ({ onNavigate = () => {} }) => {
   const { theme, toggleTheme } = useTheme();
@@ -674,10 +675,11 @@ export const OnboardingPage = ({ onNavigate = () => {} }) => {
 
                       {/* Security Deposit Input */}
                       <input
-                        type="number"
-                        min="0"
+                        type="text"
+                        inputMode="decimal"
                         value={member.securityDeposit ?? ''}
-                        onChange={(e) => handleUpdateMember(member.id, 'securityDeposit', e.target.value)}
+                        onKeyDown={(e) => handleNumericKeyDown(e, true)}
+                        onChange={(e) => handleUpdateMember(member.id, 'securityDeposit', onlyDecimal(e.target.value))}
                         placeholder="Deposit ($)"
                         title="Security Deposit Amount"
                         className="w-full min-w-0 bg-slate-50 dark:bg-[#090C16] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"

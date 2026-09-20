@@ -5,6 +5,8 @@ import {
 } from 'lucide-react';
 import { landlordApi } from '../../services/api';
 import { CountryCodeDropdown } from '../common/CountryCodeDropdown';
+import { onlyDecimal, onlyDigits, onlyPhoneDigits, handleNumericKeyDown } from '../../utils/numberSanitizers';
+import { useToast } from '../../context/ToastContext';
 
 export const AddTenantModal = ({
   isOpen,
@@ -17,6 +19,7 @@ export const AddTenantModal = ({
   onTenantAdded = () => {},
   onTenantAssigned = () => {},
 }) => {
+  const toast = useToast();
   // Mode: 'existing' (assign already created/pre-added) vs 'new' (create brand new account)
   const [activeTab, setActiveTab] = useState('existing');
 
@@ -702,9 +705,11 @@ export const AddTenantModal = ({
                       <input
                         id="tenant-phone"
                         type="tel"
+                        inputMode="tel"
                         value={tenantLocalPhone}
+                        onKeyDown={(e) => handleNumericKeyDown(e, false)}
                         onChange={(e) => {
-                          const local = e.target.value;
+                          const local = onlyPhoneDigits(e.target.value);
                           setTenantLocalPhone(local);
                           setTenantPhone(tenantDialCode + ' ' + local);
                         }}
@@ -789,9 +794,11 @@ export const AddTenantModal = ({
                       <div className="relative">
                         <DollarSign className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
                         <input
-                          type="number"
+                          type="text"
+                          inputMode="decimal"
                           value={monthlyRent}
-                          onChange={(e) => setMonthlyRent(e.target.value)}
+                          onKeyDown={(e) => handleNumericKeyDown(e, true)}
+                          onChange={(e) => setMonthlyRent(onlyDecimal(e.target.value))}
                           placeholder="e.g. 2400"
                           className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                         />
@@ -977,9 +984,11 @@ export const AddTenantModal = ({
                             Monthly Parking Fee ($)
                           </label>
                           <input
-                            type="number"
+                            type="text"
+                            inputMode="decimal"
                             value={parkingFee}
-                            onChange={(e) => setParkingFee(e.target.value)}
+                            onKeyDown={(e) => handleNumericKeyDown(e, true)}
+                            onChange={(e) => setParkingFee(onlyDecimal(e.target.value))}
                             placeholder="150"
                             className="w-full bg-white dark:bg-[#0D111D] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                           />

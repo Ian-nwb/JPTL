@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, Component, lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
 import { notificationApi, systemApi } from './services/api';
 import { DashboardSkeleton, TenantPortalSkeleton } from './components/ui/SkeletonLoader';
 
@@ -306,9 +307,11 @@ function AppRouter() {
 function App() {
   return (
     <AuthProvider>
-      <ErrorBoundary>
-        <AppRouter />
-      </ErrorBoundary>
+      <ToastProvider>
+        <ErrorBoundary>
+          <AppRouter />
+        </ErrorBoundary>
+      </ToastProvider>
     </AuthProvider>
   );
 }

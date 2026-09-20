@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Wrench, Clock, CheckCircle2, AlertTriangle, ShieldAlert, User, Building2, Trash2, HardHat, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ConfirmationModal } from '../common/ConfirmationModal';
+import { useToast } from '../../context/ToastContext';
 
 export const TicketsTab = ({
   tickets: initialTickets = [],
@@ -9,9 +11,11 @@ export const TicketsTab = ({
   onDeleteTicket,
   onAssignTechnician,
 }) => {
+  const toast = useToast();
   const [tickets, setTickets] = useState(initialTickets);
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [deletingTicket, setDeletingTicket] = useState(null);
   const pageSize = 5;
 
   useEffect(() => {
@@ -29,6 +33,7 @@ export const TicketsTab = ({
     if (onAssignTechnician) {
       onAssignTechnician(ticketId, techData);
     }
+    toast.success(`Technician ${name.trim()} assigned to ticket!`);
     setTickets((prev) =>
       prev.map((t) =>
         t.id === ticketId || t._id === ticketId
@@ -60,6 +65,7 @@ export const TicketsTab = ({
           if (onUpdateStatus) {
             onUpdateStatus(ticketId, newStatus, updated);
           }
+          toast.success(`Ticket status updated to ${newStatus.replace('_', ' ')}.`);
           return updated;
         }
         return t;
@@ -228,13 +234,9 @@ export const TicketsTab = ({
                   {onDeleteTicket && (
                     <button
                       type="button"
-                      onClick={() => {
-                        if (window.confirm(`Are you sure you want to delete maintenance ticket ${t.id || t.title}?`)) {
-                          onDeleteTicket(t.id || t._id);
-                        }
-                      }}
+                      onClick={() => setDeletingTicket(t)}
                       title="Delete ticket"
-                      className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-500 hover:border-rose-500/30 btn-press transition-colors"
+                      className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-400 hover:text-rose-500 hover:border-rose-500/30 btn-press transition-colors cursor-pointer"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -350,6 +352,24 @@ export const TicketsTab = ({
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={Boolean(deletingTicket)}
+        onClose={() => setDeletingTicket(null)}
+        onConfirm={() => {
+          if (deletingTicket && onDeleteTicket) {
+            onDeleteTicket(deletingTicket.id || deletingTicket._id);
+            setTickets((prev) => prev.filter((t) => (t.id !== deletingTicket.id && t._id !== deletingTicket._id)));
+            toast.success(`Ticket "${deletingTicket.title || deletingTicket.id}" deleted.`);
+            setDeletingTicket(null);
+          }
+        }}
+        title="Delete Maintenance Ticket?"
+        description={`Are you sure you want to delete ticket "${deletingTicket?.title || deletingTicket?.id}"? This will cancel the work request.`}
+        confirmText="Delete Ticket"
+        variant="danger"
+      />
     </div>
   );
 };

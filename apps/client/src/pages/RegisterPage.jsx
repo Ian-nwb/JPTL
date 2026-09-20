@@ -4,6 +4,7 @@ import { Building2, Eye, EyeOff, AlertCircle, Loader2, ArrowRight, ShieldCheck, 
 import { CountryCodeDropdown } from '../components/common/CountryCodeDropdown';
 import { useTheme } from '../hooks/useTheme';
 import { useAuth } from '../context/AuthContext';
+import { onlyPhoneDigits, handleNumericKeyDown } from '../utils/numberSanitizers';
 
 export const RegisterPage = ({ onNavigate = () => {} }) => {
   const { theme, toggleTheme } = useTheme();
@@ -470,11 +471,13 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                   <input
                     id="reg-phone"
                     type="tel"
+                    inputMode="numeric"
                     required
                     disabled={isSubmitting}
                     value={localPhone}
+                    onKeyDown={(e) => handleNumericKeyDown(e, false)}
                     onChange={(e) => {
-                      const local = e.target.value;
+                      const local = onlyPhoneDigits(e.target.value);
                       setLocalPhone(local);
                       const combined = dialCode + ' ' + local;
                       setPhone(combined);

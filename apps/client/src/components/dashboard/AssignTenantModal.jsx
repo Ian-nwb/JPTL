@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { X, Key, Building2, Home, Calendar, DollarSign, Clock, AlertCircle, CheckCircle2, Loader2, Sparkles, Car } from 'lucide-react';
 import { landlordApi } from '../../services/api';
+import { onlyDecimal, handleNumericKeyDown } from '../../utils/numberSanitizers';
+import { useToast } from '../../context/ToastContext';
 
 export const AssignTenantModal = ({
   isOpen,
@@ -10,6 +12,7 @@ export const AssignTenantModal = ({
   units = [],
   onTenantAssigned = () => {},
 }) => {
+  const toast = useToast();
   const [selectedPropertyId, setSelectedPropertyId] = useState('');
   const [selectedUnitId, setSelectedUnitId] = useState('');
   const [monthlyRent, setMonthlyRent] = useState('');
@@ -259,6 +262,7 @@ export const AssignTenantModal = ({
       };
 
       onTenantAssigned(finalTenant);
+      toast.success(`Resident "${finalTenant.name || 'Tenant'}" assigned to ${finalTenant.unitLabel || 'Unit'} successfully!`);
       onClose();
     } catch (err) {
       console.error('Failed to assign tenant:', err);
@@ -374,9 +378,11 @@ export const AssignTenantModal = ({
             <div className="relative">
               <DollarSign className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
               <input
-                type="number"
+                type="text"
+                inputMode="decimal"
                 value={monthlyRent}
-                onChange={(e) => setMonthlyRent(e.target.value)}
+                onKeyDown={(e) => handleNumericKeyDown(e, true)}
+                onChange={(e) => setMonthlyRent(onlyDecimal(e.target.value))}
                 placeholder="e.g. 2400"
                 className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-300 dark:border-slate-700/80 rounded-xl pl-9 pr-3 py-2.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
@@ -564,9 +570,11 @@ export const AssignTenantModal = ({
                     Monthly Parking Fee ($)
                   </label>
                   <input
-                    type="number"
+                    type="text"
+                    inputMode="decimal"
                     value={parkingFee}
-                    onChange={(e) => setParkingFee(e.target.value)}
+                    onKeyDown={(e) => handleNumericKeyDown(e, true)}
+                    onChange={(e) => setParkingFee(onlyDecimal(e.target.value))}
                     placeholder="150"
                     className="w-full bg-white dark:bg-[#0D111D] border border-slate-300 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
                   />

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Lock, Mail, Smartphone, Building2, CheckCircle2, ArrowRight, UserPlus, User } from 'lucide-react';
 import { CountryCodeDropdown } from './CountryCodeDropdown';
+import { onlyPhoneDigits, handleNumericKeyDown } from '../../utils/numberSanitizers';
 
 export const LoginModal = ({ isOpen, initialRole = 'tenant', onClose, onLoginSuccess }) => {
   const [mode, setMode] = useState('login'); // 'login' | 'register'
@@ -270,10 +271,12 @@ export const LoginModal = ({ isOpen, initialRole = 'tenant', onClose, onLoginSuc
                         />
                         <input
                           type="tel"
+                          inputMode="numeric"
                           placeholder="912 345 6789"
                           value={localPhone}
+                          onKeyDown={(e) => handleNumericKeyDown(e, false)}
                           onChange={(e) => {
-                            const local = e.target.value;
+                            const local = onlyPhoneDigits(e.target.value);
                             setLocalPhone(local);
                             setPhone(dialCode + ' ' + local);
                           }}

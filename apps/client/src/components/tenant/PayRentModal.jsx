@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { X, CreditCard, DollarSign, CheckCircle2, ShieldCheck, Lock, Building, ArrowRight } from 'lucide-react';
+import { ConfirmationModal } from '../common/ConfirmationModal';
+import { useToast } from '../../context/ToastContext';
 
 export const PayRentModal = ({
   isOpen,
@@ -8,14 +10,16 @@ export const PayRentModal = ({
   unit,
   onPaymentSuccess = () => {},
 }) => {
+  const toast = useToast();
   const [paymentMethod, setPaymentMethod] = useState('card'); // 'card' | 'ach' | 'apple_pay'
   const [isProcessing, setIsProcessing] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [receiptData, setReceiptData] = useState(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   if (!isOpen) return null;
 
-  const rentAmount = unit?.monthlyRent || tenant?.monthlyRent || 2400;
+  const rentAmount = Number(unit?.monthlyRent || tenant?.monthlyRent || 2400);
   const hasParking = Boolean(tenant?.hasParking ?? unit?.hasParking ?? false);
   const parkingSpot = hasParking ? (tenant?.parkingSpot || unit?.parkingSpot || 'Assigned Space') : null;
   const parkingFee = hasParking ? Number(tenant?.parkingFee ?? unit?.parkingFee ?? 0) : 0;
@@ -25,6 +29,11 @@ export const PayRentModal = ({
 
   const handlePay = (e) => {
     e.preventDefault();
+    setShowConfirmModal(true);
+  };
+
+  const executePayment = () => {
+    setShowConfirmModal(false);
     setIsProcessing(true);
 
     setTimeout(() => {
@@ -44,6 +53,7 @@ export const PayRentModal = ({
       };
       setReceiptData(receipt);
       onPaymentSuccess(receipt);
+      toast.success(`Rent payment of $${totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} confirmed! Receipt #${receipt.transactionId}`);
     }, 1200);
   };
 
@@ -249,6 +259,18 @@ export const PayRentModal = ({
         )}
 
       </div>
+
+      {/* Payment Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showConfirmModal}
+        onClose={() => setShowConfirmModal(false)}
+        onConfirm={executePayment}
+        title="Confirm Rent Payment"
+        description={`You are authorizing an online transaction of $${totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })} via ${paymentMethod === 'card' ? 'Credit Card' : 'Bank ACH'}. Would you like to proceed?`}
+        confirmText={`Pay $${totalAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}`}
+        variant="primary"
+        icon={CreditCard}
+      />
     </div>
   );
 };

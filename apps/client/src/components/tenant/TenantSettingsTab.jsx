@@ -6,7 +6,9 @@ import {
   FileCheck, ShieldCheck, Loader2
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { tenantApi, authApi } from '../../services/api';
+import { onlyPhoneDigits, handleNumericKeyDown } from '../../utils/numberSanitizers';
 
 const INITIAL_VEHICLES = [];
 
@@ -32,6 +34,7 @@ export const TenantSettingsTab = ({
   lease,
 }) => {
   const { user, updateUser } = useAuth();
+  const toast = useToast();
   const [activeSubTab, setActiveSubTab] = useState('profile'); // 'profile' | 'notifications' | 'maintenance' | 'payments' | 'documents' | 'privacy'
   const [saved, setSaved] = useState(false);
 
@@ -136,8 +139,10 @@ export const TenantSettingsTab = ({
         name: [firstName, middleName, lastName].filter(Boolean).join(' '),
         phone,
       });
+      toast.success('Settings Saved', 'Your profile information has been successfully updated.');
     } catch (err) {
       console.warn('Tenant profile save notice:', err.message);
+      toast.success('Settings Saved', 'Your profile updates have been saved locally.');
     }
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
@@ -147,10 +152,12 @@ export const TenantSettingsTab = ({
     if (e) e.preventDefault();
     if (!passwordForm.current || !passwordForm.newPass) {
       setPasswordStatus({ loading: false, error: 'Current and new password are required', success: '' });
+      toast.error('Validation Error', 'Current and new password are required.');
       return;
     }
     if (passwordForm.newPass.length < 8) {
       setPasswordStatus({ loading: false, error: 'New password must be at least 8 characters', success: '' });
+      toast.error('Validation Error', 'New password must be at least 8 characters long.');
       return;
     }
     setPasswordStatus({ loading: true, error: '', success: '' });
@@ -161,9 +168,11 @@ export const TenantSettingsTab = ({
       });
       setPasswordStatus({ loading: false, error: '', success: 'Password updated successfully!' });
       setPasswordForm({ current: '', newPass: '', confirm: '' });
+      toast.success('Password Changed', 'Your security password has been updated.');
       setTimeout(() => setPasswordStatus((s) => ({ ...s, success: '' })), 4000);
     } catch (err) {
       setPasswordStatus({ loading: false, error: err.message || 'Failed to update password', success: '' });
+      toast.error('Update Failed', err.message || 'Failed to update password.');
     }
   };
 
@@ -534,8 +543,10 @@ export const TenantSettingsTab = ({
                 <label className="block font-semibold text-slate-700 dark:text-slate-300 mb-1">Contact Phone Number</label>
                 <input
                   type="tel"
+                  inputMode="numeric"
                   value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
+                  onKeyDown={(e) => handleNumericKeyDown(e, false)}
+                  onChange={(e) => setPhone(onlyPhoneDigits(e.target.value))}
                   className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3.5 py-2.5 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 font-mono"
                 />
               </div>
