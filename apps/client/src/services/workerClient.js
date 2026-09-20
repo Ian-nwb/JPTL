@@ -58,6 +58,7 @@ export async function fetchConcurrent(tasks) {
   }
 
   const isPureGet = tasks.every((t) => !t.method || t.method === 'GET');
+  const batchKey = tasks.map((t) => `${t.method || 'GET'}:${t.endpoint}`).join('|');
   const now = Date.now();
 
   // Instant response if fresh cached data exists

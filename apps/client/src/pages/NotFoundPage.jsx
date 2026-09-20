@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-export const NotFoundPage = ({ onNavigate = () => {} }) => {
+export const NotFoundPage = ({ onNavigate = () => { } }) => {
   const canvasRef = useRef(null);
 
   /* ── Animated particle background ── */

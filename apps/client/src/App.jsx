@@ -1,14 +1,16 @@
-import React, { useState, useEffect, useCallback, Component } from 'react';
-import { LandingPage } from './pages/LandingPage';
-import { RegisterPage } from './pages/RegisterPage';
-import { OnboardingPage } from './pages/OnboardingPage';
-import { LoginPage } from './pages/LoginPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { TenantPortalPage } from './pages/TenantPortalPage';
-import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
-import { NotFoundPage } from './pages/NotFoundPage';
+import React, { useState, useEffect, useCallback, Component, lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { notificationApi, systemApi } from './services/api';
+
+// Dynamic route-level code splitting via React.lazy
+const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
+const RegisterPage = lazy(() => import('./pages/RegisterPage').then(m => ({ default: m.RegisterPage })));
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage').then(m => ({ default: m.OnboardingPage })));
+const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m.LoginPage })));
+const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
+const TenantPortalPage = lazy(() => import('./pages/TenantPortalPage').then(m => ({ default: m.TenantPortalPage })));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 
 /* ─────────────────────────────────────────────
    Service Worker + Push Notification Registration
@@ -247,17 +249,21 @@ function AppRouter() {
     }
   }
 
-  // 4. Render matched route
-  if (currentPath === '/register') return <RegisterPage onNavigate={navigate} />;
-  if (currentPath === '/onboarding' || currentPath.startsWith('/onboarding')) return <OnboardingPage onNavigate={navigate} />;
-  if (currentPath === '/login') return <LoginPage onNavigate={navigate} />;
-  if (currentPath === '/forgot-password' || currentPath.startsWith('/reset-password')) return <ForgotPasswordPage onNavigate={navigate} />;
-  if (currentPath.startsWith('/tenant')) return <TenantPortalPage onNavigate={navigate} />;
-  if (currentPath.startsWith('/dashboard')) return <DashboardPage onNavigate={navigate} />;
-  if (currentPath === '/') return <LandingPage onNavigate={navigate} />;
-
-  // Catch-all: 404
-  return <NotFoundPage onNavigate={navigate} />;
+  // 4. Render matched route wrapped in Suspense for route code splitting
+  return (
+    <Suspense fallback={<AuthLoadingScreen />}>
+      {(() => {
+        if (currentPath === '/register') return <RegisterPage onNavigate={navigate} />;
+        if (currentPath === '/onboarding' || currentPath.startsWith('/onboarding')) return <OnboardingPage onNavigate={navigate} />;
+        if (currentPath === '/login') return <LoginPage onNavigate={navigate} />;
+        if (currentPath === '/forgot-password' || currentPath.startsWith('/reset-password')) return <ForgotPasswordPage onNavigate={navigate} />;
+        if (currentPath.startsWith('/tenant')) return <TenantPortalPage onNavigate={navigate} />;
+        if (currentPath.startsWith('/dashboard')) return <DashboardPage onNavigate={navigate} />;
+        if (currentPath === '/') return <LandingPage onNavigate={navigate} />;
+        return <NotFoundPage onNavigate={navigate} />;
+      })()}
+    </Suspense>
+  );
 }
 
 /* ─────────────────────────────────────────────

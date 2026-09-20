@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Wrench, Clock, CheckCircle2, AlertTriangle, ShieldAlert, User, Building2, Trash2, HardHat } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Wrench, Clock, CheckCircle2, AlertTriangle, ShieldAlert, User, Building2, Trash2, HardHat, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const TicketsTab = ({
   tickets: initialTickets = [],
@@ -11,6 +11,8 @@ export const TicketsTab = ({
 }) => {
   const [tickets, setTickets] = useState(initialTickets);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
 
   useEffect(() => {
     setTickets(initialTickets);
@@ -65,17 +67,25 @@ export const TicketsTab = ({
     );
   };
 
-  const filteredTickets = tickets.filter((t) => {
-    const q = searchQuery.toLowerCase();
-    const matchesSearch =
-      (t.title ?? '').toLowerCase().includes(q) ||
-      (t.propertyName ?? '').toLowerCase().includes(q) ||
-      (t.unitLabel ?? '').toLowerCase().includes(q) ||
-      (t.tenantName ?? '').toLowerCase().includes(q);
+  const filteredTickets = useMemo(() => {
+    return tickets.filter((t) => {
+      const q = searchQuery.toLowerCase();
+      const matchesSearch =
+        (t.title ?? '').toLowerCase().includes(q) ||
+        (t.propertyName ?? '').toLowerCase().includes(q) ||
+        (t.unitLabel ?? '').toLowerCase().includes(q) ||
+        (t.tenantName ?? '').toLowerCase().includes(q);
 
-    if (statusFilter !== 'all' && t.status !== statusFilter) return false;
-    return matchesSearch;
-  });
+      if (statusFilter !== 'all' && t.status !== statusFilter) return false;
+      return matchesSearch;
+    });
+  }, [tickets, searchQuery, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredTickets.length / pageSize));
+  const paginatedTickets = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredTickets.slice(start, start + pageSize);
+  }, [filteredTickets, currentPage, pageSize]);
 
   const getPriorityBadge = (priority) => {
     switch (priority) {
@@ -169,12 +179,12 @@ export const TicketsTab = ({
 
       {/* Tickets List */}
       <div className="space-y-3">
-        {filteredTickets.length === 0 ? (
+        {paginatedTickets.length === 0 ? (
           <div className="p-12 text-center rounded-2xl border border-slate-200 dark:border-slate-800 apple-glass text-slate-500 dark:text-slate-400 text-xs">
             No maintenance tickets match the active search or filter state.
           </div>
         ) : (
-          filteredTickets.map((t) => (
+          paginatedTickets.map((t) => (
             <div
               key={t.id}
               className="p-5 rounded-2xl apple-glass border border-slate-200 dark:border-slate-800/80 hover:border-slate-300 dark:hover:border-slate-700 transition-all top-shade shadow-xs space-y-4"
@@ -206,7 +216,7 @@ export const TicketsTab = ({
                           rel="noreferrer"
                           className="relative group rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 w-14 h-14 block hover:opacity-80 transition-opacity shrink-0"
                         >
-                          <img src={url} alt={`Evidence ${i + 1}`} className="w-full h-full object-cover" />
+                          <img src={url} alt={`Evidence ${i + 1}`} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                         </a>
                       ))}
                     </div>
@@ -309,11 +319,37 @@ export const TicketsTab = ({
                   </div>
                 </div>
               )}
-
             </div>
           ))
         )}
       </div>
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="p-3 rounded-2xl apple-glass border border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+          <span className="text-slate-500 dark:text-slate-400 font-mono">
+            Page {currentPage} of {totalPages} ({filteredTickets.length} total tickets)
+          </span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={currentPage <= 1}
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              className="p-1.5 rounded-lg border border-slate-300 dark:border-slate-700 disabled:opacity-40 font-mono text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 btn-press"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              disabled={currentPage >= totalPages}
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              className="p-1.5 rounded-lg border border-slate-300 dark:border-slate-700 disabled:opacity-40 font-mono text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 btn-press"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

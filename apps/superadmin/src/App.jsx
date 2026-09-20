@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { SuperadminLoginPage } from './pages/SuperadminLoginPage';
-import { SuperadminPortalPage } from './pages/SuperadminPortalPage';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { clearAuthSession, logoutSuperadmin } from './services/superadminApi';
+import { DashboardSkeleton } from './components/ui/SkeletonLoader';
+
+const SuperadminLoginPage = lazy(() => import('./pages/SuperadminLoginPage').then(m => ({ default: m.SuperadminLoginPage })));
+const SuperadminPortalPage = lazy(() => import('./pages/SuperadminPortalPage').then(m => ({ default: m.SuperadminPortalPage })));
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -19,21 +21,21 @@ function App() {
     };
   }, []);
 
-  if (!isAuthenticated) {
-    return (
-      <SuperadminLoginPage
-        onLoginSuccess={() => setIsAuthenticated(true)}
-      />
-    );
-  }
-
   return (
-    <SuperadminPortalPage
-      onLogout={async () => {
-        await logoutSuperadmin();
-        setIsAuthenticated(false);
-      }}
-    />
+    <Suspense fallback={<div className="p-8 min-h-screen bg-[#050811] text-slate-100"><DashboardSkeleton /></div>}>
+      {!isAuthenticated ? (
+        <SuperadminLoginPage
+          onLoginSuccess={() => setIsAuthenticated(true)}
+        />
+      ) : (
+        <SuperadminPortalPage
+          onLogout={async () => {
+            await logoutSuperadmin();
+            setIsAuthenticated(false);
+          }}
+        />
+      )}
+    </Suspense>
   );
 }
 
