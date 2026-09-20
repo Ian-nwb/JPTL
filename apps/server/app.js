@@ -28,6 +28,9 @@ import { getMaintenanceState } from './src/shared/services/systemState.service.j
 
 const app = express();
 
+// Trust proxy for Docker and reverse proxy environments
+app.set('trust proxy', 1);
+
 // Apply middleware
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -36,11 +39,17 @@ app.use(cookieParser());
 // Swagger Documentation UI (Accessible at /api/docs)
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Apply global rate limiting and disable caching for API routes
+// Caching policy optimized for concurrent reads & edge/CDN proxies:
+// Safe GET reads use short SWR (s-maxage=3, stale-while-revalidate=15)
+// Mutations and auth strictly bypass cache
 app.use('/api', (req, res, next) => {
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-  res.setHeader('Pragma', 'no-cache');
-  res.setHeader('Expires', '0');
+  if (req.method === 'GET' && !req.path.startsWith('/auth')) {
+    res.setHeader('Cache-Control', 'public, s-maxage=3, stale-while-revalidate=15');
+  } else {
+    res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
+    res.setHeader('Pragma', 'no-cache');
+    res.setHeader('Expires', '0');
+  }
   next();
 });
 app.use('/api', generalLimiter);

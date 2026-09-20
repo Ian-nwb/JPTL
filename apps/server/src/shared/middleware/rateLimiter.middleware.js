@@ -7,6 +7,15 @@ const shouldSkip = () => {
   return process.env.NODE_ENV === 'test' || process.env.DISABLE_RATE_LIMIT === 'true';
 };
 
+const safeKeyGenerator = (req) => {
+  return (
+    req.ip ||
+    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+    req.socket?.remoteAddress ||
+    '127.0.0.1'
+  );
+};
+
 /**
  * Standard / General API Limiter (applied to all /api routes)
  * 300 requests per 15 minutes per IP
@@ -16,6 +25,8 @@ export const generalLimiter = rateLimit({
   max: 300,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: safeKeyGenerator,
+  validate: { ip: false, default: false },
   skip: shouldSkip,
   message: {
     success: false,
@@ -33,6 +44,8 @@ export const authLimiter = rateLimit({
   max: 20,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: safeKeyGenerator,
+  validate: { ip: false, default: false },
   skip: shouldSkip,
   message: {
     success: false,
@@ -49,6 +62,8 @@ export const strictActionLimiter = rateLimit({
   max: 60,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator: safeKeyGenerator,
+  validate: { ip: false, default: false },
   skip: shouldSkip,
   message: {
     success: false,

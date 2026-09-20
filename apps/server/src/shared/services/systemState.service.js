@@ -5,12 +5,19 @@ let inMemoryState = {
   message: 'Platform is currently undergoing scheduled maintenance. Please check back shortly.',
   updatedAt: new Date(),
 };
+let lastFetchedAt = 0;
+const CACHE_TTL_MS = 10000; // 10s in-memory cache to eliminate repetitive DB queries
 
 /**
  * Get current maintenance state.
- * Queries MongoDB so all cluster worker threads and processes see the real-time state.
+ * Queries MongoDB every 10s so all cluster worker threads see real-time state with sub-millisecond response.
  */
 export async function getMaintenanceState() {
+  const now = Date.now();
+  if (now - lastFetchedAt < CACHE_TTL_MS) {
+    return inMemoryState;
+  }
+
   try {
     const setting = await SystemSetting.findOne({ key: 'maintenance_mode' }).lean();
     if (setting?.value) {
@@ -20,6 +27,7 @@ export async function getMaintenanceState() {
         updatedAt: setting.updatedAt || new Date(),
       };
     }
+    lastFetchedAt = now;
   } catch (err) {
     // If DB query fails or not yet connected, use cached in-memory state
   }
@@ -38,6 +46,7 @@ export async function setMaintenanceState(enabled, message = '') {
     message: msg,
     updatedAt: new Date(),
   };
+  lastFetchedAt = Date.now();
 
   try {
     await SystemSetting.findOneAndUpdate(

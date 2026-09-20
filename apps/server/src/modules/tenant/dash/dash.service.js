@@ -51,13 +51,11 @@ async function getTenantDashboard(tenantId) {
   const unitId = profile?.unit?._id ?? null;
   const landlordId = tenantUser.landlord || profile?.property?.landlord || null;
 
-  // 2. Fetch landlord user details for property contacts
-  const landlordUser = landlordId
-    ? await User.findById(landlordId).select('firstName lastName email phone officePhone company').lean()
-    : null;
-
-  // 3. Parallel secondary queries — query tickets by tenant regardless of unitId
-  const [tickets, payments, announcements] = await Promise.all([
+  // 2 & 3. Run all secondary queries concurrently in parallel
+  const [landlordUser, tickets, payments, announcements] = await Promise.all([
+    landlordId
+      ? User.findById(landlordId).select('firstName lastName email phone officePhone company').lean()
+      : Promise.resolve(null),
     Ticket.find({ tenant: tenantId })
       .populate('unit')
       .sort({ createdAt: -1 })

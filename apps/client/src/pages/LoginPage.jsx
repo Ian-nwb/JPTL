@@ -85,7 +85,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
         } else {
           onNavigate('/dashboard');
         }
-      }, 500);
+      }, 100);
     } catch (err) {
       setIsSubmitting(false);
       setApiError(err.message || 'Invalid email or password. Please check your credentials.');

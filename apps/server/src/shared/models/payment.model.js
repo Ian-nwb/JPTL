@@ -37,4 +37,8 @@ const paymentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+paymentSchema.index({ tenant: 1, dueDate: 1 });
+paymentSchema.index({ status: 1 });
+paymentSchema.index({ property: 1 });
+
 export default mongoose.model('Payment', paymentSchema);

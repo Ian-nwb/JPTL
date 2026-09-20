@@ -68,13 +68,14 @@ export const LandlordSettingsTab = ({
       }));
       if (user.avatarUrl !== undefined) setAvatarUrl(user.avatarUrl || null);
     }
-    landlordApi.getVendors().then((res) => {
-      if (res.data?.length > 0) setVendors(res.data);
-    }).catch(() => {});
-
-    landlordApi.getAuditLogs().then((res) => {
-      if (res.data?.length > 0) setAuditLogs(res.data);
-    }).catch(() => {});
+    Promise.allSettled([landlordApi.getVendors(), landlordApi.getAuditLogs()]).then(([vRes, aRes]) => {
+      if (vRes.status === 'fulfilled' && vRes.value?.data?.length > 0) {
+        setVendors(vRes.value.data);
+      }
+      if (aRes.status === 'fulfilled' && aRes.value?.data?.length > 0) {
+        setAuditLogs(aRes.value.data);
+      }
+    });
   }, [user]);
   const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl || null);
   const [avatarLoading, setAvatarLoading] = useState(false);

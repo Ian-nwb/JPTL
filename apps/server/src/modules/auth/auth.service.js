@@ -116,13 +116,19 @@ async function login({ email, password, ip = '', userAgent = '' }) {
     throw new AuthError('Email and password are required', 400);
   }
 
-  const user = await User.findOne({ email: email.trim().toLowerCase() }).select('+password');
+  const normalizedEmail = email.trim().toLowerCase();
+
+  // Run User lookup and maintenance state check concurrently
+  const [user, state] = await Promise.all([
+    User.findOne({ email: normalizedEmail }).select('+password'),
+    getMaintenanceState(),
+  ]);
+
   if (!user) {
     throw new AuthError('Invalid email or password', 401);
   }
 
   // Check maintenance mode: non-superadmin users are blocked when active
-  const state = await getMaintenanceState();
   if (state.enabled && user.role !== 'superadmin') {
     throw new AuthError(state.message || 'Platform is currently undergoing scheduled maintenance. Non-administrative logins are temporarily paused.', 503);
   }
@@ -135,14 +141,14 @@ async function login({ email, password, ip = '', userAgent = '' }) {
 
   const token = signToken({ id: user._id.toString(), role: user.role });
 
-  // Record login session
-  await recordLoginSession({
+  // Record login session asynchronously (non-blocking for ultra-fast response)
+  recordLoginSession({
     userId: user._id,
     email: user.email,
     role: user.role,
     ip,
     userAgent,
-  });
+  }).catch((err) => console.error('Failed to log login session:', err));
 
   return { user: sanitizeUser(user), token };
 }
@@ -152,7 +158,13 @@ async function loginSuperadmin({ email, password, ip = '', userAgent = '' }) {
     throw new AuthError('Email and password are required', 400);
   }
 
-  const user = await User.findOne({ email: email.trim().toLowerCase() }).select('+password');
+  const normalizedEmail = email.trim().toLowerCase();
+
+  const [user, isMatchPromise] = await Promise.all([
+    User.findOne({ email: normalizedEmail }).select('+password'),
+    Promise.resolve(),
+  ]);
+
   if (!user) {
     throw new AuthError('Invalid superadmin credentials', 401);
   }
@@ -167,14 +179,14 @@ async function loginSuperadmin({ email, password, ip = '', userAgent = '' }) {
 
   const token = signToken({ id: user._id.toString(), role: user.role });
 
-  // Record login session
-  await recordLoginSession({
+  // Record login session asynchronously (non-blocking)
+  recordLoginSession({
     userId: user._id,
     email: user.email,
     role: user.role,
     ip,
     userAgent,
-  });
+  }).catch((err) => console.error('Failed to log superadmin session:', err));
 
   return { user: sanitizeUser(user), token };
 }

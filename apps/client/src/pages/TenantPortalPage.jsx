@@ -87,17 +87,15 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
 
     async function loadTenantData() {
       try {
-        const [dashRes, paymentsRes, ticketsRes, ancRes] = await Promise.allSettled([
-          tenantApi.getDashboard(),
-          tenantApi.getPayments(),
-          tenantApi.getTickets(),
-          tenantApi.getAnnouncements(),
-        ]);
+        // High-concurrency worker batch request off UI thread
+        const batch = await tenantApi.getConcurrentPortalData();
 
         if (!isMounted) return;
 
-        if (dashRes.status === 'fulfilled' && dashRes.value?.data) {
-          const d = dashRes.value.data;
+        // Process dash results
+        const dashVal = batch?.dash?.data;
+        if (dashVal?.data) {
+          const d = dashVal.data;
           if (d.tenant) setTenantData(d.tenant);
           if (d.unit) setUnitData(d.unit);
           if (d.property) setPropertyData(d.property);
@@ -108,22 +106,70 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
           if (Array.isArray(d.announcements)) setAnnouncements(d.announcements);
         }
 
-        if (ticketsRes.status === 'fulfilled') {
-          const tList = ticketsRes.value?.tickets || ticketsRes.value?.data || (Array.isArray(ticketsRes.value) ? ticketsRes.value : []);
+        // Process tickets results
+        const ticketVal = batch?.tickets?.data;
+        if (ticketVal) {
+          const tList = ticketVal.tickets || ticketVal.data || (Array.isArray(ticketVal) ? ticketVal : []);
           if (Array.isArray(tList) && tList.length > 0) setTickets(tList);
         }
 
-        if (ancRes.status === 'fulfilled') {
-          const aList = ancRes.value?.announcements || ancRes.value?.data || (Array.isArray(ancRes.value) ? ancRes.value : []);
+        // Process announcements results
+        const ancVal = batch?.announcements?.data;
+        if (ancVal) {
+          const aList = ancVal.announcements || ancVal.data || (Array.isArray(ancVal) ? ancVal : []);
           if (Array.isArray(aList) && aList.length > 0) setAnnouncements(aList);
         }
 
-        if (paymentsRes.status === 'fulfilled') {
-          const pList = paymentsRes.value?.payments || paymentsRes.value?.data?.recentPayments || paymentsRes.value?.data || (Array.isArray(paymentsRes.value) ? paymentsRes.value : []);
+        // Process payments results
+        const paymentsVal = batch?.payments?.data;
+        if (paymentsVal) {
+          const pList = paymentsVal.payments || paymentsVal.data?.recentPayments || paymentsVal.data || (Array.isArray(paymentsVal) ? paymentsVal : []);
           if (Array.isArray(pList) && pList.length > 0) setPayments(pList);
         }
+
+        // Process lease results
+        const leaseVal = batch?.lease?.data;
+        if (leaseVal?.data) {
+          setLeaseData(leaseVal.data);
+        }
       } catch (err) {
-        console.warn('Tenant live data fetch fallback:', err.message);
+        console.warn('Concurrent fetch fallback, trying Promise.allSettled:', err.message);
+        try {
+          const [dashRes, paymentsRes, ticketsRes, ancRes] = await Promise.allSettled([
+            tenantApi.getDashboard(),
+            tenantApi.getPayments(),
+            tenantApi.getTickets(),
+            tenantApi.getAnnouncements(),
+          ]);
+
+          if (!isMounted) return;
+
+          if (dashRes.status === 'fulfilled' && dashRes.value?.data) {
+            const d = dashRes.value.data;
+            if (d.tenant) setTenantData(d.tenant);
+            if (d.unit) setUnitData(d.unit);
+            if (d.property) setPropertyData(d.property);
+            if (d.landlord) setLandlordData(d.landlord);
+            if (d.lease) setLeaseData(d.lease);
+            if (Array.isArray(d.payments?.recent)) setPayments(d.payments.recent);
+            if (Array.isArray(d.tickets?.recent)) setTickets(d.tickets.recent);
+            if (Array.isArray(d.announcements)) setAnnouncements(d.announcements);
+          }
+          if (ticketsRes.status === 'fulfilled') {
+            const tList = ticketsRes.value?.tickets || ticketsRes.value?.data || (Array.isArray(ticketsRes.value) ? ticketsRes.value : []);
+            if (Array.isArray(tList) && tList.length > 0) setTickets(tList);
+          }
+          if (ancRes.status === 'fulfilled') {
+            const aList = ancRes.value?.announcements || ancRes.value?.data || (Array.isArray(ancRes.value) ? ancRes.value : []);
+            if (Array.isArray(aList) && aList.length > 0) setAnnouncements(aList);
+          }
+          if (paymentsRes.status === 'fulfilled') {
+            const pList = paymentsRes.value?.payments || paymentsRes.value?.data?.recentPayments || paymentsRes.value?.data || (Array.isArray(paymentsRes.value) ? paymentsRes.value : []);
+            if (Array.isArray(pList) && pList.length > 0) setPayments(pList);
+          }
+        } catch (fallbackErr) {
+          console.warn('Tenant live data fetch fallback:', fallbackErr.message);
+        }
       }
     }
 

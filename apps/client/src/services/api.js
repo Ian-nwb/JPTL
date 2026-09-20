@@ -3,6 +3,8 @@
  * Interacts with the backend Express API using Bearer tokens and sessionStorage.
  */
 
+import { fetchConcurrent } from './workerClient';
+
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export const tokenStorage = {
@@ -263,6 +265,18 @@ export const landlordApi = {
 
   getOnboardingStatus: () => api.get('/landlord/onboarding/status'),
   completeOnboarding: (data) => api.post('/landlord/onboarding/complete', data),
+
+  getConcurrentDashboardData: () => {
+    return fetchConcurrent([
+      { key: 'dash', endpoint: '/landlord/dash' },
+      { key: 'properties', endpoint: '/landlord/properties' },
+      { key: 'tickets', endpoint: '/landlord/tickets' },
+      { key: 'tenants', endpoint: '/landlord/tenantdirectory' },
+      { key: 'documents', endpoint: '/landlord/documents' },
+      { key: 'rentroll', endpoint: '/landlord/rentroll' },
+      { key: 'announcements', endpoint: '/landlord/announcements' },
+    ]);
+  },
 };
 
 /* -------------------------------------------------------------
@@ -310,7 +324,19 @@ export const tenantApi = {
   deleteVehicle: (id) => api.delete(`/tenant/vehicles/${id}`),
 
   getAnnouncements: () => api.get('/tenant/announcements'),
+
+  getConcurrentPortalData: () => {
+    return fetchConcurrent([
+      { key: 'dash', endpoint: '/tenant/dash' },
+      { key: 'payments', endpoint: '/tenant/payments' },
+      { key: 'tickets', endpoint: '/tenant/tickets' },
+      { key: 'announcements', endpoint: '/tenant/announcements' },
+      { key: 'lease', endpoint: '/tenant/lease' },
+    ]);
+  },
 };
+
+export { fetchConcurrent };
 
 /* -------------------------------------------------------------
  * Notification API

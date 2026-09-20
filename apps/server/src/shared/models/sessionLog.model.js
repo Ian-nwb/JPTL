@@ -44,6 +44,8 @@ const sessionLogSchema = new Schema(
   { timestamps: true }
 );
 
+sessionLogSchema.index({ userId: 1, isActive: 1 });
+
 const SessionLog = mongoose.model('SessionLog', sessionLogSchema);
 
 export { SessionLog };
