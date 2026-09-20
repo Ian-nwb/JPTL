@@ -37,13 +37,55 @@ import { useAuth } from '../context/AuthContext';
 import { landlordApi } from '../services/api';
 import { DashboardSkeleton } from '../components/ui/SkeletonLoader';
 
-export const DashboardPage = ({ onNavigate = () => {} }) => {
+const LANDLORD_VIEW_ROUTES = {
+  overview: '/dashboard',
+  announcements: '/dashboard-announcements',
+  payments: '/dashboard-payments',
+  tickets: '/dashboard-tickets',
+  units: '/dashboard-units',
+  tenants: '/dashboard-tenants',
+  documents: '/dashboard-documents',
+  settings: '/dashboard-settings',
+};
+
+function getViewFromPath(pathname) {
+  const clean = (pathname || '').toLowerCase().split('?')[0].replace(/\/$/, '');
+  if (clean === '/dashboard-announcements' || clean === '/dashboard/announcements' || clean === '/landlord-announcements' || clean === '/landlord/announcements') return 'announcements';
+  if (clean === '/dashboard-payments' || clean === '/dashboard/payments' || clean === '/landlord-payments' || clean === '/landlord/payments' || clean === '/dashboard-rentroll' || clean === '/landlord-rentroll') return 'payments';
+  if (clean === '/dashboard-tickets' || clean === '/dashboard/tickets' || clean === '/landlord-tickets' || clean === '/landlord/tickets' || clean === '/dashboard-maintenance' || clean === '/landlord-maintenance') return 'tickets';
+  if (clean === '/dashboard-units' || clean === '/dashboard/units' || clean === '/landlord-units' || clean === '/landlord/units' || clean === '/dashboard-properties' || clean === '/landlord-properties') return 'units';
+  if (clean === '/dashboard-tenants' || clean === '/dashboard/tenants' || clean === '/landlord-tenants' || clean === '/landlord/tenants') return 'tenants';
+  if (clean === '/dashboard-documents' || clean === '/dashboard/documents' || clean === '/landlord-documents' || clean === '/landlord/documents') return 'documents';
+  if (clean === '/dashboard-settings' || clean === '/dashboard/settings' || clean === '/landlord-settings' || clean === '/landlord/settings') return 'settings';
+  if (clean === '/dashboard-overview' || clean === '/dashboard/overview' || clean === '/landlord-overview' || clean === '/landlord/overview' || clean === '/dashboard' || clean === '/landlord') return 'overview';
+  return 'overview';
+}
+
+export const DashboardPage = ({ currentPath = window.location.pathname, onNavigate = () => {} }) => {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
 
-  const [activeView, setActiveView] = useState('overview');
+  const [activeView, setActiveView] = useState(() => getViewFromPath(currentPath || window.location.pathname));
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Sync activeView if browser navigation or URL change occurs
+  useEffect(() => {
+    const viewFromUrl = getViewFromPath(window.location.pathname);
+    if (viewFromUrl && viewFromUrl !== activeView) {
+      setActiveView(viewFromUrl);
+    }
+  }, [currentPath]);
+
+  const handleViewChange = (view) => {
+    setActiveView(view);
+    setSearchQuery('');
+    setFilterStatus('all');
+    const targetUrl = LANDLORD_VIEW_ROUTES[view] || '/dashboard';
+    if (window.location.pathname !== targetUrl) {
+      onNavigate(targetUrl);
+    }
+  };
 
   const [properties, setProperties] = useState(() => {
     try {
@@ -657,12 +699,12 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
 
   const handleCommandPaletteSelect = (item) => {
     if (item.type === 'property' || item.type === 'unit') {
-      setActiveView('units');
+      handleViewChange('units');
       if (item.type === 'unit') setSelectedUnitForDetail(item.raw);
     } else if (item.type === 'tenant') {
-      setActiveView('tenants');
+      handleViewChange('tenants');
     } else if (item.type === 'ticket') {
-      setActiveView('tickets');
+      handleViewChange('tickets');
     }
   };
 
@@ -696,7 +738,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
       {/* ─── LEFT SIDEBAR NAV ─── */}
       <DashboardSidebar
         activeView={activeView}
-        onChangeView={(view) => { setActiveView(view); setSearchQuery(''); setFilterStatus('all'); }}
+        onChangeView={handleViewChange}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((p) => !p)}
         onLogout={handleLogout}
@@ -840,8 +882,8 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                 units={units}
                 tenants={tenants}
                 tickets={tickets}
-                onAddTenant={() => setActiveView('units')}
-                onNavigateTickets={() => setActiveView('tickets')}
+                onAddTenant={() => handleViewChange('units')}
+                onNavigateTickets={() => handleViewChange('tickets')}
               />
 
               <SectionDivider label="Recent Activity" />
@@ -853,7 +895,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                     <h2 className="text-sm font-bold font-grotesk text-slate-900 dark:text-white flex items-center gap-2">
                       <Wrench className="w-4 h-4 text-indigo-500" /> Recent Maintenance Requests
                     </h2>
-                    <button onClick={() => setActiveView('tickets')} className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 btn-press">
+                    <button onClick={() => handleViewChange('tickets')} className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 btn-press">
                       View All <ArrowRight className="w-3 h-3" />
                     </button>
                   </div>
@@ -888,21 +930,21 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
                     <h2 className="text-sm font-bold font-grotesk text-slate-900 dark:text-white">Quick Actions</h2>
                   </div>
                   <div className="divide-y divide-slate-200 dark:divide-slate-800/60">
-                    <button onClick={() => { setActiveView('units'); }} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
+                    <button onClick={() => handleViewChange('units')} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
                       <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500"><Building2 className="w-4 h-4" /></div>
                       <div>
                         <span className="text-xs font-bold text-slate-900 dark:text-white block">Browse Properties</span>
                         <span className="text-xs text-slate-500 dark:text-slate-400">View all units and assign tenants</span>
                       </div>
                     </button>
-                    <button onClick={() => { setActiveView('tenants'); }} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
+                    <button onClick={() => handleViewChange('tenants')} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
                       <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500"><Users className="w-4 h-4" /></div>
                       <div>
                         <span className="text-xs font-bold text-slate-900 dark:text-white block">Manage Tenants</span>
                         <span className="text-xs text-slate-500 dark:text-slate-400">View directory and add new tenants</span>
                       </div>
                     </button>
-                    <button onClick={() => { setActiveView('announcements'); }} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
+                    <button onClick={() => handleViewChange('announcements')} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
                       <div className="p-2 rounded-xl bg-purple-500/10 text-purple-500"><Megaphone className="w-4 h-4" /></div>
                       <div>
                         <span className="text-xs font-bold text-slate-900 dark:text-white block">Post Broadcast</span>
@@ -1435,7 +1477,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
           { key: 'payments', label: 'Rent Roll', icon: DollarSign },
         ]}
         activeKey={activeView}
-        onSelect={(view) => { setActiveView(view); setSearchQuery(''); setFilterStatus('all'); }}
+        onSelect={handleViewChange}
         onOpenMore={() => setIsMobileNavOpen(true)}
       />
 
@@ -1457,7 +1499,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
           { key: 'settings', label: 'Console Settings', icon: Settings },
         ]}
         activeKey={activeView}
-        onSelect={(view) => { setActiveView(view); setSearchQuery(''); setFilterStatus('all'); }}
+        onSelect={handleViewChange}
         onLogout={handleLogout}
         theme={theme}
         toggleTheme={toggleTheme}

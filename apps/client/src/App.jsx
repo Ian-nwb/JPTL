@@ -117,15 +117,28 @@ function AuthLoadingScreen() {
   );
 }
 
+export const isTenantRoute = (path) => {
+  if (!path) return false;
+  const p = path.toLowerCase().split('?')[0].replace(/\/$/, '');
+  return p.startsWith('/tenant') || p === '/tenant' || p.startsWith('/tenant-') || p.startsWith('/tenant/');
+};
+
+export const isLandlordRoute = (path) => {
+  if (!path) return false;
+  const p = path.toLowerCase().split('?')[0].replace(/\/$/, '');
+  return p.startsWith('/dashboard') || p === '/dashboard' || p.startsWith('/dashboard-') || p.startsWith('/dashboard/') ||
+         p.startsWith('/landlord') || p === '/landlord' || p.startsWith('/landlord-') || p.startsWith('/landlord/');
+};
+
 function RouteLoadingFallback({ currentPath }) {
-  if (currentPath?.startsWith('/tenant')) {
+  if (isTenantRoute(currentPath)) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-[#050811] text-slate-900 dark:text-slate-100 p-4 sm:p-8 max-w-7xl mx-auto">
         <TenantPortalSkeleton />
       </div>
     );
   }
-  if (currentPath?.startsWith('/dashboard')) {
+  if (isLandlordRoute(currentPath)) {
     return (
       <div className="min-h-screen bg-slate-50 dark:bg-[#050811] text-slate-900 dark:text-slate-100 p-4 sm:p-8 max-w-7xl mx-auto">
         <DashboardSkeleton />
@@ -188,8 +201,10 @@ function AppRouter() {
       const publicPaths = ['/login', '/', '/register', '/forgot-password'];
       const isPublic =
         publicPaths.includes(currentPath) || currentPath.startsWith('/reset-password');
-      const protectedPrefixes = ['/dashboard', '/tenant', '/onboarding'];
-      const isProtected = protectedPrefixes.some(p => currentPath.startsWith(p));
+      const isProtected =
+        isTenantRoute(currentPath) ||
+        isLandlordRoute(currentPath) ||
+        currentPath.startsWith('/onboarding');
       if (!isPublic && isProtected) {
         window.history.replaceState({}, '', '/login');
         setCurrentPath('/login');
@@ -205,13 +220,13 @@ function AppRouter() {
       return;
     }
 
-    if (role === 'tenant' && currentPath.startsWith('/dashboard')) {
+    if (role === 'tenant' && isLandlordRoute(currentPath)) {
       window.history.replaceState({}, '', '/tenant');
       setCurrentPath('/tenant');
       return;
     }
 
-    if ((role === 'landlord' || role === 'superadmin') && currentPath.startsWith('/tenant')) {
+    if ((role === 'landlord' || role === 'superadmin') && isTenantRoute(currentPath)) {
       window.history.replaceState({}, '', '/dashboard');
       setCurrentPath('/dashboard');
     }
@@ -276,8 +291,8 @@ function AppRouter() {
         if (currentPath === '/onboarding' || currentPath.startsWith('/onboarding')) return <OnboardingPage onNavigate={navigate} />;
         if (currentPath === '/login') return <LoginPage onNavigate={navigate} />;
         if (currentPath === '/forgot-password' || currentPath.startsWith('/reset-password')) return <ForgotPasswordPage onNavigate={navigate} />;
-        if (currentPath.startsWith('/tenant')) return <TenantPortalPage onNavigate={navigate} />;
-        if (currentPath.startsWith('/dashboard')) return <DashboardPage onNavigate={navigate} />;
+        if (isTenantRoute(currentPath)) return <TenantPortalPage currentPath={currentPath} onNavigate={navigate} />;
+        if (isLandlordRoute(currentPath)) return <DashboardPage currentPath={currentPath} onNavigate={navigate} />;
         if (currentPath === '/') return <LandingPage onNavigate={navigate} />;
         return <NotFoundPage onNavigate={navigate} />;
       })()}

@@ -58,13 +58,51 @@ const MOCK_RESIDENT_ANNOUNCEMENTS = [
   },
 ];
 
-export const TenantPortalPage = ({ onNavigate = () => {} }) => {
+const TENANT_TAB_ROUTES = {
+  overview: '/tenant',
+  announcements: '/tenant-announcements',
+  payments: '/tenant-payments',
+  maintenance: '/tenant-maintenance',
+  lease: '/tenant-lease',
+  documents: '/tenant-documents',
+  settings: '/tenant-settings',
+};
+
+function getTabFromPath(pathname) {
+  const clean = (pathname || '').toLowerCase().split('?')[0].replace(/\/$/, '');
+  if (clean === '/tenant-announcements' || clean === '/tenant/announcements') return 'announcements';
+  if (clean === '/tenant-payments' || clean === '/tenant/payments') return 'payments';
+  if (clean === '/tenant-maintenance' || clean === '/tenant/maintenance') return 'maintenance';
+  if (clean === '/tenant-lease' || clean === '/tenant/lease') return 'lease';
+  if (clean === '/tenant-documents' || clean === '/tenant/documents') return 'documents';
+  if (clean === '/tenant-settings' || clean === '/tenant/settings') return 'settings';
+  if (clean === '/tenant-overview' || clean === '/tenant/overview' || clean === '/tenant') return 'overview';
+  return 'overview';
+}
+
+export const TenantPortalPage = ({ currentPath = window.location.pathname, onNavigate = () => {} }) => {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
 
-  // Active Tab & Resident selection
-  const [activeTab, setActiveTab] = useState('overview'); // 'overview' | 'payments' | 'maintenance' | 'lease' | 'announcements' | 'settings'
+  // Active Tab & Resident selection - synced with URL
+  const [activeTab, setActiveTab] = useState(() => getTabFromPath(currentPath || window.location.pathname));
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Sync activeTab if browser back/forward or external navigation occurs
+  useEffect(() => {
+    const tabFromUrl = getTabFromPath(window.location.pathname);
+    if (tabFromUrl && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl);
+    }
+  }, [currentPath]);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
+    const targetUrl = TENANT_TAB_ROUTES[tab] || '/tenant';
+    if (window.location.pathname !== targetUrl) {
+      onNavigate(targetUrl);
+    }
+  };
 
   // Live state from backend
   const [isLoading, setIsLoading] = useState(true);
@@ -292,7 +330,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
       {/* ─── LEFT SIDEBAR NAV ─── */}
       <TenantSidebar
         activeTab={activeTab}
-        onChangeTab={(tab) => setActiveTab(tab)}
+        onChangeTab={handleTabChange}
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed((p) => !p)}
         onLogout={handleLogout}
@@ -397,7 +435,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
                   announcements={announcements}
                   onPayRentClick={() => setIsPayRentOpen(true)}
                   onRequestRepairClick={() => setIsReportIssueOpen(true)}
-                  onNavigateTab={(tab) => setActiveTab(tab)}
+                  onNavigateTab={handleTabChange}
                 />
               )}
 
@@ -491,7 +529,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
           { key: 'lease', label: 'My Lease', icon: FileText },
         ]}
         activeKey={activeTab}
-        onSelect={(tab) => setActiveTab(tab)}
+        onSelect={handleTabChange}
         onOpenMore={() => setIsMobileNavOpen(true)}
       />
 
@@ -512,7 +550,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
           { key: 'settings', label: 'Account & Settings', icon: Settings },
         ]}
         activeKey={activeTab}
-        onSelect={(tab) => setActiveTab(tab)}
+        onSelect={handleTabChange}
         onLogout={handleLogout}
         theme={theme}
         toggleTheme={toggleTheme}
