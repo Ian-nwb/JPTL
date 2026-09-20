@@ -6,6 +6,7 @@ import {
 import {
   getProperties, createProperty, updateProperty, deleteProperty, getUsersLookup
 } from '../services/superadminApi';
+import { Skeleton } from './ui/SkeletonLoader';
 
 const CATEGORIES = ['Residential', 'Luxury', 'Studio', 'Penthouse', 'Commercial'];
 
@@ -236,12 +237,24 @@ export const PropertiesTab = () => {
             </thead>
             <tbody className="divide-y divide-slate-800/60">
               {loading && properties.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-12 text-slate-500">
-                    <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-indigo-400" />
-                    <span>Loading properties from database...</span>
-                  </td>
-                </tr>
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="py-3.5 px-5">
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="w-8 h-8 rounded-xl shrink-0" />
+                        <div className="space-y-1.5 flex-1">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-20" />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-36" /></td>
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-20 rounded-full" /></td>
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-28" /></td>
+                    <td className="py-3.5 px-5 text-center"><Skeleton className="h-4 w-8 mx-auto" /></td>
+                    <td className="py-3.5 px-5 text-right"><Skeleton className="h-7 w-16 ml-auto rounded-lg" /></td>
+                  </tr>
+                ))
               ) : properties.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-12 text-slate-500">

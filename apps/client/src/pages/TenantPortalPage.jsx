@@ -26,6 +26,7 @@ import { RightNotificationSidebar } from '../components/dashboard/RightNotificat
 import { MobileNavBar } from '../components/common/MobileNavBar';
 import { MobileNavDrawer } from '../components/common/MobileNavDrawer';
 import { FileCheck, LayoutDashboard, Settings } from 'lucide-react';
+import { TenantPortalSkeleton, DashboardSkeleton } from '../components/ui/SkeletonLoader';
 
 const MOCK_RESIDENT_ANNOUNCEMENTS = [
   {
@@ -66,6 +67,7 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Live state from backend
+  const [isLoading, setIsLoading] = useState(true);
   const [tenantData, setTenantData] = useState(null);
   const [unitData, setUnitData] = useState(null);
   const [propertyData, setPropertyData] = useState(null);
@@ -169,6 +171,10 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
           }
         } catch (fallbackErr) {
           console.warn('Tenant live data fetch fallback:', fallbackErr.message);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
         }
       }
     }
@@ -377,71 +383,77 @@ export const TenantPortalPage = ({ onNavigate = () => {} }) => {
         {/* ─── SCROLLABLE MAIN TAB CONTENT ─── */}
         <main className="flex-1 px-3 py-4 sm:px-6 sm:py-6 space-y-5 sm:space-y-6 overflow-y-auto pb-28 md:pb-8">
           
-          {activeTab === 'overview' && (
-            <TenantOverviewTab
-              tenant={{ ...currentTenant, unitLabel: currentUnit?.label || 'Unassigned', propertyName: currentProperty?.name || 'Property' }}
-              unit={currentUnit}
-              property={currentProperty}
-              landlord={landlordData}
-              tickets={tickets}
-              announcements={announcements}
-              onPayRentClick={() => setIsPayRentOpen(true)}
-              onRequestRepairClick={() => setIsReportIssueOpen(true)}
-              onNavigateTab={(tab) => setActiveTab(tab)}
-            />
-          )}
+          {isLoading && !tenantData ? (
+            <TenantPortalSkeleton />
+          ) : (
+            <>
+              {activeTab === 'overview' && (
+                <TenantOverviewTab
+                  tenant={{ ...currentTenant, unitLabel: currentUnit?.label || 'Unassigned', propertyName: currentProperty?.name || 'Property' }}
+                  unit={currentUnit}
+                  property={currentProperty}
+                  landlord={landlordData}
+                  tickets={tickets}
+                  announcements={announcements}
+                  onPayRentClick={() => setIsPayRentOpen(true)}
+                  onRequestRepairClick={() => setIsReportIssueOpen(true)}
+                  onNavigateTab={(tab) => setActiveTab(tab)}
+                />
+              )}
 
-          {activeTab === 'payments' && (
-            <TenantPaymentsTab
-              tenant={currentTenant}
-              unit={currentUnit}
-              property={currentProperty}
-              payments={payments}
-              securityDeposit={tenantData?.securityDeposit ?? leaseData?.securityDeposit}
-              onPayRentClick={() => setIsPayRentOpen(true)}
-            />
-          )}
+              {activeTab === 'payments' && (
+                <TenantPaymentsTab
+                  tenant={currentTenant}
+                  unit={currentUnit}
+                  property={currentProperty}
+                  payments={payments}
+                  securityDeposit={tenantData?.securityDeposit ?? leaseData?.securityDeposit}
+                  onPayRentClick={() => setIsPayRentOpen(true)}
+                />
+              )}
 
-          {activeTab === 'maintenance' && (
-            <TenantMaintenanceTab
-              tickets={tickets}
-              tenant={currentTenant}
-              unit={currentUnit}
-              onRequestRepairClick={() => setIsReportIssueOpen(true)}
-              onDeleteTicket={handleDeleteTicket}
-            />
-          )}
+              {activeTab === 'maintenance' && (
+                <TenantMaintenanceTab
+                  tickets={tickets}
+                  tenant={currentTenant}
+                  unit={currentUnit}
+                  onRequestRepairClick={() => setIsReportIssueOpen(true)}
+                  onDeleteTicket={handleDeleteTicket}
+                />
+              )}
 
-          {activeTab === 'lease' && (
-            <TenantLeaseTab
-              tenant={currentTenant}
-              unit={currentUnit}
-              property={currentProperty}
-              lease={leaseData}
-            />
-          )}
+              {activeTab === 'lease' && (
+                <TenantLeaseTab
+                  tenant={currentTenant}
+                  unit={currentUnit}
+                  property={currentProperty}
+                  lease={leaseData}
+                />
+              )}
 
-          {activeTab === 'announcements' && (
-            <TenantAnnouncementsTab
-              announcements={announcements}
-            />
-          )}
+              {activeTab === 'announcements' && (
+                <TenantAnnouncementsTab
+                  announcements={announcements}
+                />
+              )}
 
-          {activeTab === 'documents' && (
-            <TenantDocumentsTab
-              tenant={currentTenant}
-              unit={currentUnit}
-            />
-          )}
+              {activeTab === 'documents' && (
+                <TenantDocumentsTab
+                  tenant={currentTenant}
+                  unit={currentUnit}
+                />
+              )}
 
-          {activeTab === 'settings' && (
-            <TenantSettingsTab
-              tenant={currentTenant}
-              unit={currentUnit}
-              property={currentProperty}
-              landlord={landlordData}
-              lease={leaseData}
-            />
+              {activeTab === 'settings' && (
+                <TenantSettingsTab
+                  tenant={currentTenant}
+                  unit={currentUnit}
+                  property={currentProperty}
+                  landlord={landlordData}
+                  lease={leaseData}
+                />
+              )}
+            </>
           )}
 
         </main>

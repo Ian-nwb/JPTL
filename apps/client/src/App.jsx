@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, Component, lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { notificationApi, systemApi } from './services/api';
+import { DashboardSkeleton, TenantPortalSkeleton } from './components/ui/SkeletonLoader';
 
 // Dynamic route-level code splitting via React.lazy
 const LandingPage = lazy(() => import('./pages/LandingPage').then(m => ({ default: m.LandingPage })));
@@ -114,6 +115,24 @@ function AuthLoadingScreen() {
       </div>
     </div>
   );
+}
+
+function RouteLoadingFallback({ currentPath }) {
+  if (currentPath?.startsWith('/tenant')) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-[#050811] text-slate-900 dark:text-slate-100 p-4 sm:p-8 max-w-7xl mx-auto">
+        <TenantPortalSkeleton />
+      </div>
+    );
+  }
+  if (currentPath?.startsWith('/dashboard')) {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-[#050811] text-slate-900 dark:text-slate-100 p-4 sm:p-8 max-w-7xl mx-auto">
+        <DashboardSkeleton />
+      </div>
+    );
+  }
+  return <AuthLoadingScreen />;
 }
 
 /* ─────────────────────────────────────────────
@@ -251,7 +270,7 @@ function AppRouter() {
 
   // 4. Render matched route wrapped in Suspense for route code splitting
   return (
-    <Suspense fallback={<AuthLoadingScreen />}>
+    <Suspense fallback={<RouteLoadingFallback currentPath={currentPath} />}>
       {(() => {
         if (currentPath === '/register') return <RegisterPage onNavigate={navigate} />;
         if (currentPath === '/onboarding' || currentPath.startsWith('/onboarding')) return <OnboardingPage onNavigate={navigate} />;

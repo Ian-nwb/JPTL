@@ -35,6 +35,7 @@ import { MobileNavDrawer } from '../components/common/MobileNavDrawer';
 import { LayoutDashboard, FileCheck, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { landlordApi } from '../services/api';
+import { DashboardSkeleton } from '../components/ui/SkeletonLoader';
 
 export const DashboardPage = ({ onNavigate = () => {} }) => {
   const { theme, toggleTheme } = useTheme();
@@ -42,6 +43,7 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
 
   const [activeView, setActiveView] = useState('overview');
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [properties, setProperties] = useState(() => {
     try {
@@ -537,6 +539,10 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
         } catch (fallbackErr) {
           console.warn('Dashboard live data fetch fallback:', fallbackErr.message);
         }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
 
@@ -797,10 +803,14 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
         {/* ─── SCROLLABLE MAIN CONTENT ─── */}
         <main className="flex-1 px-3 py-4 sm:px-6 sm:py-6 space-y-5 sm:space-y-6 overflow-y-auto pb-28 md:pb-8">
 
-          {/* ═══════════════════════════════════════════ */}
-          {/* ─── VIEW 1: OVERVIEW (informational only) ─── */}
-          {/* ═══════════════════════════════════════════ */}
-          {activeView === 'overview' && (
+          {isLoading && properties.length === 0 && units.length === 0 && tickets.length === 0 ? (
+            <DashboardSkeleton />
+          ) : (
+            <>
+              {/* ═══════════════════════════════════════════ */}
+              {/* ─── VIEW 1: OVERVIEW (informational only) ─── */}
+              {/* ═══════════════════════════════════════════ */}
+              {activeView === 'overview' && (
             <>
               {/* Broadcast Banner (dismissible) */}
               {announcement && !broadcastDismissed && (
@@ -1344,13 +1354,15 @@ export const DashboardPage = ({ onNavigate = () => {} }) => {
             />
           )}
 
-          {/* ─── VIEW 8: LANDLORD SETTINGS ─── */}
-          {activeView === 'settings' && (
-            <LandlordSettingsTab
-              properties={properties}
-              units={units}
-              tenants={tenants}
-            />
+              {/* ─── VIEW 8: LANDLORD SETTINGS ─── */}
+              {activeView === 'settings' && (
+                <LandlordSettingsTab
+                  properties={properties}
+                  units={units}
+                  tenants={tenants}
+                />
+              )}
+            </>
           )}
 
         </main>

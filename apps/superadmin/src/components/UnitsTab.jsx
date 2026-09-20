@@ -6,6 +6,7 @@ import {
 import {
   getUnits, createUnit, updateUnit, deleteUnit, getProperties, getUsersLookup
 } from '../services/superadminApi';
+import { Skeleton } from './ui/SkeletonLoader';
 
 const STATUS_CHOICES = [
   { value: 'vacant', label: 'Vacant', badge: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' },
@@ -284,12 +285,17 @@ export const UnitsTab = () => {
             </thead>
             <tbody className="divide-y divide-slate-800/60">
               {loading && units.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="text-center py-12 text-slate-500">
-                    <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-purple-400" />
-                    <span>Loading units from database...</span>
-                  </td>
-                </tr>
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-28" /></td>
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-32" /></td>
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-20" /></td>
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-24" /></td>
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-20 rounded-full" /></td>
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-28" /></td>
+                    <td className="py-3.5 px-5 text-right"><Skeleton className="h-7 w-16 ml-auto rounded-lg" /></td>
+                  </tr>
+                ))
               ) : units.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center py-12 text-slate-500">

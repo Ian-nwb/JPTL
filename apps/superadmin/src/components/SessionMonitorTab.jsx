@@ -4,6 +4,7 @@ import {
   ShieldCheck, CheckCircle2, LogOut, AlertTriangle, ArrowUpRight
 } from 'lucide-react';
 import { getSessionLogs, subscribeToSessionStream } from '../services/superadminApi';
+import { Skeleton } from './ui/SkeletonLoader';
 
 export const SessionMonitorTab = () => {
   const [sessions, setSessions] = useState([]);
@@ -260,12 +261,24 @@ export const SessionMonitorTab = () => {
             </thead>
             <tbody className="divide-y divide-slate-800/60">
               {loading && sessions.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-12 text-slate-500">
-                    <RefreshCw className="w-5 h-5 animate-spin mx-auto mb-2 text-indigo-400" />
-                    <span>Loading session logs...</span>
-                  </td>
-                </tr>
+                Array.from({ length: 5 }).map((_, idx) => (
+                  <tr key={idx} className="animate-pulse">
+                    <td className="py-3.5 px-5">
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="w-8 h-8 rounded-full shrink-0" />
+                        <div className="space-y-1.5 flex-1">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-20" />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-20 rounded-full" /></td>
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-28" /></td>
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-24" /></td>
+                    <td className="py-3.5 px-5"><Skeleton className="h-4 w-40" /></td>
+                    <td className="py-3.5 px-5 text-right"><Skeleton className="h-5 w-16 ml-auto rounded-full" /></td>
+                  </tr>
+                ))
               ) : sessions.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="text-center py-12 text-slate-500">
