@@ -28,6 +28,7 @@ import { DashboardSidebar } from '../components/dashboard/DashboardSidebar';
 import { RightNotificationSidebar } from '../components/dashboard/RightNotificationSidebar';
 import { LandlordSettingsTab } from '../components/dashboard/LandlordSettingsTab';
 import { LandlordDocumentsTab } from '../components/dashboard/LandlordDocumentsTab';
+import { LeaseExtensionsTab } from '../components/dashboard/LeaseExtensionsTab';
 import { DeletePropertyModal } from '../components/dashboard/DeletePropertyModal';
 import { AddPropertyOrUnitModal } from '../components/dashboard/AddPropertyOrUnitModal';
 import { MobileNavBar } from '../components/common/MobileNavBar';
@@ -46,6 +47,7 @@ const LANDLORD_VIEW_ROUTES = {
   tenants: '/dashboard-tenants',
   documents: '/dashboard-documents',
   settings: '/dashboard-settings',
+  'lease-extensions': '/dashboard-lease-extensions',
 };
 
 function getViewFromPath(pathname) {
@@ -57,6 +59,7 @@ function getViewFromPath(pathname) {
   if (clean === '/dashboard-tenants' || clean === '/dashboard/tenants' || clean === '/landlord-tenants' || clean === '/landlord/tenants') return 'tenants';
   if (clean === '/dashboard-documents' || clean === '/dashboard/documents' || clean === '/landlord-documents' || clean === '/landlord/documents') return 'documents';
   if (clean === '/dashboard-settings' || clean === '/dashboard/settings' || clean === '/landlord-settings' || clean === '/landlord/settings') return 'settings';
+  if (clean === '/dashboard-lease-extensions' || clean === '/landlord-lease-extensions') return 'lease-extensions';
   if (clean === '/dashboard-overview' || clean === '/dashboard/overview' || clean === '/landlord-overview' || clean === '/landlord/overview' || clean === '/dashboard' || clean === '/landlord') return 'overview';
   return 'overview';
 }
@@ -1403,6 +1406,11 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
                   units={units}
                   tenants={tenants}
                 />
+              )}
+
+              {/* ─── VIEW 9: LEASE EXTENSIONS ─── */}
+              {activeView === 'lease-extensions' && (
+                <LeaseExtensionsTab />
               )}
             </>
           )}

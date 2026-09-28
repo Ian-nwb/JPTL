@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Ticket from '../../../shared/models/ticket.model.js';
 import Property from '../../../shared/models/property.model.js';
 import Unit from '../../../shared/models/unit.model.js';
@@ -36,10 +37,16 @@ async function logAction({ actorId, action, entityKind = 'Ticket', entityId, bef
 export async function getLandlordTickets(landlordId, query = {}) {
   const { status, priority, propertyId, search, page = 1, limit = 50 } = query;
 
-  // 1. Find all properties of this landlord
-  const landlordProperties = await Property.find({ landlord: landlordId }).lean();
+  // 1. Find all properties of this landlord and landlord user details
+  const [landlordProperties, landlordUser] = await Promise.all([
+    Property.find({ landlord: landlordId }).lean(),
+    User.findById(landlordId).select('firstName lastName email').lean(),
+  ]);
   const propertyIds = landlordProperties.map((p) => p._id);
   const propertyMap = new Map(landlordProperties.map((p) => [p._id.toString(), p]));
+  const landlordName = landlordUser
+    ? `${landlordUser.firstName || ''} ${landlordUser.lastName || ''}`.trim() || 'Landlord'
+    : 'Landlord';
 
   // 2. Find all units under landlord properties
   const unitFilter = { property: { $in: propertyIds } };
@@ -69,10 +76,11 @@ export async function getLandlordTickets(landlordId, query = {}) {
     matchFilter.priority = priority;
   }
 
-  // 4. Fetch tickets with populated tenant and unit (including unit.property)
+  // 4. Fetch tickets with populated tenant, unit, and status history user
   const rawTickets = await Ticket.find(matchFilter)
     .populate('tenant', 'firstName lastName email phone')
     .populate({ path: 'unit', populate: { path: 'property' } })
+    .populate('statusHistory.changedBy', 'firstName lastName email role')
     .sort({ createdAt: -1 })
     .lean();
 
@@ -106,6 +114,27 @@ export async function getLandlordTickets(landlordId, query = {}) {
       ? `${t.tenant.firstName || ''} ${t.tenant.lastName || ''}`.trim() || t.tenant.email
       : 'Unassigned';
 
+    // Format status history with human-readable user names instead of ObjectIds
+    const statusHistory = (t.statusHistory || []).map((h) => {
+      let displayName = landlordName;
+      if (h.changedBy && typeof h.changedBy === 'object') {
+        displayName = `${h.changedBy.firstName || ''} ${h.changedBy.lastName || ''}`.trim() || h.changedBy.email || (h.userRole === 'landlord' ? landlordName : 'User');
+      } else if (h.userRole === 'landlord') {
+        displayName = landlordName;
+      } else if (h.userRole === 'tenant') {
+        displayName = tenantName !== 'Unassigned' ? tenantName : 'Tenant';
+      } else if (h.userRole === 'system') {
+        displayName = 'System';
+      } else if (typeof h.changedBy === 'string' && !/^[0-9a-fA-F]{24}$/.test(h.changedBy)) {
+        displayName = h.changedBy;
+      }
+      return {
+        ...h,
+        changedByName: displayName,
+        changedBy: displayName,
+      };
+    });
+
     return {
       ...t,
       id: t._id,
@@ -117,6 +146,7 @@ export async function getLandlordTickets(landlordId, query = {}) {
       tenantName,
       tenantEmail: t.tenant?.email || '',
       tenantPhone: t.tenant?.phone || '',
+      statusHistory,
     };
   });
 
@@ -225,7 +255,7 @@ export async function createLandlordTicket(landlordId, payload, ipAddress = '') 
   const initialHistory = [
     {
       status: assignedTechnician ? 'in_progress' : 'submitted',
-      changedBy: landlordId,
+      changedBy: new mongoose.Types.ObjectId(landlordId),
       userRole: 'landlord',
       note: 'Ticket created by landlord',
       timestamp: new Date(),
@@ -306,7 +336,7 @@ export async function updateTicketStatus(landlordId, ticketId, payload, ipAddres
 
   const historyEntry = {
     status: nextStatus,
-    changedBy: landlordId,
+    changedBy: new mongoose.Types.ObjectId(landlordId),
     userRole: 'landlord',
     note: note || `Status updated to ${nextStatus.replace('_', ' ')}`,
     timestamp: new Date(),
@@ -335,9 +365,36 @@ export async function updateTicketStatus(landlordId, ticketId, payload, ipAddres
     });
   }
 
+  // Re-fetch with populate so all changedBy ObjectIds resolve to user objects
+  const populatedTicket = await Ticket.findById(ticket._id)
+    .populate('tenant', 'firstName lastName email')
+    .populate('statusHistory.changedBy', 'firstName lastName email role')
+    .lean();
+
+  const landlordUser = await User.findById(landlordId).select('firstName lastName').lean();
+  const landlordName = landlordUser
+    ? `${landlordUser.firstName || ''} ${landlordUser.lastName || ''}`.trim() || 'Landlord'
+    : 'Landlord';
+
+  const tenantName = populatedTicket?.tenant
+    ? `${populatedTicket.tenant.firstName || ''} ${populatedTicket.tenant.lastName || ''}`.trim() || populatedTicket.tenant.email || 'Tenant'
+    : 'Tenant';
+
+  const statusHistory = (populatedTicket?.statusHistory || []).map((h) => {
+    let displayName;
+    if (h.changedBy && typeof h.changedBy === 'object') {
+      displayName = `${h.changedBy.firstName || ''} ${h.changedBy.lastName || ''}`.trim() || h.changedBy.email;
+    }
+    if (!displayName) {
+      displayName = h.userRole === 'landlord' ? landlordName : h.userRole === 'tenant' ? tenantName : 'System';
+    }
+    return { ...h, changedByName: displayName, changedBy: displayName };
+  });
+
   return {
-    ...ticket.toObject(),
-    id: ticket._id,
+    ...populatedTicket,
+    id: populatedTicket._id,
+    statusHistory,
   };
 }
 

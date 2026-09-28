@@ -6,6 +6,11 @@ import connectDB from '../src/shared/config/db.js';
  * Wraps Express application with cached database connection.
  */
 export default async function handler(req, res) {
+  // FAST-PATH: Answer CORS preflight immediately without waiting for DB pool
+  if (req.method === 'OPTIONS') {
+    return app(req, res);
+  }
+
   try {
     await connectDB();
   } catch (err) {

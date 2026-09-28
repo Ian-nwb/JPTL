@@ -12,7 +12,14 @@ const connectDB = async () => {
   }
 
   if (!cached.promise) {
-    cached.promise = mongoose.connect(process.env.MONGO_URI).then((m) => {
+    const opts = {
+      bufferCommands: false, // Fail immediately if connection is down instead of hanging
+      maxPoolSize: 10,       // Keep pool bounded per lambda to prevent Atlas connection exhaustion
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    };
+
+    cached.promise = mongoose.connect(process.env.MONGO_URI, opts).then((m) => {
       console.log(`MongoDB Connected: ${m.connection.host}`);
       return m;
     });

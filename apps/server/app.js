@@ -13,6 +13,7 @@ import landlordRentRollRoutes from './src/modules/landlord/rentroll/rentroll.rou
 import landlordPropertyRoutes from './src/modules/landlord/properties/properties.routes.js';
 import landlordTicketRoutes from './src/modules/landlord/tickets/tickets.routes.js';
 import landlordLeaseRoutes from './src/modules/landlord/lease/lease.routes.js';
+import landlordLeaseExtensionRoutes from './src/modules/landlord/leaseExtensions/leaseExtensions.routes.js';
 import landlordDocumentRoutes from './src/modules/landlord/documents/documents.routes.js';
 import tenantAnnouncementRoutes from './src/modules/tenant/announcements/announcements.routes.js';
 import tenantDashRoutes from './src/modules/tenant/dash/dash.routers.js';
@@ -24,6 +25,7 @@ import notificationRoutes from './src/modules/notifications/notification.routes.
 import vehicleRoutes from './src/modules/tenant/vehicle/vehicle.routes.js';
 import { generalLimiter, authLimiter } from './src/shared/middleware/rateLimiter.middleware.js';
 import { checkMaintenanceMode } from './src/shared/middleware/maintenance.middleware.js';
+import { securityHeaders } from './src/shared/middleware/securityHeaders.middleware.js';
 import { getMaintenanceState } from './src/shared/services/systemState.service.js';
 
 const app = express();
@@ -32,6 +34,7 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Apply middleware
+app.use(securityHeaders);
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(cookieParser());
@@ -85,6 +88,7 @@ app.use('/api/landlord/onboarding', landlordOnboardingRoutes);
 app.use('/api/landlord/properties', landlordPropertyRoutes);
 app.use('/api/landlord/tickets', landlordTicketRoutes);
 app.use('/api/landlord/lease', landlordLeaseRoutes);
+app.use('/api/landlord/lease-extensions', landlordLeaseExtensionRoutes);
 app.use('/api/landlord/documents', landlordDocumentRoutes);
 app.use('/api/landlord/announcements', landlordAnnouncementRoutes);
 app.use('/api/landlord/tenantdirectory', landlordTenantDirectoryRoutes);

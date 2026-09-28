@@ -26,6 +26,8 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
+userSchema.index({ landlord: 1, role: 1 });
+
 // Hash password automatically before saving (no 'next' parameter in async hooks)
 userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;

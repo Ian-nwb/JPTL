@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Wrench, Clock, CheckCircle2, AlertTriangle, ShieldAlert, User, Building2, Trash2, HardHat, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ConfirmationModal } from '../common/ConfirmationModal';
 import { useToast } from '../../context/ToastContext';
+import { useAuth } from '../../context/AuthContext';
 
 export const TicketsTab = ({
   tickets: initialTickets = [],
@@ -12,6 +13,11 @@ export const TicketsTab = ({
   onAssignTechnician,
 }) => {
   const toast = useToast();
+  const { user } = useAuth();
+  const currentUserName = user
+    ? `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email || 'Landlord'
+    : 'Landlord';
+
   const [tickets, setTickets] = useState(initialTickets);
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -52,7 +58,8 @@ export const TicketsTab = ({
         if (t.id === ticketId) {
           const newHistoryItem = {
             status: newStatus,
-            changedBy: 'Alexander Vance',
+            changedBy: currentUserName,
+            changedByName: currentUserName,
             userRole: 'landlord',
             timestamp: new Date().toISOString(),
             note: `Status changed to ${newStatus.replace('_', ' ')}`,
@@ -308,16 +315,26 @@ export const TicketsTab = ({
                     Technician & Activity Log
                   </span>
                   <div className="space-y-1">
-                    {t.statusHistory.slice(-2).map((h, i) => (
-                      <div key={i} className="text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between gap-2">
-                        <span>
-                          <strong className="text-slate-700 dark:text-slate-300">{h.changedBy}</strong> updated status to <span className="font-mono text-indigo-500 font-semibold">{h.status}</span> {h.note ? `— "${h.note}"` : ''}
-                        </span>
-                        <span className="font-mono text-xs text-slate-400 shrink-0">
-                          {new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                        </span>
-                      </div>
-                    ))}
+                    {t.statusHistory.slice(-2).map((h, i) => {
+                      const displayName =
+                        h.changedByName ||
+                        (typeof h.changedBy === 'object'
+                          ? `${h.changedBy.firstName || ''} ${h.changedBy.lastName || ''}`.trim() || h.changedBy.email || 'Landlord'
+                          : (/^[0-9a-fA-F]{24}$/.test(h.changedBy)
+                              ? (h.userRole === 'landlord' ? currentUserName : (h.userRole === 'tenant' ? (t.tenantName || 'Tenant') : 'User'))
+                              : (h.changedBy || (h.userRole === 'landlord' ? currentUserName : 'User'))));
+
+                      return (
+                        <div key={i} className="text-xs text-slate-500 dark:text-slate-400 flex items-center justify-between gap-2">
+                          <span>
+                            <strong className="text-slate-700 dark:text-slate-300">{displayName}</strong> updated status to <span className="font-mono text-indigo-500 font-semibold">{h.status}</span> {h.note ? `— "${h.note}"` : ''}
+                          </span>
+                          <span className="font-mono text-xs text-slate-400 shrink-0">
+                            {new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          </span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}

@@ -3,12 +3,14 @@ import {
   getTenantLedger,
   getPaymentReceipt,
   payRent,
+  payAdvance,
   toggleAutoPay,
   getPaymentMethods,
   addPaymentMethod,
   deletePaymentMethod,
 } from './payments.controller.js';
 import { requireAuth, requireRole } from '../../../shared/middleware/auth.middleware.js';
+import { strictActionLimiter } from '../../../shared/middleware/rateLimiter.middleware.js';
 
 const router = Router();
 
@@ -20,6 +22,9 @@ router.get('/', getTenantLedger);
 
 // POST /api/tenant/payments/pay - Pay rent and receive official digital receipt
 router.post('/pay', payRent);
+
+// POST /api/tenant/payments/pay-advance - Pay months in advance (bounded to lease end)
+router.post('/pay-advance', strictActionLimiter, payAdvance);
 
 // GET /api/tenant/payments/methods - List saved payment methods
 router.get('/methods', getPaymentMethods);
