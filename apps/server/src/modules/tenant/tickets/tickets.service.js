@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import Ticket from '../../../shared/models/ticket.model.js';
 import Unit from '../../../shared/models/unit.model.js';
 import Property from '../../../shared/models/property.model.js';
@@ -41,6 +42,7 @@ export async function getTenantTickets(tenantId, query = {}) {
 
   const rawTickets = await Ticket.find(matchFilter)
     .populate('unit')
+    .populate('statusHistory.changedBy', 'firstName lastName email role')
     .sort({ createdAt: -1 })
     .lean();
 
@@ -51,6 +53,26 @@ export async function getTenantTickets(tenantId, query = {}) {
   const formattedTickets = rawTickets.map((t) => {
     const propertyDoc = t.unit?.property ? propertyMap.get(t.unit.property.toString()) : null;
 
+    const statusHistory = (t.statusHistory || []).map((h) => {
+      let displayName = 'Landlord';
+      if (h.changedBy && typeof h.changedBy === 'object') {
+        displayName = `${h.changedBy.firstName || ''} ${h.changedBy.lastName || ''}`.trim() || h.changedBy.email || (h.userRole === 'landlord' ? 'Landlord' : 'User');
+      } else if (h.userRole === 'landlord') {
+        displayName = 'Landlord';
+      } else if (h.userRole === 'tenant') {
+        displayName = 'You';
+      } else if (h.userRole === 'system') {
+        displayName = 'System';
+      } else if (typeof h.changedBy === 'string' && !/^[0-9a-fA-F]{24}$/.test(h.changedBy)) {
+        displayName = h.changedBy;
+      }
+      return {
+        ...h,
+        changedByName: displayName,
+        changedBy: displayName,
+      };
+    });
+
     return {
       ...t,
       id: t._id,
@@ -59,6 +81,7 @@ export async function getTenantTickets(tenantId, query = {}) {
       propertyId: propertyDoc?._id || null,
       propertyName: propertyDoc?.name || 'Property N/A',
       propertyAddress: propertyDoc?.address || '',
+      statusHistory,
     };
   });
 
@@ -128,7 +151,7 @@ export async function submitTenantTicket(tenantId, payload, ipAddress = '') {
   const initialHistory = [
     {
       status: 'submitted',
-      changedBy: tenantId,
+      changedBy: new mongoose.Types.ObjectId(tenantId),
       userRole: 'tenant',
       note: 'Maintenance ticket submitted by tenant',
       timestamp: new Date(),
@@ -191,7 +214,7 @@ export async function cancelTenantTicket(tenantId, ticketId, reason = '', ipAddr
   ticket.status = 'cancelled';
   ticket.statusHistory.push({
     status: 'cancelled',
-    changedBy: tenantId,
+    changedBy: new mongoose.Types.ObjectId(tenantId),
     userRole: 'tenant',
     note: reason ? `Cancelled by tenant: ${reason}` : 'Cancelled by tenant',
     timestamp: new Date(),
@@ -242,7 +265,7 @@ export async function addTenantComment(tenantId, ticketId, note, ipAddress = '')
 
   ticket.statusHistory.push({
     status: ticket.status,
-    changedBy: tenantId,
+    changedBy: new mongoose.Types.ObjectId(tenantId),
     userRole: 'tenant',
     note: note.trim(),
     timestamp: new Date(),

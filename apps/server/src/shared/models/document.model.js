@@ -33,4 +33,7 @@ const documentSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+documentSchema.index({ unit: 1 });
+documentSchema.index({ tenant: 1, category: 1 });
+
 export default mongoose.model('Document', documentSchema);

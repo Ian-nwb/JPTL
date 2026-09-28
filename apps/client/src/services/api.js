@@ -266,6 +266,11 @@ export const landlordApi = {
   getOnboardingStatus: () => api.get('/landlord/onboarding/status'),
   completeOnboarding: (data) => api.post('/landlord/onboarding/complete', data),
 
+  // Lease Extensions
+  getLeaseExtensions: (status = 'all') => api.get(`/landlord/lease-extensions?status=${status}`),
+  reviewLeaseExtension: (leaseId, extensionId, data) =>
+    api.patch(`/landlord/lease-extensions/${leaseId}/${extensionId}`, data),
+
   getConcurrentDashboardData: () => {
     return fetchConcurrent([
       { key: 'dash', endpoint: '/landlord/dash' },
@@ -289,11 +294,14 @@ export const tenantApi = {
 
   getPayments: () => api.get('/tenant/payments'),
   payRent: (data) => api.post('/tenant/payments/pay', data),
+  payInAdvance: (data) => api.post('/tenant/payments/pay-advance', data),
   getPaymentMethods: () => api.get('/tenant/payments/methods'),
   addPaymentMethod: (data) => api.post('/tenant/payments/methods', data),
   deletePaymentMethod: (id) => api.delete(`/tenant/payments/methods/${id}`),
   toggleAutoPay: (autoPay) => api.patch('/tenant/payments/autopay', { autoPay }),
   getReceipt: (id) => api.get(`/tenant/payments/${id}/receipt`),
+
+  requestLeaseExtension: (data) => api.post('/tenant/lease/extension', data),
 
   getTickets: () => api.get('/tenant/tickets'),
   createTicket: (data) => api.post('/tenant/tickets', data),

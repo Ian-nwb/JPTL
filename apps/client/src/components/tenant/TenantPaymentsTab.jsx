@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { 
   CreditCard, CheckCircle2, Clock, Download, ArrowUpRight, DollarSign, 
-  ShieldCheck, Building, Plus, FileText, Eye, ChevronRight, PieChart, Sparkles 
+  ShieldCheck, Building, Plus, FileText, Eye, ChevronRight, PieChart, Sparkles, Calendar 
 } from 'lucide-react';
 import { TenantReceiptModal } from './TenantReceiptModal';
 import { PaymentMethodsModal } from './PaymentMethodsModal';
@@ -10,9 +10,11 @@ export const TenantPaymentsTab = ({
   tenant,
   unit,
   property,
+  lease,
   payments = [],
   securityDeposit,
   onPayRentClick,
+  onPayAdvanceClick,
 }) => {
   const [autoPayEnabled, setAutoPayEnabled] = useState(true);
 
@@ -48,6 +50,7 @@ export const TenantPaymentsTab = ({
           : 'Cleared',
         status: p.status || 'paid',
         method: p.paymentMethod === 'ach' ? 'Direct Bank ACH' : p.paymentMethod === 'card' ? 'Visa •••• 4242' : 'Tenant Portal ACH',
+        isAdvancePayment: Boolean(p.isAdvancePayment),
       }))
     : [];
 
@@ -65,7 +68,7 @@ export const TenantPaymentsTab = ({
           <p className="text-xs text-slate-500 dark:text-slate-400">View itemized monthly charges, manage saved payment cards, and print tax receipts.</p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-3 shrink-0 flex-wrap">
           <button
             type="button"
             onClick={() => setIsMethodsOpen(true)}
@@ -73,6 +76,15 @@ export const TenantPaymentsTab = ({
           >
             <CreditCard className="w-4 h-4 text-indigo-500" />
             <span>Manage Methods</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onPayAdvanceClick}
+            className="px-4 py-3 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-grotesk font-semibold text-xs flex items-center gap-2 btn-press"
+          >
+            <Calendar className="w-4 h-4" />
+            <span>Pay in Advance</span>
           </button>
 
           <button
@@ -181,11 +193,16 @@ export const TenantPaymentsTab = ({
                 className="p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors"
               >
                 <div className="space-y-1">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-sm font-bold text-slate-900 dark:text-white font-grotesk">{tx.period}</span>
                     <span className="px-2 py-0.5 rounded-full text-xs font-bold font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
                       <CheckCircle2 className="w-3 h-3" /> Cleared
                     </span>
+                    {tx.isAdvancePayment && (
+                      <span className="px-2 py-0.5 rounded-full text-xs font-bold font-mono bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                        Advance
+                      </span>
+                    )}
                   </div>
                   <p className="text-xs text-slate-400 font-mono flex items-center gap-3">
                     <span>Ref: {tx.id}</span>

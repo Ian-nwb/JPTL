@@ -7,9 +7,16 @@ export const TenantLeaseTab = ({
   unit,
   property,
   lease,
+  onExtensionRequested = () => {},
 }) => {
   const [isRenewalOpen, setIsRenewalOpen] = useState(false);
   const [renewalStatus, setRenewalStatus] = useState(null);
+
+  const pendingExtension = renewalStatus || (lease?.extensionRequests?.find((r) => r.status === 'pending') ? {
+    term: lease.extensionRequests.find((r) => r.status === 'pending').termMonths,
+    proposedStartDate: new Date(lease.extensionRequests.find((r) => r.status === 'pending').proposedStartDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+    proposedEndDate: new Date(lease.extensionRequests.find((r) => r.status === 'pending').proposedEndDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }),
+  } : null);
 
   const isPreAdded = !unit && !lease?.leaseStart;
 
@@ -96,11 +103,16 @@ export const TenantLeaseTab = ({
         <div className="flex items-center gap-3 shrink-0">
           <button
             type="button"
+            disabled={Boolean(pendingExtension)}
             onClick={() => setIsRenewalOpen(true)}
-            className="px-4 py-3 rounded-2xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 font-grotesk font-semibold text-xs flex items-center gap-2 btn-press"
+            className={`px-4 py-3 rounded-2xl font-grotesk font-semibold text-xs flex items-center gap-2 btn-press border transition-all ${
+              pendingExtension
+                ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 cursor-not-allowed opacity-80'
+                : 'bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'
+            }`}
           >
-            <Plus className="w-4 h-4" />
-            <span>Request Extension</span>
+            {pendingExtension ? <Clock className="w-4 h-4 text-amber-500" /> : <Plus className="w-4 h-4" />}
+            <span>{pendingExtension ? 'Extension Pending Review' : 'Request Extension'}</span>
           </button>
 
           <button
@@ -114,14 +126,19 @@ export const TenantLeaseTab = ({
         </div>
       </div>
 
-      {/* Renewal Status Banner if requested */}
-      {renewalStatus && (
-        <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-mono flex items-center justify-between">
+      {/* Renewal Status Banner if requested or pending */}
+      {pendingExtension && (
+        <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs font-mono flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-            <span>Renewal request pending for <strong>{renewalStatus.term} Months</strong> (Effective {renewalStatus.proposedStartDate})</span>
+            <Clock className="w-4 h-4 text-amber-500 shrink-0" />
+            <span>
+              Extension request pending for <strong>{pendingExtension.term} Months</strong> (Starting {pendingExtension.proposedStartDate}
+              {pendingExtension.proposedEndDate ? ` → Ending ${pendingExtension.proposedEndDate}` : ''})
+            </span>
           </div>
-          <span className="text-xs uppercase font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-md">Pending Review</span>
+          <span className="text-xs uppercase font-bold text-amber-600 dark:text-amber-400 bg-amber-500/20 px-2.5 py-1 rounded-md shrink-0">
+            Pending Landlord Review
+          </span>
         </div>
       )}
 
@@ -232,7 +249,11 @@ export const TenantLeaseTab = ({
         tenant={tenant}
         unit={unit}
         property={property}
-        onRenewalSubmitted={handleRenewalSubmitted}
+        lease={lease}
+        onRenewalSubmitted={(data) => {
+          handleRenewalSubmitted(data);
+          onExtensionRequested();
+        }}
       />
 
     </div>

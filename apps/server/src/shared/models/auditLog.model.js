@@ -20,4 +20,7 @@ const auditLogSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+auditLogSchema.index({ actor: 1, createdAt: -1 });
+auditLogSchema.index({ entityId: 1, entityKind: 1 });
+
 export default mongoose.model('AuditLog', auditLogSchema);

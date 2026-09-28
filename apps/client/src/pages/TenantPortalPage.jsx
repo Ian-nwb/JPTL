@@ -21,6 +21,7 @@ import { TenantAnnouncementsTab } from '../components/tenant/TenantAnnouncements
 import { TenantSettingsTab } from '../components/tenant/TenantSettingsTab';
 import { TenantDocumentsTab } from '../components/tenant/TenantDocumentsTab';
 import { PayRentModal } from '../components/tenant/PayRentModal';
+import { AdvancePaymentModal } from '../components/tenant/AdvancePaymentModal';
 import { ReportIssueModal } from '../components/tenant/ReportIssueModal';
 import { RightNotificationSidebar } from '../components/dashboard/RightNotificationSidebar';
 import { MobileNavBar } from '../components/common/MobileNavBar';
@@ -117,6 +118,7 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
 
   // Modals & Drawers
   const [isPayRentOpen, setIsPayRentOpen] = useState(false);
+  const [isPayAdvanceOpen, setIsPayAdvanceOpen] = useState(false);
   const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -444,9 +446,11 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
                   tenant={currentTenant}
                   unit={currentUnit}
                   property={currentProperty}
+                  lease={leaseData}
                   payments={payments}
                   securityDeposit={tenantData?.securityDeposit ?? leaseData?.securityDeposit}
                   onPayRentClick={() => setIsPayRentOpen(true)}
+                  onPayAdvanceClick={() => setIsPayAdvanceOpen(true)}
                 />
               )}
 
@@ -466,6 +470,16 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
                   unit={currentUnit}
                   property={currentProperty}
                   lease={leaseData}
+                  onExtensionRequested={async () => {
+                    try {
+                      const batch = await tenantApi.getConcurrentPortalData();
+                      if (batch?.dash?.data?.data?.lease) {
+                        setLeaseData(batch.dash.data.data.lease);
+                      }
+                    } catch (e) {
+                      console.warn('Failed to refresh lease after extension request:', e.message);
+                    }
+                  }}
                 />
               )}
 
@@ -510,6 +524,25 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
         tenant={currentTenant}
         unit={currentUnit}
         onPaymentSuccess={handlePaymentSuccess}
+      />
+
+      <AdvancePaymentModal
+        isOpen={isPayAdvanceOpen}
+        onClose={() => setIsPayAdvanceOpen(false)}
+        tenant={currentTenant}
+        unit={currentUnit}
+        lease={leaseData}
+        payments={payments}
+        onRequestExtension={() => handleTabChange('lease')}
+        onPaymentSuccess={async () => {
+          try {
+            const paymentsRes = await tenantApi.getPayments();
+            const pList = paymentsRes.data?.data?.payments || paymentsRes.data?.data || paymentsRes.data?.recentPayments;
+            if (Array.isArray(pList)) setPayments(pList);
+          } catch (err) {
+            console.warn('Failed to reload payments:', err.message);
+          }
+        }}
       />
 
       <ReportIssueModal
