@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 import { corsOptions } from './src/shared/config/cors.js';
 import { swaggerUi, swaggerSpec } from './src/shared/config/swagger.js';
 import authRoutes from './src/modules/auth/auth.routes.js';
@@ -36,6 +37,10 @@ app.set('trust proxy', 1);
 // Apply middleware
 app.use(securityHeaders);
 app.use(cors(corsOptions));
+app.use(compression({
+  threshold: 1024, // Compress responses larger than 1KB
+  level: 6,        // Balanced compression ratio & CPU speed
+}));
 app.use(express.json());
 app.use(cookieParser());
 
@@ -43,11 +48,16 @@ app.use(cookieParser());
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Caching policy optimized for concurrent reads & edge/CDN proxies:
-// Safe GET reads use short SWR (s-maxage=3, stale-while-revalidate=15)
+// Safe GET reads use short SWR (s-maxage=5, stale-while-revalidate=30)
+// Low-churn routes (announcements, documents) get 30s cache
 // Mutations and auth strictly bypass cache
 app.use('/api', (req, res, next) => {
   if (req.method === 'GET' && !req.path.startsWith('/auth')) {
-    res.setHeader('Cache-Control', 'public, s-maxage=3, stale-while-revalidate=15');
+    if (req.path.includes('/announcements') || req.path.includes('/documents')) {
+      res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=120');
+    } else {
+      res.setHeader('Cache-Control', 'public, s-maxage=5, stale-while-revalidate=30');
+    }
   } else {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');

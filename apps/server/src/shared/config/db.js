@@ -15,6 +15,8 @@ const connectDB = async () => {
     const opts = {
       bufferCommands: false, // Fail immediately if connection is down instead of hanging
       maxPoolSize: 10,       // Keep pool bounded per lambda to prevent Atlas connection exhaustion
+      minPoolSize: 0,        // Allow connection pool to scale down to zero when idle
+      maxIdleTimeMS: 30000,  // Clean up idle sockets after 30s to prevent Atlas connection spikes
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
     };
