@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Building2, UserPlus, Users, Search, Home, LogOut, ShieldCheck, ArrowUpRight, 
+import {
+  Building2, UserPlus, Users, Search, Home, LogOut, ShieldCheck, ArrowUpRight,
   Sun, Moon, Sparkles, Megaphone, Wrench, DollarSign, X, Bell, ArrowRight,
   TrendingUp, CheckCircle2, Clock, AlertCircle, Trash2, Layers, MapPin, Key
 } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
-import { 
-  MOCK_PROPERTIES, 
-  MOCK_UNITS as INITIAL_UNITS, 
+import {
+  MOCK_PROPERTIES,
+  MOCK_UNITS as INITIAL_UNITS,
   MOCK_TENANTS as INITIAL_TENANTS,
   MOCK_TICKETS as INITIAL_TICKETS,
   MOCK_PAYMENTS as INITIAL_PAYMENTS,
@@ -64,7 +64,7 @@ function getViewFromPath(pathname) {
   return 'overview';
 }
 
-export const DashboardPage = ({ currentPath = window.location.pathname, onNavigate = () => {} }) => {
+export const DashboardPage = ({ currentPath = window.location.pathname, onNavigate = () => { } }) => {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
 
@@ -144,10 +144,10 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
       console.warn('Could not persist document status to server:', err.message);
     }
     setDocuments((prev) => {
-      const updated = prev.map((d) => 
-        (d.id === docId || d._id === docId) ? { 
-          ...d, 
-          status, 
+      const updated = prev.map((d) =>
+        (d.id === docId || d._id === docId) ? {
+          ...d,
+          status,
           rejectionReason: status === 'Rejected' ? rejectionReason : undefined,
           verifiedAt: status === 'Verified' ? new Date().toISOString() : d.verifiedAt,
           reviewedBy: `${user?.name || 'Alexander Vance'} (Landlord)`
@@ -370,13 +370,13 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
       prev.map((t) =>
         t.id === ticketId || t._id === ticketId
           ? {
-              ...t,
-              status: t.status === 'submitted' ? 'in_progress' : t.status,
-              assignedTechnician: {
-                ...(t.assignedTechnician || {}),
-                ...techData,
-              },
-            }
+            ...t,
+            status: t.status === 'submitted' ? 'in_progress' : t.status,
+            assignedTechnician: {
+              ...(t.assignedTechnician || {}),
+              ...techData,
+            },
+          }
           : t
       )
     );
@@ -733,7 +733,7 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
 
   return (
     <div className="min-h-screen bg-[#F4F6F9] dark:bg-[#070A12] text-slate-900 dark:text-slate-100 font-sans flex selection:bg-indigo-600/30 selection:text-indigo-300 transition-colors duration-300">
-      
+
       {/* ─── LEFT SIDEBAR NAV ─── */}
       <DashboardSidebar
         activeView={activeView}
@@ -852,548 +852,543 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
               {/* ─── VIEW 1: OVERVIEW (informational only) ─── */}
               {/* ═══════════════════════════════════════════ */}
               {activeView === 'overview' && (
-            <>
-              {/* Broadcast Banner (dismissible) */}
-              {announcement && !broadcastDismissed && (
-                <div className="relative p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-indigo-500/10 border border-indigo-500/30 flex items-start gap-3 top-shade apple-glass">
-                  <Megaphone className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
-                  <div className="flex-1 space-y-0.5">
-                    <span className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400 block font-mono">Workspace Broadcast</span>
-                    <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">{announcement.subject}</h4>
-                    <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{announcement.body}</p>
-                  </div>
-                  <button onClick={() => setBroadcastDismissed(true)} className="p-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 btn-press shrink-0" aria-label="Dismiss">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              )}
-
-              {/* Hero Greeting */}
-              <div>
-                <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-grotesk tracking-tight text-slate-900 dark:text-white leading-tight break-words">
-                  {greeting}, <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">{user?.firstName || 'Landlord'}</span> 👋
-                </h1>
-                <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Here's what's happening with your properties today.</p>
-              </div>
-
-              {/* KPI Stat Cards (informational — link to sidebar pages) */}
-              <KpiMetricsSection
-                units={units}
-                tenants={tenants}
-                tickets={tickets}
-                onAddTenant={() => handleViewChange('units')}
-                onNavigateTickets={() => handleViewChange('tickets')}
-              />
-
-              <SectionDivider label="Recent Activity" />
-
-              {/* Recent Tickets Preview & Quick Actions */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                <div className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 overflow-hidden">
-                  <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800/80">
-                    <h2 className="text-sm font-bold font-grotesk text-slate-900 dark:text-white flex items-center gap-2">
-                      <Wrench className="w-4 h-4 text-indigo-500" /> Recent Maintenance Requests
-                    </h2>
-                    <button onClick={() => handleViewChange('tickets')} className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 btn-press">
-                      View All <ArrowRight className="w-3 h-3" />
-                    </button>
-                  </div>
-                  <div className="divide-y divide-slate-200 dark:divide-slate-800/60">
-                    {tickets.slice(0, 3).map((t) => (
-                      <div key={t.id} className="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
-                        <div className="space-y-0.5">
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">{t.id}</span>
-                            <span className="text-xs font-semibold text-slate-900 dark:text-white">{t.title}</span>
-                          </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400">{t.propertyName} &bull; {t.unitLabel}</p>
-                        </div>
-                        <span className={`px-2 py-0.5 rounded-full text-xs font-bold font-mono border ${
-                          t.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
-                          : t.status === 'in_progress' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20'
-                          : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
-                        }`}>
-                          {t.status.replace('_', ' ')}
-                        </span>
+                <>
+                  {/* Broadcast Banner (dismissible) */}
+                  {announcement && !broadcastDismissed && (
+                    <div className="relative p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-indigo-500/10 via-purple-500/5 to-indigo-500/10 border border-indigo-500/30 flex items-start gap-3 top-shade apple-glass">
+                      <Megaphone className="w-5 h-5 text-indigo-500 shrink-0 mt-0.5" />
+                      <div className="flex-1 space-y-0.5">
+                        <span className="text-xs font-bold uppercase tracking-[0.2em] text-indigo-600 dark:text-indigo-400 block font-mono">Workspace Broadcast</span>
+                        <h4 className="font-bold text-sm sm:text-base text-slate-900 dark:text-white">{announcement.subject}</h4>
+                        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">{announcement.body}</p>
                       </div>
-                    ))}
-                    {tickets.length === 0 && (
-                      <div className="px-5 py-8 text-center text-xs text-slate-400 font-mono">No recent requests found.</div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 overflow-hidden">
-                  <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800/80">
-                    <h2 className="text-sm font-bold font-grotesk text-slate-900 dark:text-white">Quick Actions</h2>
-                  </div>
-                  <div className="divide-y divide-slate-200 dark:divide-slate-800/60">
-                    <button onClick={() => handleViewChange('units')} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
-                      <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500"><Building2 className="w-4 h-4" /></div>
-                      <div>
-                        <span className="text-xs font-bold text-slate-900 dark:text-white block">Browse Properties</span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">View all units and assign tenants</span>
-                      </div>
-                    </button>
-                    <button onClick={() => handleViewChange('tenants')} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
-                      <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500"><Users className="w-4 h-4" /></div>
-                      <div>
-                        <span className="text-xs font-bold text-slate-900 dark:text-white block">Manage Tenants</span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">View directory and add new tenants</span>
-                      </div>
-                    </button>
-                    <button onClick={() => handleViewChange('announcements')} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
-                      <div className="p-2 rounded-xl bg-purple-500/10 text-purple-500"><Megaphone className="w-4 h-4" /></div>
-                      <div>
-                        <span className="text-xs font-bold text-slate-900 dark:text-white block">Post Broadcast</span>
-                        <span className="text-xs text-slate-500 dark:text-slate-400">Publish announcements to all tenants</span>
-                      </div>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </>
-          )}
-
-          {/* ═════════════════════════════════════════ */}
-          {/* ─── VIEW 2: ANNOUNCEMENTS PAGE (dedicated) */}
-          {/* ═════════════════════════════════════════ */}
-          {activeView === 'announcements' && (
-            <AnnouncementsTab
-              announcements={announcements}
-              onOpenNewAnnouncement={() => setIsNewAnnouncementOpen(true)}
-              onDeleteAnnouncement={handleDeleteAnnouncement}
-            />
-          )}
-
-          {/* ═════════════════════════════════════════ */}
-          {/* ─── VIEW 3: PROPERTIES & UNITS (full CRUD) */}
-          {/* ═════════════════════════════════════════ */}
-          {activeView === 'units' && (
-            <div className="space-y-5">
-              {/* Page Header with Actions */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl font-extrabold font-grotesk text-slate-900 dark:text-white">Properties & Units</h1>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                    Manage your real estate portfolio — {units.length} total units across {properties.length} properties.
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => { setAddPropPreselectedPropertyId(null); setAddPropUnitTab('property'); setIsAddPropUnitOpen(true); }}
-                    className="px-4 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 text-xs font-bold font-grotesk btn-press flex items-center gap-2"
-                  >
-                    <Building2 className="w-4 h-4 text-indigo-500" /> + Add Property / Unit
-                  </button>
-                  <button
-                    onClick={() => onNavigate('/onboarding?step=2')}
-                    className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs font-semibold btn-press flex items-center gap-2"
-                  >
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Onboarding Wizard
-                  </button>
-                  <button
-                    onClick={() => handleOpenAddTenant()}
-                    className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold font-grotesk btn-press flex items-center gap-2 shadow-md shadow-indigo-600/20"
-                  >
-                    <UserPlus className="w-4 h-4" /> + Add Tenant
-                  </button>
-                </div>
-              </div>
-
-              {/* Sub-view Segmented Switcher */}
-              <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-                <div className="flex items-center gap-2 p-1 rounded-xl bg-slate-200/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
-                  <button
-                    onClick={() => setPropSubTab('properties')}
-                    className={`px-4 py-1.5 rounded-lg text-xs font-bold font-grotesk flex items-center gap-2 transition-all ${
-                      propSubTab === 'properties'
-                        ? 'bg-white dark:bg-indigo-600 text-slate-900 dark:text-white shadow-sm'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    <Building2 className="w-3.5 h-3.5" />
-                    Properties ({properties.length})
-                  </button>
-                  <button
-                    onClick={() => setPropSubTab('units')}
-                    className={`px-4 py-1.5 rounded-lg text-xs font-bold font-grotesk flex items-center gap-2 transition-all ${
-                      propSubTab === 'units'
-                        ? 'bg-white dark:bg-indigo-600 text-slate-900 dark:text-white shadow-sm'
-                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                    }`}
-                  >
-                    <Layers className="w-3.5 h-3.5" />
-                    All Units ({units.length})
-                  </button>
-                </div>
-
-                {propSubTab === 'units' && (
-                  <div className="flex items-center gap-3">
-                    <div className="relative w-64">
-                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
-                      <input
-                        type="text"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search units…"
-                        className="w-full bg-white dark:bg-[#10131F] border border-slate-300 dark:border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
+                      <button onClick={() => setBroadcastDismissed(true)} className="p-1.5 rounded-lg bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-500 btn-press shrink-0" aria-label="Dismiss">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                    <select
-                      value={filterStatus}
-                      onChange={(e) => setFilterStatus(e.target.value)}
-                      className="bg-white dark:bg-[#10131F] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    >
-                      <option value="all">All status</option>
-                      <option value="vacant">Vacant ({vacantCount})</option>
-                      <option value="occupied">Occupied ({occupiedCount})</option>
-                    </select>
+                  )}
+
+                  {/* Hero Greeting */}
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-grotesk tracking-tight text-slate-900 dark:text-white leading-tight break-words">
+                      {greeting}, <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">{user?.firstName || 'Landlord'}</span>
+                    </h1>
+                    <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Here's what's happening with your properties today.</p>
                   </div>
-                )}
-              </div>
 
-              {/* ─── TAB 1: PROPERTIES GRID ─── */}
-              {propSubTab === 'properties' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                  {properties.map((p) => {
-                    const propUnits = units.filter((u) => u.propertyId === p.id || u.property === p.id);
-                    const occupiedUnits = propUnits.filter((u) => u.status === 'occupied').length;
-                    const occRate = propUnits.length > 0 ? Math.round((occupiedUnits / propUnits.length) * 100) : (p.occupancyRate || 0);
-                    const totalGrossRent = propUnits.reduce((sum, u) => sum + (Number(u.monthlyRent) || 0), 0);
+                  {/* KPI Stat Cards (informational — link to sidebar pages) */}
+                  <KpiMetricsSection
+                    units={units}
+                    tenants={tenants}
+                    tickets={tickets}
+                    onAddTenant={() => handleViewChange('units')}
+                    onNavigateTickets={() => handleViewChange('tickets')}
+                  />
 
-                    return (
-                      <div
-                        key={p.id}
-                        className="top-shade apple-glass rounded-3xl border border-slate-200 dark:border-slate-800/80 overflow-hidden hover:border-indigo-400 dark:hover:border-slate-700 transition-all flex flex-col justify-between shadow-sm group"
-                      >
-                        <div>
-                          {/* Property Image & Badge Header */}
-                          <div className="h-32 bg-slate-900 relative overflow-hidden flex items-center justify-center">
-                            <img
-                              src={p.image || '/images/property-1.jpg'}
-                              alt={p.name}
-                              className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
-                              onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80'; }}
-                            />
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
-                            <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                              <span className="px-2.5 py-1 rounded-full text-xs font-bold font-mono uppercase tracking-wider bg-indigo-600/90 text-white backdrop-blur-md shadow-sm">
-                                {p.category || 'Residential'}
-                              </span>
-                              {p.featured && (
-                                <span className="px-2 py-0.5 rounded-full text-xs font-bold font-mono bg-amber-500/90 text-white">
-                                  Featured
-                                </span>
-                              )}
-                            </div>
-                            
-                            {/* Delete Property Action Icon */}
-                            <div className="absolute top-3 right-3">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedPropertyForDelete(p);
-                                }}
-                                title="Delete Property"
-                                className="p-2 rounded-xl bg-slate-950/70 hover:bg-rose-600 text-slate-300 hover:text-white backdrop-blur-md transition-all btn-press border border-white/10 shadow-md"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
-                            </div>
+                  <SectionDivider label="Recent Activity" />
 
-                            <div className="absolute bottom-3 left-3 right-3">
-                              <h3 className="text-base font-bold font-grotesk text-white truncate drop-shadow-sm">
-                                {p.name}
-                              </h3>
-                              <p className="text-xs text-slate-300 flex items-center gap-1 mt-0.5 truncate">
-                                <MapPin className="w-3 h-3 text-indigo-400 shrink-0" /> {p.address}, {p.city}
-                              </p>
-                            </div>
-                          </div>
-
-                          {/* Stats Metrics Matrix */}
-                          <div className="p-4 space-y-3">
-                            <div className="grid grid-cols-3 gap-2 text-center">
-                              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60">
-                                <span className="text-xs font-mono text-slate-500 block">Units</span>
-                                <span className="text-sm font-extrabold font-grotesk text-slate-900 dark:text-white">{propUnits.length}</span>
-                              </div>
-                              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60">
-                                <span className="text-xs font-mono text-slate-500 block">Occupied</span>
-                                <span className="text-sm font-extrabold font-grotesk text-emerald-600 dark:text-emerald-400">{occupiedUnits}</span>
-                              </div>
-                              <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60">
-                                <span className="text-xs font-mono text-slate-500 block">Occupancy</span>
-                                <span className="text-sm font-extrabold font-grotesk text-indigo-600 dark:text-indigo-400">{occRate}%</span>
-                              </div>
-                            </div>
-
-                            {/* Occupancy Progress Bar */}
-                            <div className="space-y-1">
-                              <div className="flex justify-between text-xs font-mono text-slate-500">
-                                <span>Occupancy status</span>
-                                <span className="font-bold text-slate-700 dark:text-slate-300">{occupiedUnits} / {propUnits.length} Units</span>
-                              </div>
-                              <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-full transition-all duration-500"
-                                  style={{ width: `${occRate}%` }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Footer Actions */}
-                        <div className="p-4 pt-0 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800/80 mt-2">
-                          <button
-                            onClick={() => {
-                              setSelectedPropertyForDelete(p);
-                            }}
-                            className="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-xs font-bold font-grotesk btn-press flex items-center gap-1.5"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" /> Delete Property
-                          </button>
-                          
-                          <button
-                            onClick={() => {
-                              setAddPropPreselectedPropertyId(p.id);
-                              setAddPropUnitTab('unit');
-                              setIsAddPropUnitOpen(true);
-                            }}
-                            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold font-grotesk btn-press flex items-center gap-1.5 shadow-sm"
-                          >
-                            <Layers className="w-3.5 h-3.5" /> + Add Unit
-                          </button>
-                        </div>
+                  {/* Recent Tickets Preview & Quick Actions */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 overflow-hidden">
+                      <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800/80">
+                        <h2 className="text-sm font-bold font-grotesk text-slate-900 dark:text-white flex items-center gap-2">
+                          <Wrench className="w-4 h-4 text-indigo-500" /> Recent Maintenance Requests
+                        </h2>
+                        <button onClick={() => handleViewChange('tickets')} className="text-xs font-medium text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 btn-press">
+                          View All <ArrowRight className="w-3 h-3" />
+                        </button>
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-
-              {/* ─── TAB 2: ALL UNITS GRID ─── */}
-              {propSubTab === 'units' && (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                  {filteredUnits.map((u) => {
-                    const isVacant = u.status === 'vacant';
-                    return (
-                      <div key={u.id} className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-5 hover:border-indigo-400 dark:hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 shadow-xs">
-                        <div>
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-xs font-mono text-slate-500 dark:text-slate-400">{u.propertyName}</span>
-                            <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider font-mono ${isVacant ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'}`}>
-                              {u.status}
+                      <div className="divide-y divide-slate-200 dark:divide-slate-800/60">
+                        {tickets.slice(0, 3).map((t) => (
+                          <div key={t.id} className="px-5 py-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
+                            <div className="space-y-0.5">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">{t.id}</span>
+                                <span className="text-xs font-semibold text-slate-900 dark:text-white">{t.title}</span>
+                              </div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400">{t.propertyName} &bull; {t.unitLabel}</p>
+                            </div>
+                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold font-mono border ${t.status === 'resolved' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20'
+                                : t.status === 'in_progress' ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20'
+                                  : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20'
+                              }`}>
+                              {t.status.replace('_', ' ')}
                             </span>
                           </div>
-                          <h3 className="text-lg font-bold font-grotesk text-slate-900 dark:text-white mb-1">{u.label}</h3>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">{u.bedrooms} Bed &bull; {u.bathrooms} Bath &bull; {u.sqft} sqft</p>
-                        </div>
-                        <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60 text-xs font-mono">
-                          <div className="flex justify-between mb-1"><span className="text-slate-500">Rent:</span><span className="font-bold text-slate-900 dark:text-white">${u.monthlyRent}/mo</span></div>
-                          <div className="flex justify-between"><span className="text-slate-500">Occupant:</span><span className={isVacant ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-slate-900 dark:text-slate-200 font-semibold'}>{isVacant ? 'None (Vacant)' : u.tenantName}</span></div>
-                        </div>
-                        <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
-                          <button onClick={() => setSelectedUnitForDetail(u)} className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 btn-press flex items-center gap-1">
-                            Details <ArrowUpRight className="w-3.5 h-3.5" />
-                          </button>
-                          {isVacant && (
-                            <button onClick={() => handleOpenAddTenant(u.propertyId, u.id)} className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold font-grotesk btn-press flex items-center gap-1.5 shadow-sm">
-                              <UserPlus className="w-3.5 h-3.5" /> Add tenant
-                            </button>
-                          )}
-                        </div>
+                        ))}
+                        {tickets.length === 0 && (
+                          <div className="px-5 py-8 text-center text-xs text-slate-400 font-mono">No recent requests found.</div>
+                        )}
                       </div>
-                    );
-                  })}
-                  {filteredUnits.length === 0 && (
-                    <div className="col-span-full p-8 text-center bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-400">
-                      No units matching search criteria.
+                    </div>
+
+                    {/* Quick Actions */}
+                    <div className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 overflow-hidden">
+                      <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-800/80">
+                        <h2 className="text-sm font-bold font-grotesk text-slate-900 dark:text-white">Quick Actions</h2>
+                      </div>
+                      <div className="divide-y divide-slate-200 dark:divide-slate-800/60">
+                        <button onClick={() => handleViewChange('units')} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
+                          <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-500"><Building2 className="w-4 h-4" /></div>
+                          <div>
+                            <span className="text-xs font-bold text-slate-900 dark:text-white block">Browse Properties</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">View all units and assign tenants</span>
+                          </div>
+                        </button>
+                        <button onClick={() => handleViewChange('tenants')} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
+                          <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-500"><Users className="w-4 h-4" /></div>
+                          <div>
+                            <span className="text-xs font-bold text-slate-900 dark:text-white block">Manage Tenants</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">View directory and add new tenants</span>
+                          </div>
+                        </button>
+                        <button onClick={() => handleViewChange('announcements')} className="w-full px-5 py-4 flex items-center gap-3 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors text-left btn-press">
+                          <div className="p-2 rounded-xl bg-purple-500/10 text-purple-500"><Megaphone className="w-4 h-4" /></div>
+                          <div>
+                            <span className="text-xs font-bold text-slate-900 dark:text-white block">Post Broadcast</span>
+                            <span className="text-xs text-slate-500 dark:text-slate-400">Publish announcements to all tenants</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* ═════════════════════════════════════════ */}
+              {/* ─── VIEW 2: ANNOUNCEMENTS PAGE (dedicated) */}
+              {/* ═════════════════════════════════════════ */}
+              {activeView === 'announcements' && (
+                <AnnouncementsTab
+                  announcements={announcements}
+                  onOpenNewAnnouncement={() => setIsNewAnnouncementOpen(true)}
+                  onDeleteAnnouncement={handleDeleteAnnouncement}
+                />
+              )}
+
+              {/* ═════════════════════════════════════════ */}
+              {/* ─── VIEW 3: PROPERTIES & UNITS (full CRUD) */}
+              {/* ═════════════════════════════════════════ */}
+              {activeView === 'units' && (
+                <div className="space-y-5">
+                  {/* Page Header with Actions */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <h1 className="text-2xl font-extrabold font-grotesk text-slate-900 dark:text-white">Properties & Units</h1>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        Manage your real estate portfolio — {units.length} total units across {properties.length} properties.
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => { setAddPropPreselectedPropertyId(null); setAddPropUnitTab('property'); setIsAddPropUnitOpen(true); }}
+                        className="px-4 py-2.5 rounded-xl bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 text-xs font-bold font-grotesk btn-press flex items-center gap-2"
+                      >
+                        <Building2 className="w-4 h-4 text-indigo-500" /> + Add Property / Unit
+                      </button>
+                      <button
+                        onClick={() => onNavigate('/onboarding?step=2')}
+                        className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs font-semibold btn-press flex items-center gap-2"
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-amber-500" /> Onboarding Wizard
+                      </button>
+                      <button
+                        onClick={() => handleOpenAddTenant()}
+                        className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold font-grotesk btn-press flex items-center gap-2 shadow-md shadow-indigo-600/20"
+                      >
+                        <UserPlus className="w-4 h-4" /> + Add Tenant
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Sub-view Segmented Switcher */}
+                  <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+                    <div className="flex items-center gap-2 p-1 rounded-xl bg-slate-200/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+                      <button
+                        onClick={() => setPropSubTab('properties')}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold font-grotesk flex items-center gap-2 transition-all ${propSubTab === 'properties'
+                            ? 'bg-white dark:bg-indigo-600 text-slate-900 dark:text-white shadow-sm'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                          }`}
+                      >
+                        <Building2 className="w-3.5 h-3.5" />
+                        Properties ({properties.length})
+                      </button>
+                      <button
+                        onClick={() => setPropSubTab('units')}
+                        className={`px-4 py-1.5 rounded-lg text-xs font-bold font-grotesk flex items-center gap-2 transition-all ${propSubTab === 'units'
+                            ? 'bg-white dark:bg-indigo-600 text-slate-900 dark:text-white shadow-sm'
+                            : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                          }`}
+                      >
+                        <Layers className="w-3.5 h-3.5" />
+                        All Units ({units.length})
+                      </button>
+                    </div>
+
+                    {propSubTab === 'units' && (
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-64">
+                          <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+                          <input
+                            type="text"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Search units…"
+                            className="w-full bg-white dark:bg-[#10131F] border border-slate-300 dark:border-slate-800 rounded-xl pl-9 pr-3 py-1.5 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                          />
+                        </div>
+                        <select
+                          value={filterStatus}
+                          onChange={(e) => setFilterStatus(e.target.value)}
+                          className="bg-white dark:bg-[#10131F] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        >
+                          <option value="all">All status</option>
+                          <option value="vacant">Vacant ({vacantCount})</option>
+                          <option value="occupied">Occupied ({occupiedCount})</option>
+                        </select>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* ─── TAB 1: PROPERTIES GRID ─── */}
+                  {propSubTab === 'properties' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                      {properties.map((p) => {
+                        const propUnits = units.filter((u) => u.propertyId === p.id || u.property === p.id);
+                        const occupiedUnits = propUnits.filter((u) => u.status === 'occupied').length;
+                        const occRate = propUnits.length > 0 ? Math.round((occupiedUnits / propUnits.length) * 100) : (p.occupancyRate || 0);
+                        const totalGrossRent = propUnits.reduce((sum, u) => sum + (Number(u.monthlyRent) || 0), 0);
+
+                        return (
+                          <div
+                            key={p.id}
+                            className="top-shade apple-glass rounded-3xl border border-slate-200 dark:border-slate-800/80 overflow-hidden hover:border-indigo-400 dark:hover:border-slate-700 transition-all flex flex-col justify-between shadow-sm group"
+                          >
+                            <div>
+                              {/* Property Image & Badge Header */}
+                              <div className="h-32 bg-slate-900 relative overflow-hidden flex items-center justify-center">
+                                <img
+                                  src={p.image || '/images/property-1.jpg'}
+                                  alt={p.name}
+                                  className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-500"
+                                  onError={(e) => { e.target.src = 'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=600&q=80'; }}
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent" />
+                                <div className="absolute top-3 left-3 flex items-center gap-1.5">
+                                  <span className="px-2.5 py-1 rounded-full text-xs font-bold font-mono uppercase tracking-wider bg-indigo-600/90 text-white backdrop-blur-md shadow-sm">
+                                    {p.category || 'Residential'}
+                                  </span>
+                                  {p.featured && (
+                                    <span className="px-2 py-0.5 rounded-full text-xs font-bold font-mono bg-amber-500/90 text-white">
+                                      Featured
+                                    </span>
+                                  )}
+                                </div>
+
+                                {/* Delete Property Action Icon */}
+                                <div className="absolute top-3 right-3">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setSelectedPropertyForDelete(p);
+                                    }}
+                                    title="Delete Property"
+                                    className="p-2 rounded-xl bg-slate-950/70 hover:bg-rose-600 text-slate-300 hover:text-white backdrop-blur-md transition-all btn-press border border-white/10 shadow-md"
+                                  >
+                                    <Trash2 className="w-3.5 h-3.5" />
+                                  </button>
+                                </div>
+
+                                <div className="absolute bottom-3 left-3 right-3">
+                                  <h3 className="text-base font-bold font-grotesk text-white truncate drop-shadow-sm">
+                                    {p.name}
+                                  </h3>
+                                  <p className="text-xs text-slate-300 flex items-center gap-1 mt-0.5 truncate">
+                                    <MapPin className="w-3 h-3 text-indigo-400 shrink-0" /> {p.address}, {p.city}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {/* Stats Metrics Matrix */}
+                              <div className="p-4 space-y-3">
+                                <div className="grid grid-cols-3 gap-2 text-center">
+                                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60">
+                                    <span className="text-xs font-mono text-slate-500 block">Units</span>
+                                    <span className="text-sm font-extrabold font-grotesk text-slate-900 dark:text-white">{propUnits.length}</span>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60">
+                                    <span className="text-xs font-mono text-slate-500 block">Occupied</span>
+                                    <span className="text-sm font-extrabold font-grotesk text-emerald-600 dark:text-emerald-400">{occupiedUnits}</span>
+                                  </div>
+                                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60">
+                                    <span className="text-xs font-mono text-slate-500 block">Occupancy</span>
+                                    <span className="text-sm font-extrabold font-grotesk text-indigo-600 dark:text-indigo-400">{occRate}%</span>
+                                  </div>
+                                </div>
+
+                                {/* Occupancy Progress Bar */}
+                                <div className="space-y-1">
+                                  <div className="flex justify-between text-xs font-mono text-slate-500">
+                                    <span>Occupancy status</span>
+                                    <span className="font-bold text-slate-700 dark:text-slate-300">{occupiedUnits} / {propUnits.length} Units</span>
+                                  </div>
+                                  <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                    <div
+                                      className="h-full bg-gradient-to-r from-indigo-500 to-emerald-500 rounded-full transition-all duration-500"
+                                      style={{ width: `${occRate}%` }}
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Footer Actions */}
+                            <div className="p-4 pt-0 flex items-center justify-between gap-2 border-t border-slate-100 dark:border-slate-800/80 mt-2">
+                              <button
+                                onClick={() => {
+                                  setSelectedPropertyForDelete(p);
+                                }}
+                                className="px-3 py-2 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-xs font-bold font-grotesk btn-press flex items-center gap-1.5"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" /> Delete Property
+                              </button>
+
+                              <button
+                                onClick={() => {
+                                  setAddPropPreselectedPropertyId(p.id);
+                                  setAddPropUnitTab('unit');
+                                  setIsAddPropUnitOpen(true);
+                                }}
+                                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold font-grotesk btn-press flex items-center gap-1.5 shadow-sm"
+                              >
+                                <Layers className="w-3.5 h-3.5" /> + Add Unit
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {/* ─── TAB 2: ALL UNITS GRID ─── */}
+                  {propSubTab === 'units' && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {filteredUnits.map((u) => {
+                        const isVacant = u.status === 'vacant';
+                        return (
+                          <div key={u.id} className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-5 hover:border-indigo-400 dark:hover:border-slate-700 transition-all flex flex-col justify-between space-y-4 shadow-xs">
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-xs font-mono text-slate-500 dark:text-slate-400">{u.propertyName}</span>
+                                <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider font-mono ${isVacant ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'}`}>
+                                  {u.status}
+                                </span>
+                              </div>
+                              <h3 className="text-lg font-bold font-grotesk text-slate-900 dark:text-white mb-1">{u.label}</h3>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">{u.bedrooms} Bed &bull; {u.bathrooms} Bath &bull; {u.sqft} sqft</p>
+                            </div>
+                            <div className="p-3 rounded-xl bg-slate-50 dark:bg-[#080B14] border border-slate-200/80 dark:border-slate-800/60 text-xs font-mono">
+                              <div className="flex justify-between mb-1"><span className="text-slate-500">Rent:</span><span className="font-bold text-slate-900 dark:text-white">${u.monthlyRent}/mo</span></div>
+                              <div className="flex justify-between"><span className="text-slate-500">Occupant:</span><span className={isVacant ? 'text-emerald-600 dark:text-emerald-400 font-semibold' : 'text-slate-900 dark:text-slate-200 font-semibold'}>{isVacant ? 'None (Vacant)' : u.tenantName}</span></div>
+                            </div>
+                            <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800/80">
+                              <button onClick={() => setSelectedUnitForDetail(u)} className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 btn-press flex items-center gap-1">
+                                Details <ArrowUpRight className="w-3.5 h-3.5" />
+                              </button>
+                              {isVacant && (
+                                <button onClick={() => handleOpenAddTenant(u.propertyId, u.id)} className="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold font-grotesk btn-press flex items-center gap-1.5 shadow-sm">
+                                  <UserPlus className="w-3.5 h-3.5" /> Add tenant
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                      {filteredUnits.length === 0 && (
+                        <div className="col-span-full p-8 text-center bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-400">
+                          No units matching search criteria.
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
               )}
-            </div>
-          )}
 
-          {/* ═══════════════════════════════════════ */}
-          {/* ─── VIEW 4: TENANTS DIRECTORY (full CRUD) */}
-          {/* ═══════════════════════════════════════ */}
-          {activeView === 'tenants' && (
-            <div className="space-y-5">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <h1 className="text-2xl font-extrabold font-grotesk text-slate-900 dark:text-white">Tenants Directory</h1>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage tenant profiles, active leases, and pre-added occupants.</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <button onClick={() => onNavigate('/onboarding?step=2')} className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs font-semibold btn-press flex items-center gap-2">
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-500" /> Onboarding Wizard
-                  </button>
-                  <button onClick={() => handleOpenAddTenant()} className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold font-grotesk btn-press flex items-center gap-2 shadow-md shadow-indigo-600/20">
-                    <UserPlus className="w-4 h-4" /> + Add Tenant
-                  </button>
-                </div>
-              </div>
+              {/* ═══════════════════════════════════════ */}
+              {/* ─── VIEW 4: TENANTS DIRECTORY (full CRUD) */}
+              {/* ═══════════════════════════════════════ */}
+              {activeView === 'tenants' && (
+                <div className="space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                      <h1 className="text-2xl font-extrabold font-grotesk text-slate-900 dark:text-white">Tenants Directory</h1>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">Manage tenant profiles, active leases, and pre-added occupants.</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => onNavigate('/onboarding?step=2')} className="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-900 hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs font-semibold btn-press flex items-center gap-2">
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-500" /> Onboarding Wizard
+                      </button>
+                      <button onClick={() => handleOpenAddTenant()} className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold font-grotesk btn-press flex items-center gap-2 shadow-md shadow-indigo-600/20">
+                        <UserPlus className="w-4 h-4" /> + Add Tenant
+                      </button>
+                    </div>
+                  </div>
 
-              {/* Search & Filter */}
-              <div className="flex items-center gap-3">
-                <div className="relative flex-1 max-w-sm">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
-                  <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search tenants…"
-                    className="w-full bg-white dark:bg-[#10131F] border border-slate-300 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
-                </div>
-                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
-                  className="bg-white dark:bg-[#10131F] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="all">All tenants</option>
-                  <option value="occupied">Active Leases</option>
-                  <option value="pre_added">Pre-added / Unassigned</option>
-                </select>
-              </div>
+                  {/* Search & Filter */}
+                  <div className="flex items-center gap-3">
+                    <div className="relative flex-1 max-w-sm">
+                      <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+                      <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search tenants…"
+                        className="w-full bg-white dark:bg-[#10131F] border border-slate-300 dark:border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
+                      className="bg-white dark:bg-[#10131F] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                      <option value="all">All tenants</option>
+                      <option value="occupied">Active Leases</option>
+                      <option value="pre_added">Pre-added / Unassigned</option>
+                    </select>
+                  </div>
 
-              {/* Tenants Table */}
-              <div className="divide-y divide-slate-200 dark:divide-slate-800 border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden apple-glass shadow-xs top-shade">
-                {filteredTenants.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-slate-400 font-mono">No tenants match the search filter.</div>
-                ) : (
-                  filteredTenants.map((t, idx) => {
-                    const duration = getLeaseDuration(t.leaseStart, t.leaseEnd);
-                    const expiration = getLeaseExpirationInfo(t.leaseEnd);
-                    const isAssigned = Boolean(t.unitId && t.unitId !== 'pre_add_unassigned');
+                  {/* Tenants Table */}
+                  <div className="divide-y divide-slate-200 dark:divide-slate-800 border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden apple-glass shadow-xs top-shade">
+                    {filteredTenants.length === 0 ? (
+                      <div className="p-8 text-center text-xs text-slate-400 font-mono">No tenants match the search filter.</div>
+                    ) : (
+                      filteredTenants.map((t, idx) => {
+                        const duration = getLeaseDuration(t.leaseStart, t.leaseEnd);
+                        const expiration = getLeaseExpirationInfo(t.leaseEnd);
+                        const isAssigned = Boolean(t.unitId && t.unitId !== 'pre_add_unassigned');
 
-                    return (
-                      <div key={t.id || t._id || `tenant-${idx}`} className="p-4 sm:p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
-                        {/* Tenant Identity */}
-                        <div className="space-y-1 min-w-[200px]">
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-sm font-bold text-slate-900 dark:text-white font-grotesk">{t.name}</h3>
-                            <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase font-mono ${
-                              isAssigned
-                                ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'
-                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
-                            }`}>
-                              {isAssigned ? 'Active Lease' : 'Unassigned'}
-                            </span>
-                          </div>
-                          <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">{t.email} {t.phone ? `• ${t.phone}` : ''}</p>
-                        </div>
-
-                        {/* Property, Unit, Rent, Duration, Expiration Grid */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-xs font-mono items-center flex-1">
-                          {/* Property & Unit */}
-                          <div>
-                            <span className="text-slate-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Property & Unit</span>
-                            {isAssigned ? (
-                              <div className="flex flex-col">
-                                <strong className="text-slate-900 dark:text-white flex items-center gap-1 truncate font-sans text-xs">
-                                  <Building2 className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                                  {t.propertyName || 'Property'}
-                                </strong>
-                                <span className="text-slate-600 dark:text-slate-300 flex items-center gap-1 text-xs">
-                                  <Home className="w-3 h-3 text-slate-400 shrink-0" />
-                                  {t.unitLabel || 'Unit'}
+                        return (
+                          <div key={t.id || t._id || `tenant-${idx}`} className="p-4 sm:p-5 flex flex-col xl:flex-row xl:items-center justify-between gap-4 hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
+                            {/* Tenant Identity */}
+                            <div className="space-y-1 min-w-[200px]">
+                              <div className="flex items-center gap-2">
+                                <h3 className="text-sm font-bold text-slate-900 dark:text-white font-grotesk">{t.name}</h3>
+                                <span className={`px-2 py-0.5 rounded-full text-xs font-bold uppercase font-mono ${isAssigned
+                                    ? 'bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20'
+                                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                                  }`}>
+                                  {isAssigned ? 'Active Lease' : 'Unassigned'}
                                 </span>
                               </div>
-                            ) : (
-                              <span className="text-amber-600 dark:text-amber-400 text-xs italic font-sans font-medium">Unassigned</span>
-                            )}
-                          </div>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">{t.email} {t.phone ? `• ${t.phone}` : ''}</p>
+                            </div>
 
-                          {/* Rent */}
-                          <div>
-                            <span className="text-slate-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Rent</span>
-                            {t.monthlyRent > 0 ? (
-                              <strong className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">${t.monthlyRent}/mo</strong>
-                            ) : (
-                              <span className="text-slate-400">—</span>
-                            )}
-                          </div>
-
-                          {/* Lease Duration */}
-                          <div>
-                            <span className="text-slate-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Lease Duration</span>
-                            {duration ? (
-                              <div className="flex items-center gap-1 text-slate-800 dark:text-slate-200">
-                                <Clock className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
-                                <strong>{duration}</strong>
+                            {/* Property, Unit, Rent, Duration, Expiration Grid */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-xs font-mono items-center flex-1">
+                              {/* Property & Unit */}
+                              <div>
+                                <span className="text-slate-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Property & Unit</span>
+                                {isAssigned ? (
+                                  <div className="flex flex-col">
+                                    <strong className="text-slate-900 dark:text-white flex items-center gap-1 truncate font-sans text-xs">
+                                      <Building2 className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                                      {t.propertyName || 'Property'}
+                                    </strong>
+                                    <span className="text-slate-600 dark:text-slate-300 flex items-center gap-1 text-xs">
+                                      <Home className="w-3 h-3 text-slate-400 shrink-0" />
+                                      {t.unitLabel || 'Unit'}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="text-amber-600 dark:text-amber-400 text-xs italic font-sans font-medium">Unassigned</span>
+                                )}
                               </div>
-                            ) : (
-                              <span className="text-slate-400">No active term</span>
-                            )}
-                          </div>
 
-                          {/* Expiration Date & Status */}
-                          <div>
-                            <span className="text-slate-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Expiration</span>
-                            {expiration ? (
-                              <div className="space-y-1">
-                                <strong className="text-slate-900 dark:text-slate-100 block">{expiration.formattedDate}</strong>
-                                <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold font-mono ${expiration.statusClass}`}>
-                                  {expiration.badgeText}
-                                </span>
+                              {/* Rent */}
+                              <div>
+                                <span className="text-slate-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Rent</span>
+                                {t.monthlyRent > 0 ? (
+                                  <strong className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">${t.monthlyRent}/mo</strong>
+                                ) : (
+                                  <span className="text-slate-400">—</span>
+                                )}
                               </div>
-                            ) : (
-                              <span className="text-slate-400">—</span>
-                            )}
+
+                              {/* Lease Duration */}
+                              <div>
+                                <span className="text-slate-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Lease Duration</span>
+                                {duration ? (
+                                  <div className="flex items-center gap-1 text-slate-800 dark:text-slate-200">
+                                    <Clock className="w-3.5 h-3.5 text-indigo-500 shrink-0" />
+                                    <strong>{duration}</strong>
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-400">No active term</span>
+                                )}
+                              </div>
+
+                              {/* Expiration Date & Status */}
+                              <div>
+                                <span className="text-slate-400 block text-xs uppercase tracking-wider font-semibold mb-0.5">Expiration</span>
+                                {expiration ? (
+                                  <div className="space-y-1">
+                                    <strong className="text-slate-900 dark:text-slate-100 block">{expiration.formattedDate}</strong>
+                                    <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-bold font-mono ${expiration.statusClass}`}>
+                                      {expiration.badgeText}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="text-slate-400">—</span>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
+                              <button
+                                onClick={() => setAssigningTenant(t)}
+                                className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-grotesk btn-press flex items-center gap-1.5 transition-all ${!isAssigned
+                                    ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-600/30'
+                                    : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
+                                  }`}
+                              >
+                                <Key className="w-3.5 h-3.5 text-indigo-400" />
+                                <span>{!isAssigned ? 'Assign Unit' : 'Manage Lease'}</span>
+                              </button>
+                            </div>
                           </div>
-                        </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              )}
 
-                        {/* Action Buttons */}
-                        <div className="flex items-center gap-2 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100 dark:border-slate-800">
-                          <button
-                            onClick={() => setAssigningTenant(t)}
-                            className={`px-3.5 py-1.5 rounded-xl text-xs font-bold font-grotesk btn-press flex items-center gap-1.5 transition-all ${
-                              !isAssigned
-                                ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-sm shadow-indigo-600/30'
-                                : 'bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700'
-                            }`}
-                          >
-                            <Key className="w-3.5 h-3.5 text-indigo-400" />
-                            <span>{!isAssigned ? 'Assign Unit' : 'Manage Lease'}</span>
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
-              </div>
-            </div>
-          )}
+              {/* ═══════════════════════════════════════════ */}
+              {/* ─── VIEW 5: MAINTENANCE QUEUE (full CRUD) ─── */}
+              {/* ═══════════════════════════════════════════ */}
+              {activeView === 'tickets' && (
+                <TicketsTab
+                  tickets={tickets}
+                  searchQuery={searchQuery}
+                  onOpenNewTicket={() => setIsNewTicketOpen(true)}
+                  onUpdateStatus={handleUpdateTicketStatus}
+                  onDeleteTicket={handleDeleteTicket}
+                  onAssignTechnician={handleAssignTechnician}
+                />
+              )}
 
-          {/* ═══════════════════════════════════════════ */}
-          {/* ─── VIEW 5: MAINTENANCE QUEUE (full CRUD) ─── */}
-          {/* ═══════════════════════════════════════════ */}
-          {activeView === 'tickets' && (
-            <TicketsTab
-              tickets={tickets}
-              searchQuery={searchQuery}
-              onOpenNewTicket={() => setIsNewTicketOpen(true)}
-              onUpdateStatus={handleUpdateTicketStatus}
-              onDeleteTicket={handleDeleteTicket}
-              onAssignTechnician={handleAssignTechnician}
-            />
-          )}
+              {/* ═════════════════════════════════════ */}
+              {/* ─── VIEW 6: RENT ROLL (full CRUD) ───── */}
+              {/* ═════════════════════════════════════ */}
+              {activeView === 'payments' && (
+                <PaymentsTab payments={payments} searchQuery={searchQuery} />
+              )}
 
-          {/* ═════════════════════════════════════ */}
-          {/* ─── VIEW 6: RENT ROLL (full CRUD) ───── */}
-          {/* ═════════════════════════════════════ */}
-          {activeView === 'payments' && (
-            <PaymentsTab payments={payments} searchQuery={searchQuery} />
-          )}
-
-          {/* ─── VIEW 7: DOCUMENTS & VERIFICATION ─── */}
-          {activeView === 'documents' && (
-            <LandlordDocumentsTab
-              properties={properties}
-              units={units}
-              tenants={tenants}
-              documents={documents}
-              onUpdateDocumentStatus={handleUpdateDocumentStatus}
-            />
-          )}
+              {/* ─── VIEW 7: DOCUMENTS & VERIFICATION ─── */}
+              {activeView === 'documents' && (
+                <LandlordDocumentsTab
+                  properties={properties}
+                  units={units}
+                  tenants={tenants}
+                  documents={documents}
+                  onUpdateDocumentStatus={handleUpdateDocumentStatus}
+                />
+              )}
 
               {/* ─── VIEW 8: LANDLORD SETTINGS ─── */}
               {activeView === 'settings' && (
@@ -1441,7 +1436,7 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
       <UnitDetailModal isOpen={Boolean(selectedUnitForDetail)} unit={selectedUnitForDetail} property={properties.find((p) => p.id === selectedUnitForDetail?.propertyId)} onClose={() => setSelectedUnitForDetail(null)} onAddTenant={handleOpenAddTenant} />
       <NewTicketModal isOpen={isNewTicketOpen} onClose={() => setIsNewTicketOpen(false)} properties={properties} units={units} onTicketCreated={handleTicketCreated} />
       <NewAnnouncementModal isOpen={isNewAnnouncementOpen} onClose={() => setIsNewAnnouncementOpen(false)} onAnnouncementCreated={handleAnnouncementCreated} />
-      
+
       {/* Add Property / Unit Modal */}
       <AddPropertyOrUnitModal
         isOpen={isAddPropUnitOpen}
