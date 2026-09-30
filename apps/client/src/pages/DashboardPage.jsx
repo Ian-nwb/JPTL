@@ -421,10 +421,11 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
 
     async function loadLiveDashboardData() {
       try {
-        // High-concurrency worker batch request off UI thread
-        const batch = await landlordApi.getConcurrentDashboardData();
-
+        // ── PRIMARY: singular consolidated endpoint (1 HTTP call) ──
+        const res = await landlordApi.getDashInit();
         if (!isMounted) return;
+
+        const batch = res?.data; // { dash, properties, tickets, tenants, documents, rentroll, announcements }
 
         if (batch?.properties?.ok) {
           const liveProps = batch.properties.data?.data || [];
@@ -507,22 +508,15 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
           });
         }
       } catch (err) {
-        console.warn('Dashboard concurrent fetch fallback, trying Promise.allSettled:', err.message);
+        console.warn('Singular /init failed, falling back to concurrent fetch:', err.message);
         try {
-          const [dashRes, propsRes, ticketsRes, tenantsRes, docsRes, rentRollRes, ancRes] = await Promise.allSettled([
-            landlordApi.getDashboard(),
-            landlordApi.getProperties(),
-            landlordApi.getTickets(),
-            landlordApi.getTenants(),
-            landlordApi.getDocuments(),
-            landlordApi.getRentRoll(),
-            landlordApi.getAnnouncements(),
-          ]);
+          // ── FALLBACK: worker-based multi-fetch ──
+          const batch = await landlordApi.getConcurrentDashboardData();
 
           if (!isMounted) return;
 
-          if (propsRes.status === 'fulfilled') {
-            const liveProps = propsRes.value?.data || [];
+          if (batch?.properties?.ok) {
+            const liveProps = batch.properties.data?.data || [];
             setProperties(liveProps);
             const liveUnits = liveProps.flatMap((p) =>
               (p.units || []).map((u) => ({
@@ -536,13 +530,14 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
             setUnits(liveUnits);
           }
 
-          if (ticketsRes.status === 'fulfilled') {
-            const tList = ticketsRes.value?.tickets || ticketsRes.value?.data || (Array.isArray(ticketsRes.value) ? ticketsRes.value : []);
+          if (batch?.tickets?.ok) {
+            const tVal = batch.tickets.data;
+            const tList = tVal?.tickets || tVal?.data || (Array.isArray(tVal) ? tVal : []);
             setTickets(Array.isArray(tList) ? tList : []);
           }
 
-          if (tenantsRes.status === 'fulfilled') {
-            const serverTenants = tenantsRes.value?.data || [];
+          if (batch?.tenants?.ok) {
+            const serverTenants = batch.tenants.data?.data || [];
             const map = new Map();
             const emailSet = new Set();
             serverTenants.forEach((t) => {
@@ -553,17 +548,18 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
             setTenants(Array.from(map.values()));
           }
 
-          if (docsRes.status === 'fulfilled') {
-            const dList = docsRes.value?.documents || docsRes.value?.data || (Array.isArray(docsRes.value) ? docsRes.value : []);
+          if (batch?.documents?.ok) {
+            const dVal = batch.documents.data;
+            const dList = dVal?.documents || dVal?.data || (Array.isArray(dVal) ? dVal : []);
             setDocuments(Array.isArray(dList) ? dList : []);
           }
 
-          if (rentRollRes.status === 'fulfilled') {
-            setPayments(rentRollRes.value?.data || []);
+          if (batch?.rentroll?.ok) {
+            setPayments(batch.rentroll.data?.data || []);
           }
 
-          if (ancRes.status === 'fulfilled') {
-            const ancList = ancRes.value?.data || [];
+          if (batch?.announcements?.ok) {
+            const ancList = batch.announcements.data?.data || [];
             setAnnouncements(ancList);
             const pinned = ancList.find((a) => a.isPinned) || ancList[0];
             if (pinned) {
@@ -574,8 +570,8 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
             } else {
               setAnnouncement(null);
             }
-          } else if (dashRes.status === 'fulfilled' && dashRes.value?.data?.pinnedAnnouncement) {
-            const p = dashRes.value.data.pinnedAnnouncement;
+          } else if (batch?.dash?.ok && batch.dash.data?.data?.pinnedAnnouncement) {
+            const p = batch.dash.data.data.pinnedAnnouncement;
             setAnnouncement({
               subject: p.title,
               body: p.content || p.body,

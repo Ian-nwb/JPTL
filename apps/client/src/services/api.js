@@ -209,6 +209,9 @@ export const authApi = {
 export const landlordApi = {
   getDashboard: () => api.get('/landlord/dash'),
   
+  /** Singular consolidated endpoint – 1 HTTP call for all dashboard data */
+  getDashInit: () => api.get('/landlord/dash/init'),
+  
   getProperties: () => api.get('/landlord/properties'),
   createProperty: (data) => api.post('/landlord/properties', data),
   updateProperty: (id, data) => api.put(`/landlord/properties/${id}`, data),
@@ -332,6 +335,9 @@ export const tenantApi = {
   deleteVehicle: (id) => api.delete(`/tenant/vehicles/${id}`),
 
   getAnnouncements: () => api.get('/tenant/announcements'),
+
+  /** Singular consolidated endpoint – 1 HTTP call for all portal data */
+  getPortalInit: () => api.get('/tenant/dash/init'),
 
   getConcurrentPortalData: () => {
     return fetchConcurrent([
