@@ -129,10 +129,11 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
 
     async function loadTenantData() {
       try {
-        // High-concurrency worker batch request off UI thread
-        const batch = await tenantApi.getConcurrentPortalData();
-
+        // ── PRIMARY: singular consolidated endpoint (1 HTTP call) ──
+        const res = await tenantApi.getPortalInit();
         if (!isMounted) return;
+
+        const batch = res?.data; // { dash, payments, tickets, announcements, lease }
 
         // Process dash results
         const dashVal = batch?.dash?.data;
@@ -175,19 +176,16 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
           setLeaseData(leaseVal.data);
         }
       } catch (err) {
-        console.warn('Concurrent fetch fallback, trying Promise.allSettled:', err.message);
+        console.warn('Singular /init failed, falling back to concurrent fetch:', err.message);
         try {
-          const [dashRes, paymentsRes, ticketsRes, ancRes] = await Promise.allSettled([
-            tenantApi.getDashboard(),
-            tenantApi.getPayments(),
-            tenantApi.getTickets(),
-            tenantApi.getAnnouncements(),
-          ]);
+          // ── FALLBACK: worker-based multi-fetch ──
+          const batch = await tenantApi.getConcurrentPortalData();
 
           if (!isMounted) return;
 
-          if (dashRes.status === 'fulfilled' && dashRes.value?.data) {
-            const d = dashRes.value.data;
+          const dashVal = batch?.dash?.data;
+          if (dashVal?.data) {
+            const d = dashVal.data;
             if (d.tenant) setTenantData(d.tenant);
             if (d.unit) setUnitData(d.unit);
             if (d.property) setPropertyData(d.property);
@@ -197,17 +195,24 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
             if (Array.isArray(d.tickets?.recent)) setTickets(d.tickets.recent);
             if (Array.isArray(d.announcements)) setAnnouncements(d.announcements);
           }
-          if (ticketsRes.status === 'fulfilled') {
-            const tList = ticketsRes.value?.tickets || ticketsRes.value?.data || (Array.isArray(ticketsRes.value) ? ticketsRes.value : []);
+          const ticketVal = batch?.tickets?.data;
+          if (ticketVal) {
+            const tList = ticketVal.tickets || ticketVal.data || (Array.isArray(ticketVal) ? ticketVal : []);
             if (Array.isArray(tList) && tList.length > 0) setTickets(tList);
           }
-          if (ancRes.status === 'fulfilled') {
-            const aList = ancRes.value?.announcements || ancRes.value?.data || (Array.isArray(ancRes.value) ? ancRes.value : []);
+          const ancVal = batch?.announcements?.data;
+          if (ancVal) {
+            const aList = ancVal.announcements || ancVal.data || (Array.isArray(ancVal) ? ancVal : []);
             if (Array.isArray(aList) && aList.length > 0) setAnnouncements(aList);
           }
-          if (paymentsRes.status === 'fulfilled') {
-            const pList = paymentsRes.value?.payments || paymentsRes.value?.data?.recentPayments || paymentsRes.value?.data || (Array.isArray(paymentsRes.value) ? paymentsRes.value : []);
+          const paymentsVal = batch?.payments?.data;
+          if (paymentsVal) {
+            const pList = paymentsVal.payments || paymentsVal.data?.recentPayments || paymentsVal.data || (Array.isArray(paymentsVal) ? paymentsVal : []);
             if (Array.isArray(pList) && pList.length > 0) setPayments(pList);
+          }
+          const leaseVal = batch?.lease?.data;
+          if (leaseVal?.data) {
+            setLeaseData(leaseVal.data);
           }
         } catch (fallbackErr) {
           console.warn('Tenant live data fetch fallback:', fallbackErr.message);
@@ -472,9 +477,12 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
                   lease={leaseData}
                   onExtensionRequested={async () => {
                     try {
-                      const batch = await tenantApi.getConcurrentPortalData();
-                      if (batch?.dash?.data?.data?.lease) {
-                        setLeaseData(batch.dash.data.data.lease);
+                      const res = await tenantApi.getPortalInit();
+                      const leaseVal = res?.data?.lease?.data;
+                      if (leaseVal?.data) {
+                        setLeaseData(leaseVal.data);
+                      } else if (res?.data?.dash?.data?.data?.lease) {
+                        setLeaseData(res.data.dash.data.data.lease);
                       }
                     } catch (e) {
                       console.warn('Failed to refresh lease after extension request:', e.message);
