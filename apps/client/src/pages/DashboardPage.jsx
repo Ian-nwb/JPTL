@@ -33,6 +33,7 @@ import { DeletePropertyModal } from '../components/dashboard/DeletePropertyModal
 import { AddPropertyOrUnitModal } from '../components/dashboard/AddPropertyOrUnitModal';
 import { MobileNavBar } from '../components/common/MobileNavBar';
 import { MobileNavDrawer } from '../components/common/MobileNavDrawer';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { LayoutDashboard, FileCheck, Settings } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { landlordApi } from '../services/api';
@@ -64,13 +65,25 @@ function getViewFromPath(pathname) {
   return 'overview';
 }
 
+function getCachedLandlordSnapshot(userId) {
+  if (!userId) return null;
+  try {
+    const raw = sessionStorage.getItem(`jptl_dash_cache_${userId}`);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export const DashboardPage = ({ currentPath = window.location.pathname, onNavigate = () => { } }) => {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const userId = user?.id || user?._id;
+  const initialCache = getCachedLandlordSnapshot(userId);
 
   const [activeView, setActiveView] = useState(() => getViewFromPath(currentPath || window.location.pathname));
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !initialCache);
 
   // Sync activeView if browser navigation or URL change occurs
   useEffect(() => {
@@ -91,6 +104,7 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
   };
 
   const [properties, setProperties] = useState(() => {
+    if (initialCache?.properties?.length) return initialCache.properties;
     try {
       const savedProps = sessionStorage.getItem('jptl_custom_properties');
       if (savedProps) {
@@ -104,6 +118,7 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
   });
 
   const [units, setUnits] = useState(() => {
+    if (initialCache?.units?.length) return initialCache.units;
     try {
       const savedUnits = sessionStorage.getItem('jptl_custom_units');
       if (savedUnits) {
@@ -116,10 +131,11 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
     return [];
   });
 
-  const [tenants, setTenants] = useState([]);
-  const [tickets, setTickets] = useState([]);
-  const [payments, setPayments] = useState([]);
+  const [tenants, setTenants] = useState(() => initialCache?.tenants || []);
+  const [tickets, setTickets] = useState(() => initialCache?.tickets || []);
+  const [payments, setPayments] = useState(() => initialCache?.payments || []);
   const [documents, setDocuments] = useState(() => {
+    if (initialCache?.documents?.length) return initialCache.documents;
     try {
       const savedDocs = sessionStorage.getItem('jptl_documents');
       if (savedDocs) {
@@ -132,8 +148,8 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
     return [];
   });
 
-  const [announcements, setAnnouncements] = useState([]);
-  const [announcement, setAnnouncement] = useState(null);
+  const [announcements, setAnnouncements] = useState(() => initialCache?.announcements || []);
+  const [announcement, setAnnouncement] = useState(() => initialCache?.announcement || null);
   const [broadcastDismissed, setBroadcastDismissed] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
@@ -398,9 +414,24 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
     setTimeout(() => setToastNotification(null), 3500);
   };
 
-  const handleLogout = async () => {
-    await logout();
-    onNavigate('/login');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      onNavigate('/login');
+    } catch (e) {
+      console.error('Logout error:', e);
+    } finally {
+      setIsLoggingOut(false);
+      setShowLogoutConfirm(false);
+    }
   };
 
   // ⌘K shortcut
@@ -428,7 +459,8 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
         const batch = res?.data; // { dash, properties, tickets, tenants, documents, rentroll, announcements }
 
         if (batch?.properties?.ok) {
-          const liveProps = batch.properties.data?.data || [];
+          const pVal = batch.properties.data;
+          const liveProps = Array.isArray(pVal?.data) ? pVal.data : (Array.isArray(pVal) ? pVal : []);
           setProperties(liveProps);
           const liveUnits = liveProps.flatMap((p) =>
             (p.units || []).map((u) => ({
@@ -449,7 +481,12 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
         }
 
         if (batch?.tenants?.ok) {
-          const serverTenants = batch.tenants.data?.data || [];
+          const tData = batch.tenants.data;
+          const serverTenants = Array.isArray(tData?.data)
+            ? tData.data
+            : Array.isArray(tData?.tenants)
+            ? tData.tenants
+            : (Array.isArray(tData) ? tData : []);
           const map = new Map();
           const emailSet = new Set();
           serverTenants.forEach((t) => {
@@ -485,11 +522,22 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
         }
 
         if (batch?.rentroll?.ok) {
-          setPayments(batch.rentroll.data?.data || []);
+          const rVal = batch.rentroll.data;
+          const rList = Array.isArray(rVal?.data)
+            ? rVal.data
+            : Array.isArray(rVal?.payments)
+            ? rVal.payments
+            : (Array.isArray(rVal) ? rVal : []);
+          setPayments(rList);
         }
 
         if (batch?.announcements?.ok) {
-          const ancList = batch.announcements.data?.data || [];
+          const aVal = batch.announcements.data;
+          const ancList = Array.isArray(aVal?.data)
+            ? aVal.data
+            : Array.isArray(aVal?.announcements)
+            ? aVal.announcements
+            : (Array.isArray(aVal) ? aVal : []);
           setAnnouncements(ancList);
           const pinned = ancList.find((a) => a.isPinned) || ancList[0];
           if (pinned) {
@@ -507,6 +555,45 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
             body: p.content || p.body,
           });
         }
+
+        // Cache fresh snapshot to sessionStorage for instant 0ms mount on next visit
+        if (userId && batch) {
+          try {
+            const pVal = batch.properties?.data;
+            const liveProps = Array.isArray(pVal?.data) ? pVal.data : (Array.isArray(pVal) ? pVal : []);
+            const liveUnits = liveProps.flatMap((p) =>
+              (p.units || []).map((u) => ({
+                ...u,
+                id: u._id || u.id,
+                propertyId: p._id || p.id,
+                propertyName: p.name,
+                propertyAddress: p.address,
+              }))
+            );
+            const tData = batch.tenants?.data;
+            const liveTenants = Array.isArray(tData?.data) ? tData.data : (Array.isArray(tData?.tenants) ? tData.tenants : (Array.isArray(tData) ? tData : []));
+            const tVal = batch.tickets?.data;
+            const liveTickets = tVal?.tickets || tVal?.data || (Array.isArray(tVal) ? tVal : []);
+            const dVal = batch.documents?.data;
+            const liveDocs = dVal?.documents || dVal?.data || (Array.isArray(dVal) ? dVal : []);
+            const rVal = batch.rentroll?.data;
+            const livePayments = Array.isArray(rVal?.data) ? rVal.data : (Array.isArray(rVal?.payments) ? rVal.payments : (Array.isArray(rVal) ? rVal : []));
+            const aVal = batch.announcements?.data;
+            const liveAncs = Array.isArray(aVal?.data) ? aVal.data : (Array.isArray(aVal?.announcements) ? aVal.announcements : (Array.isArray(aVal) ? aVal : []));
+
+            sessionStorage.setItem(`jptl_dash_cache_${userId}`, JSON.stringify({
+              properties: liveProps,
+              units: liveUnits,
+              tenants: liveTenants,
+              tickets: liveTickets,
+              documents: liveDocs,
+              payments: livePayments,
+              announcements: liveAncs,
+            }));
+          } catch (e) {
+            // Ignore quota errors
+          }
+        }
       } catch (err) {
         console.warn('Singular /init failed, falling back to concurrent fetch:', err.message);
         try {
@@ -516,7 +603,8 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
           if (!isMounted) return;
 
           if (batch?.properties?.ok) {
-            const liveProps = batch.properties.data?.data || [];
+            const pVal = batch.properties.data;
+            const liveProps = Array.isArray(pVal?.data) ? pVal.data : (Array.isArray(pVal) ? pVal : []);
             setProperties(liveProps);
             const liveUnits = liveProps.flatMap((p) =>
               (p.units || []).map((u) => ({
@@ -537,7 +625,12 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
           }
 
           if (batch?.tenants?.ok) {
-            const serverTenants = batch.tenants.data?.data || [];
+            const tData = batch.tenants.data;
+            const serverTenants = Array.isArray(tData?.data)
+              ? tData.data
+              : Array.isArray(tData?.tenants)
+              ? tData.tenants
+              : (Array.isArray(tData) ? tData : []);
             const map = new Map();
             const emailSet = new Set();
             serverTenants.forEach((t) => {
@@ -555,11 +648,22 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
           }
 
           if (batch?.rentroll?.ok) {
-            setPayments(batch.rentroll.data?.data || []);
+            const rVal = batch.rentroll.data;
+            const rList = Array.isArray(rVal?.data)
+              ? rVal.data
+              : Array.isArray(rVal?.payments)
+              ? rVal.payments
+              : (Array.isArray(rVal) ? rVal : []);
+            setPayments(rList);
           }
 
           if (batch?.announcements?.ok) {
-            const ancList = batch.announcements.data?.data || [];
+            const aVal = batch.announcements.data;
+            const ancList = Array.isArray(aVal?.data)
+              ? aVal.data
+              : Array.isArray(aVal?.announcements)
+              ? aVal.announcements
+              : (Array.isArray(aVal) ? aVal : []);
             setAnnouncements(ancList);
             const pinned = ancList.find((a) => a.isPinned) || ancList[0];
             if (pinned) {
@@ -1465,6 +1569,20 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
         properties={properties}
         units={units}
         onTenantAssigned={handleTenantAssigned}
+      />
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showLogoutConfirm}
+        onClose={() => !isLoggingOut && setShowLogoutConfirm(false)}
+        onConfirm={handleConfirmLogout}
+        title="Log Out of JPTL?"
+        description="Are you sure you want to log out of your landlord account? You will need to sign in again to access the portal."
+        confirmText={isLoggingOut ? 'Logging out...' : 'Log Out'}
+        cancelText="Cancel"
+        variant="danger"
+        loading={isLoggingOut}
+        icon={LogOut}
       />
 
       {/* ─── MOBILE BOTTOM NAVIGATION BAR ─── */}

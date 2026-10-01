@@ -47,17 +47,15 @@ app.use(cookieParser());
 // Swagger Documentation UI (Accessible at /api/docs)
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Caching policy optimized for concurrent reads & edge/CDN proxies:
-// Safe GET reads use short SWR (s-maxage=5, stale-while-revalidate=30)
-// Low-churn routes (announcements, documents) get 30s cache
-// Mutations and auth strictly bypass cache
+// Caching policy:
+// - Authenticated GET routes: private (browser-only), no CDN caching
+// - Mutations and auth: strict no-store
+// CDN caching (s-maxage) is ONLY safe for public, unauthenticated routes
+// (health, system/status), set directly on those handlers.
 app.use('/api', (req, res, next) => {
   if (req.method === 'GET' && !req.path.startsWith('/auth')) {
-    if (req.path.includes('/announcements') || req.path.includes('/documents')) {
-      res.setHeader('Cache-Control', 'public, s-maxage=30, stale-while-revalidate=120');
-    } else {
-      res.setHeader('Cache-Control', 'public, s-maxage=5, stale-while-revalidate=30');
-    }
+    // Private cache: browser can revalidate via ETag/304, but CDN never caches
+    res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
   } else {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');

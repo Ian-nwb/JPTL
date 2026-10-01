@@ -32,12 +32,12 @@ async function logAction({ actorId, action, entityKind = 'Document', entityId, b
 /**
  * GET all compliance documents across all units owned by landlord
  */
-export async function getLandlordDocuments(landlordId, query = {}) {
+export async function getLandlordDocuments(landlordId, query = {}, context = {}) {
   const { status, type, propertyId, search } = query;
 
   // 1. Find all properties of this landlord
-  const landlordProperties = await Property.find({ landlord: landlordId }).lean();
-  const propertyIds = landlordProperties.map((p) => p._id);
+  const landlordProperties = context.properties || (await Property.find({ landlord: landlordId }).lean());
+  const propertyIds = context.propertyIds || landlordProperties.map((p) => p._id);
   const propertyMap = new Map(landlordProperties.map((p) => [p._id.toString(), p]));
 
   // 2. Find all units under landlord properties
@@ -46,13 +46,13 @@ export async function getLandlordDocuments(landlordId, query = {}) {
     unitFilter.property = propertyId;
   }
 
-  const units = await Unit.find(unitFilter).lean();
-  const unitIds = units.map((u) => u._id);
+  const units = context.units && !propertyId ? context.units : await Unit.find(unitFilter).lean();
+  const unitIds = context.unitIds && !propertyId ? context.unitIds : units.map((u) => u._id);
   const unitMap = new Map(units.map((u) => [u._id.toString(), u]));
 
   // Also query tenants registered under this landlord
-  const landlordTenants = await User.find({ landlord: landlordId }).select('_id').lean();
-  const tenantIds = landlordTenants.map((t) => t._id);
+  const landlordTenants = context.tenants || (await User.find({ landlord: landlordId }).select('_id').lean());
+  const tenantIds = landlordTenants.map((t) => t._id || t.id);
 
   // 3. Build Document match filter
   const matchFilter = {

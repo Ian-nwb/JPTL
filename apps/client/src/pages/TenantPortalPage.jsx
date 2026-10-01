@@ -26,6 +26,7 @@ import { ReportIssueModal } from '../components/tenant/ReportIssueModal';
 import { RightNotificationSidebar } from '../components/dashboard/RightNotificationSidebar';
 import { MobileNavBar } from '../components/common/MobileNavBar';
 import { MobileNavDrawer } from '../components/common/MobileNavDrawer';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { FileCheck, LayoutDashboard, Settings } from 'lucide-react';
 import { TenantPortalSkeleton, DashboardSkeleton } from '../components/ui/SkeletonLoader';
 
@@ -81,9 +82,21 @@ function getTabFromPath(pathname) {
   return 'overview';
 }
 
+function getCachedTenantSnapshot(userId) {
+  if (!userId) return null;
+  try {
+    const raw = sessionStorage.getItem(`jptl_tenant_cache_${userId}`);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export const TenantPortalPage = ({ currentPath = window.location.pathname, onNavigate = () => {} }) => {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const userId = user?.id || user?._id;
+  const initialCache = getCachedTenantSnapshot(userId);
 
   // Active Tab & Resident selection - synced with URL
   const [activeTab, setActiveTab] = useState(() => getTabFromPath(currentPath || window.location.pathname));
@@ -105,16 +118,16 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
     }
   };
 
-  // Live state from backend
-  const [isLoading, setIsLoading] = useState(true);
-  const [tenantData, setTenantData] = useState(null);
-  const [unitData, setUnitData] = useState(null);
-  const [propertyData, setPropertyData] = useState(null);
-  const [landlordData, setLandlordData] = useState(null);
-  const [leaseData, setLeaseData] = useState(null);
-  const [payments, setPayments] = useState([]);
-  const [tickets, setTickets] = useState([]);
-  const [announcements, setAnnouncements] = useState([]);
+  // Live state from backend - Instant SWR
+  const [isLoading, setIsLoading] = useState(() => !initialCache);
+  const [tenantData, setTenantData] = useState(() => initialCache?.tenantData || null);
+  const [unitData, setUnitData] = useState(() => initialCache?.unitData || null);
+  const [propertyData, setPropertyData] = useState(() => initialCache?.propertyData || null);
+  const [landlordData, setLandlordData] = useState(() => initialCache?.landlordData || null);
+  const [leaseData, setLeaseData] = useState(() => initialCache?.leaseData || null);
+  const [payments, setPayments] = useState(() => initialCache?.payments || []);
+  const [tickets, setTickets] = useState(() => initialCache?.tickets || []);
+  const [announcements, setAnnouncements] = useState(() => initialCache?.announcements || []);
 
   // Modals & Drawers
   const [isPayRentOpen, setIsPayRentOpen] = useState(false);
@@ -174,6 +187,24 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
         const leaseVal = batch?.lease?.data;
         if (leaseVal?.data) {
           setLeaseData(leaseVal.data);
+        }
+
+        // Cache fresh snapshot to sessionStorage for instant 0ms mount on next visit
+        if (userId && batch) {
+          try {
+            sessionStorage.setItem(`jptl_tenant_cache_${userId}`, JSON.stringify({
+              tenantData: dashVal?.data?.tenant || null,
+              unitData: dashVal?.data?.unit || null,
+              propertyData: dashVal?.data?.property || null,
+              landlordData: dashVal?.data?.landlord || null,
+              leaseData: leaseVal?.data || dashVal?.data?.lease || null,
+              payments: paymentsVal?.payments || paymentsVal?.data?.recentPayments || (Array.isArray(paymentsVal?.data) ? paymentsVal.data : []) || dashVal?.data?.payments?.recent || [],
+              tickets: ticketVal?.tickets || ticketVal?.data || (Array.isArray(ticketVal) ? ticketVal : []) || dashVal?.data?.tickets?.recent || [],
+              announcements: ancVal?.announcements || ancVal?.data || (Array.isArray(ancVal) ? ancVal : []) || dashVal?.data?.announcements || [],
+            }));
+          } catch (e) {
+            // Ignore quota errors
+          }
         }
       } catch (err) {
         console.warn('Singular /init failed, falling back to concurrent fetch:', err.message);
@@ -322,9 +353,24 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
     setPayments((prev) => [newPaymentRecord, ...prev]);
   };
 
-  const handleLogout = async () => {
-    await logout();
-    onNavigate('/login');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      onNavigate('/login');
+    } catch (e) {
+      console.error('Logout error:', e);
+    } finally {
+      setIsLoggingOut(false);
+      setShowLogoutConfirm(false);
+    }
   };
 
   const displayName = currentTenant.name || 'Resident';
@@ -559,6 +605,20 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
         tenant={currentTenant}
         unit={currentUnit}
         onTicketSubmitted={handleTicketSubmitted}
+      />
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showLogoutConfirm}
+        onClose={() => !isLoggingOut && setShowLogoutConfirm(false)}
+        onConfirm={handleConfirmLogout}
+        title="Log Out of JPTL?"
+        description="Are you sure you want to log out of your resident account? You will need to sign in again to access the portal."
+        confirmText={isLoggingOut ? 'Logging out...' : 'Log Out'}
+        cancelText="Cancel"
+        variant="danger"
+        loading={isLoggingOut}
+        icon={LogOut}
       />
 
       {/* ─── MOBILE BOTTOM NAVIGATION BAR ─── */}

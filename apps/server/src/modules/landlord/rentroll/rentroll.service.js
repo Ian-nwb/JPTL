@@ -95,8 +95,10 @@ function formatPayment(p) {
  * GET /api/landlord/rentroll
  * Query rent roll with search, status filters, property/unit filters, and summary metrics.
  */
-export async function getRentRoll(landlordId, query = {}) {
-  const { propertyIds, unitIds, units } = await getLandlordUnitIds(landlordId);
+export async function getRentRoll(landlordId, query = {}, context = {}) {
+  const { propertyIds, unitIds, units } = (context.propertyIds && context.unitIds && context.units)
+    ? context
+    : await getLandlordUnitIds(landlordId);
 
   if (!unitIds.length) {
     return {

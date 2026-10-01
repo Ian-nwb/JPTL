@@ -61,19 +61,19 @@ async function updatePropertyMetrics(propertyId) {
  * @param {string} landlordId
  * @param {object} query - { search, status, propertyId }
  */
-async function getTenantDirectory(landlordId, query = {}) {
+async function getTenantDirectory(landlordId, query = {}, context = {}) {
   const { search = '', status = 'all', propertyId = '' } = query;
 
   // 1. Find all properties belonging to this landlord
-  const landlordProperties = await Property.find({ landlord: landlordId }).lean();
-  const propertyIds = landlordProperties.map((p) => p._id);
+  const landlordProperties = context.properties || (await Property.find({ landlord: landlordId }).lean());
+  const propertyIds = context.propertyIds || landlordProperties.map((p) => p._id);
   const propertyMap = new Map(landlordProperties.map((p) => [p._id.toString(), p]));
 
   // 2. Find all tenant users registered under this landlord
-  const tenantUsers = await User.find({
+  const tenantUsers = context.tenants || (await User.find({
     landlord: landlordId,
     role: 'tenant',
-  }).select('firstName middleName lastName email phone status createdAt').lean();
+  }).select('firstName middleName lastName email phone status createdAt').lean());
 
   if (tenantUsers.length === 0) {
     return {
