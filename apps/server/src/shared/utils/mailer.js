@@ -37,6 +37,7 @@ function getTransporter() {
  * Sends a welcome email to a new tenant with instructions to change the default JPTL2026 password.
  */
 export async function sendTenantWelcomeEmail({ email, name, landlordName = 'Your Landlord', propertyName = 'your community', password = 'jptl2026' }) {
+  const clientUrl = ((process.env.CLIENT_URL || 'http://localhost:5173').split(',')[0]).replace(/\/$/, '');
   const from = process.env.SMTP_FROM || '"JPTL Property Management" <noreply@jptl.com>';
   const subject = 'Welcome to JPTL — Your Tenant Portal Account Credentials';
 
@@ -52,7 +53,7 @@ export async function sendTenantWelcomeEmail({ email, name, landlordName = 'Your
         
         <div style="background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px; padding: 18px; margin: 20px 0;">
           <h3 style="margin-top: 0; color: #0f172a; font-size: 16px;">🔑 Your Login Credentials:</h3>
-          <p style="margin: 6px 0;"><strong>Portal Login URL:</strong> <a href="http://localhost:5173/login" style="color: #2563eb;">http://localhost:5173/login</a></p>
+          <p style="margin: 6px 0;"><strong>Portal Login URL:</strong> <a href="${clientUrl}/login" style="color: #2563eb;">${clientUrl}/login</a></p>
           <p style="margin: 6px 0;"><strong>Username / Email:</strong> <code style="background: #e2e8f0; padding: 2px 6px; border-radius: 4px;">${email}</code></p>
           <p style="margin: 6px 0;"><strong>Default Password:</strong> <code style="background: #fef08a; color: #854d0e; padding: 2px 6px; border-radius: 4px; font-weight: bold;">${password}</code></p>
         </div>
@@ -93,6 +94,7 @@ export async function sendTenantWelcomeEmail({ email, name, landlordName = 'Your
  * Sends broadcast email notifications for new announcements.
  */
 export async function sendAnnouncementEmail({ recipients = [], title, content, category = 'General', authorName = 'Property Management' }) {
+  const clientUrl = ((process.env.CLIENT_URL || 'http://localhost:5173').split(',')[0]).replace(/\/$/, '');
   if (!recipients || recipients.length === 0) return;
 
   const from = process.env.SMTP_FROM || '"JPTL Property Management" <noreply@jptl.com>';
@@ -108,7 +110,7 @@ export async function sendAnnouncementEmail({ recipients = [], title, content, c
       <div style="padding: 24px;">
         <div style="font-size: 15px; color: #334155; white-space: pre-wrap;">${content}</div>
         <div style="margin-top: 24px; text-align: center;">
-          <a href="http://localhost:5173/tenant" style="background: #2563eb; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: bold; display: inline-block;">View in Tenant Portal</a>
+          <a href="${clientUrl}/tenant" style="background: #2563eb; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 6px; font-size: 14px; font-weight: bold; display: inline-block;">View in Tenant Portal</a>
         </div>
       </div>
     </div>
