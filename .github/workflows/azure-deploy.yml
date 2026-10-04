@@ -33,8 +33,13 @@ jobs:
           npm run test --if-present
 
       - name: Zip apps/server for deployment
-        working-directory: apps/server
-        run: zip -r ../../server-deploy.zip . --exclude "*.env" --exclude ".env*"
+        run: |
+          cd $GITHUB_WORKSPACE/apps/server
+          zip -r $GITHUB_WORKSPACE/server-deploy.zip . --exclude "*.env" --exclude ".env*"
+          echo "=== Zip contents (first 20 entries) ==="
+          unzip -l $GITHUB_WORKSPACE/server-deploy.zip | head -20
+          echo "=== Zip size ==="
+          ls -lh $GITHUB_WORKSPACE/server-deploy.zip
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4

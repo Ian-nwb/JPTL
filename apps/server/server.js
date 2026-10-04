@@ -1,4 +1,4 @@
-import 'dotenv/config';
+// dotenv loaded in local dev only (Azure injects env vars via App Settings)
 import cluster from 'node:cluster';
 import os from 'node:os';
 import app from './app.js';
