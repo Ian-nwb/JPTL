@@ -34,13 +34,13 @@ jobs:
 
       - name: Zip apps/server for deployment
         working-directory: apps/server
-        run: zip -r ../../../server-deploy.zip . --exclude "*.env" --exclude ".env*"
+        run: zip -r ../../server-deploy.zip . --exclude "*.env" --exclude ".env*"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: server-deploy.zip
+          path: ${{ github.workspace }}/server-deploy.zip
 
   deploy:
     name: Deploy to Azure
