@@ -335,6 +335,7 @@ export const tenantApi = {
   getReceipt: (id) => api.get(`/tenant/payments/${id}/receipt`),
 
   requestLeaseExtension: (data) => api.post('/tenant/lease/extension', data),
+  getLeaseDocument: () => api.get('/tenant/lease/document'),
 
   getTickets: () => api.get('/tenant/tickets'),
   createTicket: (data) => api.post('/tenant/tickets', data),
