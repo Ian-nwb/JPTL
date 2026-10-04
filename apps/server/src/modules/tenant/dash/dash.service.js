@@ -198,8 +198,12 @@ async function getTenantDashboard(tenantId) {
             : 'Property Management',
           landlordEmail: landlordUser?.email || '',
           landlordPhone: landlordUser?.phone || landlordUser?.officePhone || '',
+          accessCodes: property.accessCodes || {},
+          buildingRules: property.buildingRules || [],
+          emergencyPhone: property.emergencyPhone || '',
         }
       : null,
+
     payments: {
       upcoming: upcomingPayment
         ? {
