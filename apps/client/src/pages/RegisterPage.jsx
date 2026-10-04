@@ -6,7 +6,7 @@ import { useTheme } from '../hooks/useTheme';
 import { useAuth } from '../context/AuthContext';
 import { onlyPhoneDigits, handleNumericKeyDown } from '../utils/numberSanitizers';
 
-export const RegisterPage = ({ onNavigate = () => {} }) => {
+export const RegisterPage = ({ onNavigate = () => { } }) => {
   const { theme, toggleTheme } = useTheme();
   const { signup, login } = useAuth();
 
@@ -223,10 +223,10 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
 
   return (
     <div className="min-h-screen w-full flex flex-col md:flex-row bg-slate-50 dark:bg-[#070A12] text-slate-900 dark:text-slate-100 font-sans selection:bg-indigo-600/30 selection:text-indigo-300">
-      
+
       {/* LEFT PANEL: Split Screen Hero (~45% width) - Designed with Emil Kowalski Craft */}
       <div className="w-full md:w-[45%] lg:w-[42%] min-h-[340px] md:min-h-screen bg-gradient-to-br from-indigo-950 via-slate-900 to-indigo-950 dark:from-[#090B18] dark:via-[#0C0F22] dark:to-[#05060E] p-6 sm:p-10 md:p-12 flex flex-col justify-between relative overflow-hidden border-b md:border-b-0 md:border-r border-slate-200/10 dark:border-white/[0.08]">
-        
+
         {/* Glow Ambient Layering */}
         <div className="absolute -top-32 -left-32 w-[480px] h-[480px] bg-indigo-600/15 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute -bottom-32 -right-32 w-[480px] h-[480px] bg-purple-600/15 rounded-full blur-[100px] pointer-events-none" />
@@ -294,7 +294,7 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
 
       {/* RIGHT PANEL: Form Content (~55% width) */}
       <div className="flex-1 flex flex-col justify-between p-6 sm:p-10 md:p-14 lg:p-16 max-w-xl mx-auto w-full my-auto">
-        
+
         {/* Header Title */}
         <div className="mb-8">
           <h2 className="text-2xl sm:text-3xl font-bold font-grotesk text-slate-900 dark:text-white tracking-tight">
@@ -331,7 +331,7 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
 
         {/* Registration Form */}
         <form onSubmit={handleSubmit} noValidate className="space-y-4">
-          
+
           {/* Name Fields: First, Middle, Last */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             {/* First Name */}
@@ -348,11 +348,10 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                 onChange={(e) => handleChange('firstName', e.target.value)}
                 onBlur={() => handleBlur('firstName')}
                 placeholder="Alexander"
-                className={`w-full bg-white dark:bg-[#0D111D] border ${
-                  touched.firstName && errors.firstName
-                    ? 'border-rose-500 focus:ring-rose-500'
-                    : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
-                } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
+                className={`w-full bg-white dark:bg-[#0D111D] border ${touched.firstName && errors.firstName
+                  ? 'border-rose-500 focus:ring-rose-500'
+                  : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
+                  } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
               />
               {touched.firstName && errors.firstName && (
                 <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
@@ -375,11 +374,10 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                 onChange={(e) => handleChange('middleName', e.target.value)}
                 onBlur={() => handleBlur('middleName')}
                 placeholder="J."
-                className={`w-full bg-white dark:bg-[#0D111D] border ${
-                  touched.middleName && errors.middleName
-                    ? 'border-rose-500 focus:ring-rose-500'
-                    : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
-                } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
+                className={`w-full bg-white dark:bg-[#0D111D] border ${touched.middleName && errors.middleName
+                  ? 'border-rose-500 focus:ring-rose-500'
+                  : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
+                  } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
               />
               {touched.middleName && errors.middleName && (
                 <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
@@ -403,11 +401,10 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                 onChange={(e) => handleChange('lastName', e.target.value)}
                 onBlur={() => handleBlur('lastName')}
                 placeholder="Vance"
-                className={`w-full bg-white dark:bg-[#0D111D] border ${
-                  touched.lastName && errors.lastName
-                    ? 'border-rose-500 focus:ring-rose-500'
-                    : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
-                } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
+                className={`w-full bg-white dark:bg-[#0D111D] border ${touched.lastName && errors.lastName
+                  ? 'border-rose-500 focus:ring-rose-500'
+                  : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
+                  } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
               />
               {touched.lastName && errors.lastName && (
                 <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
@@ -433,11 +430,10 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                 onChange={(e) => handleChange('email', e.target.value)}
                 onBlur={() => handleBlur('email')}
                 placeholder="vance.landlord@horizonliving.io"
-                className={`w-full bg-white dark:bg-[#0D111D] border ${
-                  touched.email && errors.email
-                    ? 'border-rose-500 focus:ring-rose-500'
-                    : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
-                } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
+                className={`w-full bg-white dark:bg-[#0D111D] border ${touched.email && errors.email
+                  ? 'border-rose-500 focus:ring-rose-500'
+                  : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
+                  } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
               />
               {touched.email && errors.email && (
                 <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1 font-medium">
@@ -488,11 +484,10 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                       setErrors((prev) => ({ ...prev, phone: validateField('phone', phone) }));
                     }}
                     placeholder="912 345 6789"
-                    className={`w-full bg-white dark:bg-[#0D111D] border ${
-                      touched.phone && errors.phone
-                        ? 'border-rose-500 focus:ring-rose-500'
-                        : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
-                    } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
+                    className={`w-full bg-white dark:bg-[#0D111D] border ${touched.phone && errors.phone
+                      ? 'border-rose-500 focus:ring-rose-500'
+                      : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
+                      } rounded-2xl px-3.5 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
                   />
                 </div>
               </div>
@@ -520,11 +515,10 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                 onChange={(e) => handleChange('password', e.target.value)}
                 onBlur={() => handleBlur('password')}
                 placeholder="Create password"
-                className={`w-full bg-white dark:bg-[#0D111D] border ${
-                  touched.password && errors.password
-                    ? 'border-rose-500 focus:ring-rose-500'
-                    : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
-                } rounded-2xl pl-4 pr-11 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
+                className={`w-full bg-white dark:bg-[#0D111D] border ${touched.password && errors.password
+                  ? 'border-rose-500 focus:ring-rose-500'
+                  : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
+                  } rounded-2xl pl-4 pr-11 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
               />
               <button
                 type="button"
@@ -538,18 +532,16 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
             {/* Password Validation Indicators with smooth transitions */}
             <div className="flex items-center gap-4 mt-2.5 text-xs">
               <span
-                className={`flex items-center gap-1.5 font-medium transition-all duration-150 ease-out ${
-                  is8Chars ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
-                }`}
+                className={`flex items-center gap-1.5 font-medium transition-all duration-150 ease-out ${is8Chars ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
+                  }`}
               >
                 {is8Chars ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Circle className="w-3 h-3 text-slate-400" />}
                 <span>8+ chars</span>
               </span>
 
               <span
-                className={`flex items-center gap-1.5 font-medium transition-all duration-150 ease-out ${
-                  hasDigit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
-                }`}
+                className={`flex items-center gap-1.5 font-medium transition-all duration-150 ease-out ${hasDigit ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-500 dark:text-slate-400'
+                  }`}
               >
                 {hasDigit ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Circle className="w-3 h-3 text-slate-400" />}
                 <span>Number</span>
@@ -579,11 +571,10 @@ export const RegisterPage = ({ onNavigate = () => {} }) => {
                 onChange={(e) => handleChange('confirmPassword', e.target.value)}
                 onBlur={() => handleBlur('confirmPassword')}
                 placeholder="Re-enter password"
-                className={`w-full bg-white dark:bg-[#0D111D] border ${
-                  touched.confirmPassword && errors.confirmPassword
-                    ? 'border-rose-500 focus:ring-rose-500'
-                    : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
-                } rounded-2xl pl-4 pr-11 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
+                className={`w-full bg-white dark:bg-[#0D111D] border ${touched.confirmPassword && errors.confirmPassword
+                  ? 'border-rose-500 focus:ring-rose-500'
+                  : 'border-slate-300 dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/15'
+                  } rounded-2xl pl-4 pr-11 py-3 text-xs sm:text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none transition-all duration-150 ease-out shadow-sm`}
               />
               <button
                 type="button"
