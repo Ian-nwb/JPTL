@@ -36,7 +36,9 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/apps/server
           zip -r $GITHUB_WORKSPACE/server-deploy.zip . --exclude "*.env" --exclude ".env*"
-          echo "Zip created at $GITHUB_WORKSPACE/server-deploy.zip"
+          echo "=== Zip contents (first 20 entries) ==="
+          unzip -l $GITHUB_WORKSPACE/server-deploy.zip | head -20
+          echo "=== Zip size ==="
           ls -lh $GITHUB_WORKSPACE/server-deploy.zip
 
       - name: Upload artifact for deployment job
