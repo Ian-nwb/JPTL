@@ -34,12 +34,12 @@
     "nodemailer": "^10.0.9",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
-    "web-push": "^3.6.7"
+    "web-push": "^3.6.7",
+    "dotenv": "^17.4.2"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",
     "cross-env": "^10.1.0",
-    "dotenv": "^17.4.2",
     "jest": "^30.5.1",
     "mongodb-memory-server": "^11.2.0",
     "nodemon": "^3.1.14",
