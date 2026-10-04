@@ -7,6 +7,7 @@ import Ticket from '../../../shared/models/ticket.model.js';
 import Payment from '../../../shared/models/payment.model.js';
 import Document from '../../../shared/models/document.model.js';
 import AuditLog from '../../../shared/models/auditLog.model.js';
+import Lease from '../../../shared/models/lease.model.js';
 import crypto from 'crypto';
 import { sendTenantWelcomeEmail } from '../../../shared/utils/mailer.js';
 
@@ -61,19 +62,19 @@ async function updatePropertyMetrics(propertyId) {
  * @param {string} landlordId
  * @param {object} query - { search, status, propertyId }
  */
-async function getTenantDirectory(landlordId, query = {}) {
+async function getTenantDirectory(landlordId, query = {}, context = {}) {
   const { search = '', status = 'all', propertyId = '' } = query;
 
   // 1. Find all properties belonging to this landlord
-  const landlordProperties = await Property.find({ landlord: landlordId }).lean();
-  const propertyIds = landlordProperties.map((p) => p._id);
+  const landlordProperties = context.properties || (await Property.find({ landlord: landlordId }).lean());
+  const propertyIds = context.propertyIds || landlordProperties.map((p) => p._id);
   const propertyMap = new Map(landlordProperties.map((p) => [p._id.toString(), p]));
 
   // 2. Find all tenant users registered under this landlord
-  const tenantUsers = await User.find({
+  const tenantUsers = context.tenants || (await User.find({
     landlord: landlordId,
     role: 'tenant',
-  }).select('firstName middleName lastName email phone status createdAt').lean();
+  }).select('firstName middleName lastName email phone status createdAt').lean());
 
   if (tenantUsers.length === 0) {
     return {
@@ -101,9 +102,22 @@ async function getTenantDirectory(landlordId, query = {}) {
 
   const profileMap = new Map(profiles.map((pr) => [pr.user.toString(), pr]));
 
-  // 4. Combine user and profile data
+  // 4. Fetch active leases for these tenants so we always show the up-to-date leaseEnd
+  //    (TenantProfile.leaseEnd is NOT updated when a lease extension is approved;
+  //     only the Lease document itself gets updated.)
+  const leases = await Lease.find({
+    tenant: { $in: tenantUserIds },
+    landlord: landlordId,
+    status: { $in: ['active', 'renewal_pending', 'renewal_approved'] },
+  })
+    .select('tenant leaseStart leaseEnd monthlyRent status')
+    .lean();
+
+  const leaseMap = new Map(leases.map((l) => [l.tenant.toString(), l]));
+
   let directory = tenantUsers.map((u) => {
     const profile = profileMap.get(u._id.toString());
+    const activeLease = leaseMap.get(u._id.toString()) || null;
     const unitDoc = profile?.unit || null;
     const propDoc = profile?.property || (unitDoc ? propertyMap.get(unitDoc.property?.toString()) : null);
 
@@ -148,8 +162,8 @@ async function getTenantDirectory(landlordId, query = {}) {
       parkingSpot: profile?.parkingSpot ?? unitDoc?.parkingSpot ?? null,
       parkingFee: profile?.parkingFee ?? unitDoc?.parkingFee ?? 0,
       securityDeposit: profile?.securityDeposit ?? (profile?.monthlyRent ? profile.monthlyRent * 1.5 : 0),
-      leaseStart: profile?.leaseStart ?? unitDoc?.leaseStart ?? null,
-      leaseEnd: profile?.leaseEnd ?? unitDoc?.leaseEnd ?? null,
+      leaseStart: activeLease?.leaseStart ?? profile?.leaseStart ?? unitDoc?.leaseStart ?? null,
+      leaseEnd:   activeLease?.leaseEnd   ?? profile?.leaseEnd   ?? unitDoc?.leaseEnd   ?? null,
       memberSince: u.createdAt,
     };
   });

@@ -324,7 +324,7 @@ export function LeaseExtensionsTab() {
                   {/* Lease dates */}
                   <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300 mt-2 flex-wrap">
                     <span className="font-mono text-xs bg-white/60 dark:bg-slate-700/60 px-2 py-0.5 rounded-lg">
-                      Current end: {fmt(leaseEntry.leaseEnd)}
+                      Current end: {fmt(ext.originalLeaseEnd || leaseEntry.leaseEnd)}
                     </span>
                     <ArrowRight size={14} className="text-indigo-400 shrink-0" />
                     <span className="font-mono text-xs bg-indigo-100/70 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 px-2 py-0.5 rounded-lg font-semibold">

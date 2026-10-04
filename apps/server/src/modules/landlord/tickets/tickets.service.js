@@ -34,15 +34,17 @@ async function logAction({ actorId, action, entityKind = 'Ticket', entityId, bef
 /**
  * GET all tickets for landlord's properties
  */
-export async function getLandlordTickets(landlordId, query = {}) {
+export async function getLandlordTickets(landlordId, query = {}, context = {}) {
   const { status, priority, propertyId, search, page = 1, limit = 50 } = query;
 
   // 1. Find all properties of this landlord and landlord user details
-  const [landlordProperties, landlordUser] = await Promise.all([
-    Property.find({ landlord: landlordId }).lean(),
-    User.findById(landlordId).select('firstName lastName email').lean(),
-  ]);
-  const propertyIds = landlordProperties.map((p) => p._id);
+  const [landlordProperties, landlordUser] = context.properties && context.landlordUser
+    ? [context.properties, context.landlordUser]
+    : await Promise.all([
+        Property.find({ landlord: landlordId }).lean(),
+        User.findById(landlordId).select('firstName lastName email').lean(),
+      ]);
+  const propertyIds = context.propertyIds || landlordProperties.map((p) => p._id);
   const propertyMap = new Map(landlordProperties.map((p) => [p._id.toString(), p]));
   const landlordName = landlordUser
     ? `${landlordUser.firstName || ''} ${landlordUser.lastName || ''}`.trim() || 'Landlord'
@@ -54,8 +56,12 @@ export async function getLandlordTickets(landlordId, query = {}) {
     unitFilter.property = propertyId;
   }
 
-  const units = await Unit.find(unitFilter).lean();
-  const unitIds = units.map((u) => u._id);
+  const units = context.units && !propertyId
+    ? context.units
+    : await Unit.find(unitFilter).lean();
+  const unitIds = context.unitIds && !propertyId
+    ? context.unitIds
+    : units.map((u) => u._id);
   const unitMap = new Map(units.map((u) => [u._id.toString(), u]));
 
   // Also query tenants registered under this landlord

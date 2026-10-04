@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Building2, Eye, EyeOff, AlertCircle, Loader2, ArrowRight, Sun, Moon, CheckCircle2, Lock } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { useAuth } from '../context/AuthContext';
+import { landlordApi, tenantApi } from '../services/api';
 
 export const LoginPage = ({ onNavigate = () => {} }) => {
   const { theme, toggleTheme } = useTheme();
@@ -75,17 +76,23 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
       const userRole = res?.user?.role || res?.role;
       const isTenant = userRole === 'tenant';
 
+      // Prefetch data immediately so it's resolving or completed when dashboard mounts
+      if (isTenant) {
+        tenantApi.prefetchPortalInit();
+      } else if (userRole === 'landlord') {
+        landlordApi.prefetchDashInit();
+      }
+
       setIsSubmitting(false);
       setIsSuccess(true);
       setTargetPortal(isTenant ? 'Resident Portal' : 'Landlord Console');
 
-      setTimeout(() => {
-        if (isTenant) {
-          onNavigate('/tenant');
-        } else {
-          onNavigate('/dashboard');
-        }
-      }, 100);
+      // Navigate immediately with zero delay
+      if (isTenant) {
+        onNavigate('/tenant');
+      } else {
+        onNavigate('/dashboard');
+      }
     } catch (err) {
       setIsSubmitting(false);
       setApiError(err.message || 'Invalid email or password. Please check your credentials.');

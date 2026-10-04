@@ -45,11 +45,11 @@ export async function updatePropertyMetrics(propertyId) {
 /**
  * GET all properties for the authenticated landlord
  */
-export async function getLandlordProperties(landlordId) {
-  const properties = await Property.find({ landlord: landlordId }).sort({ createdAt: -1 }).lean();
-  const propertyIds = properties.map((p) => p._id);
+export async function getLandlordProperties(landlordId, context = {}) {
+  const properties = context.properties || (await Property.find({ landlord: landlordId }).sort({ createdAt: -1 }).lean());
+  const propertyIds = context.propertyIds || properties.map((p) => p._id);
 
-  const units = await Unit.find({ property: { $in: propertyIds } }).lean();
+  const units = context.units || (await Unit.find({ property: { $in: propertyIds } }).lean());
 
   const propertiesWithUnits = properties.map((prop) => {
     const propUnits = units.filter((u) => u.property.toString() === prop._id.toString());

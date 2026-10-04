@@ -39,7 +39,7 @@ export async function getLandlordLeaseExtensions(landlordId, query = {}) {
 
   // Find all leases belonging to this landlord that have extension requests
   const leases = await Lease.find({ landlord: landlordId })
-    .populate('tenant', 'firstName lastName email phone')
+    .populate('tenant', 'firstName middleName lastName email phone')
     .populate('unit', 'label')
     .populate('property', 'name address')
     .lean();
@@ -64,7 +64,7 @@ export async function getLandlordLeaseExtensions(landlordId, query = {}) {
       tenant: lease.tenant
         ? {
             id: lease.tenant._id,
-            name: `${lease.tenant.firstName || ''} ${lease.tenant.lastName || ''}`.trim() || lease.tenant.email,
+            name: [lease.tenant.firstName, lease.tenant.middleName, lease.tenant.lastName].filter(Boolean).join(' ') || lease.tenant.email,
             email: lease.tenant.email,
             phone: lease.tenant.phone || '',
           }
@@ -74,6 +74,10 @@ export async function getLandlordLeaseExtensions(landlordId, query = {}) {
       extensionRequests: filteredRequests.map((r) => ({
         ...r,
         id: r._id,
+        // For approved requests, lease.leaseEnd is already updated to proposedEndDate.
+        // Expose the original end date via proposedStartDate so the UI can show:
+        //   "Current end: <originalEnd> → Proposed: <proposedEndDate>"
+        originalLeaseEnd: r.proposedStartDate || null,
       })),
     });
   }

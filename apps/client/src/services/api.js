@@ -203,6 +203,24 @@ export const authApi = {
   },
 };
 
+// In-flight prefetch promise store to deduplicate across login/navigation
+const inFlightPrefetches = new Map();
+
+export const prefetchStore = {
+  fetch: (key, fetcher) => {
+    if (!inFlightPrefetches.has(key)) {
+      const p = fetcher().catch((err) => {
+        inFlightPrefetches.delete(key);
+        throw err;
+      });
+      inFlightPrefetches.set(key, p);
+    }
+    return inFlightPrefetches.get(key);
+  },
+  get: (key) => inFlightPrefetches.get(key) || null,
+  clear: (key) => inFlightPrefetches.delete(key),
+};
+
 /* -------------------------------------------------------------
  * Landlord API
  * ------------------------------------------------------------- */
@@ -210,7 +228,19 @@ export const landlordApi = {
   getDashboard: () => api.get('/landlord/dash'),
   
   /** Singular consolidated endpoint – 1 HTTP call for all dashboard data */
-  getDashInit: () => api.get('/landlord/dash/init'),
+  getDashInit: () => {
+    const existing = prefetchStore.get('landlord_dash_init');
+    if (existing) {
+      prefetchStore.clear('landlord_dash_init');
+      return existing;
+    }
+    return api.get('/landlord/dash/init');
+  },
+
+  /** Prefetches landlord dashboard data during login transition */
+  prefetchDashInit: () => {
+    return prefetchStore.fetch('landlord_dash_init', () => api.get('/landlord/dash/init'));
+  },
   
   getProperties: () => api.get('/landlord/properties'),
   createProperty: (data) => api.post('/landlord/properties', data),
@@ -337,7 +367,19 @@ export const tenantApi = {
   getAnnouncements: () => api.get('/tenant/announcements'),
 
   /** Singular consolidated endpoint – 1 HTTP call for all portal data */
-  getPortalInit: () => api.get('/tenant/dash/init'),
+  getPortalInit: () => {
+    const existing = prefetchStore.get('tenant_portal_init');
+    if (existing) {
+      prefetchStore.clear('tenant_portal_init');
+      return existing;
+    }
+    return api.get('/tenant/dash/init');
+  },
+
+  /** Prefetches tenant portal data during login transition */
+  prefetchPortalInit: () => {
+    return prefetchStore.fetch('tenant_portal_init', () => api.get('/tenant/dash/init'));
+  },
 
   getConcurrentPortalData: () => {
     return fetchConcurrent([
