@@ -220,3 +220,43 @@ export async function setMaintenanceMode(enabled, message = '') {
   });
 }
 
+// ─── AUDIT TRAIL ───
+export async function getAuditLogs({ page = 1, limit = 50, actorRole = '', action = '', entityKind = '', search = '', startDate = '', endDate = '' } = {}) {
+  const params = new URLSearchParams();
+  params.append('page', page);
+  params.append('limit', limit);
+  if (actorRole) params.append('actorRole', actorRole);
+  if (action) params.append('action', action);
+  if (entityKind) params.append('entityKind', entityKind);
+  if (search) params.append('search', search);
+  if (startDate) params.append('startDate', startDate);
+  if (endDate) params.append('endDate', endDate);
+  return request(`/superadmin/audit-logs?${params.toString()}`);
+}
+
+async function downloadCsv(endpoint, filename) {
+  const token = getAuthToken();
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) throw new Error('CSV export failed');
+  const blob = await res.blob();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+export async function exportAuditLogsCsv(filters = {}) {
+  const params = new URLSearchParams(filters);
+  await downloadCsv(`/superadmin/audit-logs/export?${params.toString()}`, `Audit_Trail_${new Date().toISOString().slice(0, 10)}.csv`);
+}
+
+export async function exportSessionLogsCsv(filters = {}) {
+  const params = new URLSearchParams(filters);
+  await downloadCsv(`/superadmin/sessions/export?${params.toString()}`, `Session_Logs_${new Date().toISOString().slice(0, 10)}.csv`);
+}
