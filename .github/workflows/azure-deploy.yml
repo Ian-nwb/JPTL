@@ -1,0 +1,45 @@
+name: Deploy Server to Azure
+
+on:
+  push:
+    branches:
+      - main          # change to your prod branch (e.g. prod, kpi, etc.)
+    paths:
+      - 'apps/server/**'   # only trigger when server files change
+  workflow_dispatch:       # allow manual trigger from GitHub Actions UI
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy apps/server → Azure
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Set up Node (Azure App Service runs Node)
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'   # match your Azure runtime (Node 20 LTS)
+          cache: 'npm'
+          cache-dependency-path: apps/server/package-lock.json
+
+      # 3. Install production dependencies only
+      - name: Install dependencies
+        working-directory: apps/server
+        run: npm install --omit=dev
+
+      # 4. Zip only apps/server (excluding .env files for security)
+      - name: Create deployment package
+        working-directory: apps/server
+        run: zip -r ../../server-deploy.zip . --exclude "*.env" --exclude ".env.*"
+
+      # 5. Deploy to Azure App Service via ZipDeploy
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: 'jptl-api'           # ← your Azure App Service name
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: server-deploy.zip
