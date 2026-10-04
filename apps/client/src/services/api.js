@@ -203,11 +203,44 @@ export const authApi = {
   },
 };
 
+// In-flight prefetch promise store to deduplicate across login/navigation
+const inFlightPrefetches = new Map();
+
+export const prefetchStore = {
+  fetch: (key, fetcher) => {
+    if (!inFlightPrefetches.has(key)) {
+      const p = fetcher().catch((err) => {
+        inFlightPrefetches.delete(key);
+        throw err;
+      });
+      inFlightPrefetches.set(key, p);
+    }
+    return inFlightPrefetches.get(key);
+  },
+  get: (key) => inFlightPrefetches.get(key) || null,
+  clear: (key) => inFlightPrefetches.delete(key),
+};
+
 /* -------------------------------------------------------------
  * Landlord API
  * ------------------------------------------------------------- */
 export const landlordApi = {
   getDashboard: () => api.get('/landlord/dash'),
+  
+  /** Singular consolidated endpoint – 1 HTTP call for all dashboard data */
+  getDashInit: () => {
+    const existing = prefetchStore.get('landlord_dash_init');
+    if (existing) {
+      prefetchStore.clear('landlord_dash_init');
+      return existing;
+    }
+    return api.get('/landlord/dash/init');
+  },
+
+  /** Prefetches landlord dashboard data during login transition */
+  prefetchDashInit: () => {
+    return prefetchStore.fetch('landlord_dash_init', () => api.get('/landlord/dash/init'));
+  },
   
   getProperties: () => api.get('/landlord/properties'),
   createProperty: (data) => api.post('/landlord/properties', data),
@@ -266,6 +299,11 @@ export const landlordApi = {
   getOnboardingStatus: () => api.get('/landlord/onboarding/status'),
   completeOnboarding: (data) => api.post('/landlord/onboarding/complete', data),
 
+  // Lease Extensions
+  getLeaseExtensions: (status = 'all') => api.get(`/landlord/lease-extensions?status=${status}`),
+  reviewLeaseExtension: (leaseId, extensionId, data) =>
+    api.patch(`/landlord/lease-extensions/${leaseId}/${extensionId}`, data),
+
   getConcurrentDashboardData: () => {
     return fetchConcurrent([
       { key: 'dash', endpoint: '/landlord/dash' },
@@ -289,11 +327,14 @@ export const tenantApi = {
 
   getPayments: () => api.get('/tenant/payments'),
   payRent: (data) => api.post('/tenant/payments/pay', data),
+  payInAdvance: (data) => api.post('/tenant/payments/pay-advance', data),
   getPaymentMethods: () => api.get('/tenant/payments/methods'),
   addPaymentMethod: (data) => api.post('/tenant/payments/methods', data),
   deletePaymentMethod: (id) => api.delete(`/tenant/payments/methods/${id}`),
   toggleAutoPay: (autoPay) => api.patch('/tenant/payments/autopay', { autoPay }),
   getReceipt: (id) => api.get(`/tenant/payments/${id}/receipt`),
+
+  requestLeaseExtension: (data) => api.post('/tenant/lease/extension', data),
 
   getTickets: () => api.get('/tenant/tickets'),
   createTicket: (data) => api.post('/tenant/tickets', data),
@@ -324,6 +365,21 @@ export const tenantApi = {
   deleteVehicle: (id) => api.delete(`/tenant/vehicles/${id}`),
 
   getAnnouncements: () => api.get('/tenant/announcements'),
+
+  /** Singular consolidated endpoint – 1 HTTP call for all portal data */
+  getPortalInit: () => {
+    const existing = prefetchStore.get('tenant_portal_init');
+    if (existing) {
+      prefetchStore.clear('tenant_portal_init');
+      return existing;
+    }
+    return api.get('/tenant/dash/init');
+  },
+
+  /** Prefetches tenant portal data during login transition */
+  prefetchPortalInit: () => {
+    return prefetchStore.fetch('tenant_portal_init', () => api.get('/tenant/dash/init'));
+  },
 
   getConcurrentPortalData: () => {
     return fetchConcurrent([

@@ -23,32 +23,38 @@ class DashError extends Error {
  * @param {string} landlordId  - ObjectId of the authenticated landlord
  * @returns {Promise<object>}
  */
-async function getLandlordDashboard(landlordId) {
+async function getLandlordDashboard(landlordId, context = {}) {
   // 1. Resolve landlord properties (scoped ownership boundary)
-  const [properties, landlordDoc] = await Promise.all([
-    Property.find({ landlord: landlordId }).lean(),
-    User.findById(landlordId).lean(),
-  ]);
+  const [properties, landlordDoc] = (context.properties && context.landlordUser)
+    ? [context.properties, context.landlordUser]
+    : await Promise.all([
+        Property.find({ landlord: landlordId }).lean(),
+        User.findById(landlordId).lean(),
+      ]);
 
   if (!landlordDoc) throw new DashError('Landlord not found', 404);
 
-  const propertyIds = properties.map((p) => p._id);
+  const propertyIds = context.propertyIds || properties.map((p) => p._id);
 
   // 2. Parallel collection queries (all scoped to landlord's properties)
   const [units, tenants, pinnedAnnouncement] = await Promise.all([
-    Unit.find({ property: { $in: propertyIds } })
-      .populate('tenant', 'firstName lastName email')
-      .lean(),
-    User.find({ landlord: landlordId, role: 'tenant' })
-      .select('firstName middleName lastName email createdAt status')
-      .lean(),
+    context.units
+      ? Promise.resolve(context.units)
+      : Unit.find({ property: { $in: propertyIds } })
+          .populate('tenant', 'firstName lastName email')
+          .lean(),
+    context.tenants
+      ? Promise.resolve(context.tenants)
+      : User.find({ landlord: landlordId, role: 'tenant' })
+          .select('firstName middleName lastName email createdAt status')
+          .lean(),
     Announcement.findOne({ author: landlordId, isPinned: true })
       .sort({ createdAt: -1 })
       .lean(),
   ]);
 
   // Query tickets and payments after units are resolved
-  const unitIds = units.map((u) => u._id);
+  const unitIds = context.unitIds || units.map((u) => u._id);
 
   const [resolvedTickets, resolvedPayments] = await Promise.all([
     Ticket.find({ unit: { $in: unitIds } })

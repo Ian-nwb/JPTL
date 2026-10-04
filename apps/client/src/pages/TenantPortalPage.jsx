@@ -21,10 +21,12 @@ import { TenantAnnouncementsTab } from '../components/tenant/TenantAnnouncements
 import { TenantSettingsTab } from '../components/tenant/TenantSettingsTab';
 import { TenantDocumentsTab } from '../components/tenant/TenantDocumentsTab';
 import { PayRentModal } from '../components/tenant/PayRentModal';
+import { AdvancePaymentModal } from '../components/tenant/AdvancePaymentModal';
 import { ReportIssueModal } from '../components/tenant/ReportIssueModal';
 import { RightNotificationSidebar } from '../components/dashboard/RightNotificationSidebar';
 import { MobileNavBar } from '../components/common/MobileNavBar';
 import { MobileNavDrawer } from '../components/common/MobileNavDrawer';
+import { ConfirmationModal } from '../components/common/ConfirmationModal';
 import { FileCheck, LayoutDashboard, Settings } from 'lucide-react';
 import { TenantPortalSkeleton, DashboardSkeleton } from '../components/ui/SkeletonLoader';
 
@@ -80,9 +82,21 @@ function getTabFromPath(pathname) {
   return 'overview';
 }
 
+function getCachedTenantSnapshot(userId) {
+  if (!userId) return null;
+  try {
+    const raw = sessionStorage.getItem(`jptl_tenant_cache_${userId}`);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
 export const TenantPortalPage = ({ currentPath = window.location.pathname, onNavigate = () => {} }) => {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const userId = user?.id || user?._id;
+  const initialCache = getCachedTenantSnapshot(userId);
 
   // Active Tab & Resident selection - synced with URL
   const [activeTab, setActiveTab] = useState(() => getTabFromPath(currentPath || window.location.pathname));
@@ -104,19 +118,20 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
     }
   };
 
-  // Live state from backend
-  const [isLoading, setIsLoading] = useState(true);
-  const [tenantData, setTenantData] = useState(null);
-  const [unitData, setUnitData] = useState(null);
-  const [propertyData, setPropertyData] = useState(null);
-  const [landlordData, setLandlordData] = useState(null);
-  const [leaseData, setLeaseData] = useState(null);
-  const [payments, setPayments] = useState([]);
-  const [tickets, setTickets] = useState([]);
-  const [announcements, setAnnouncements] = useState([]);
+  // Live state from backend - Instant SWR
+  const [isLoading, setIsLoading] = useState(() => !initialCache);
+  const [tenantData, setTenantData] = useState(() => initialCache?.tenantData || null);
+  const [unitData, setUnitData] = useState(() => initialCache?.unitData || null);
+  const [propertyData, setPropertyData] = useState(() => initialCache?.propertyData || null);
+  const [landlordData, setLandlordData] = useState(() => initialCache?.landlordData || null);
+  const [leaseData, setLeaseData] = useState(() => initialCache?.leaseData || null);
+  const [payments, setPayments] = useState(() => initialCache?.payments || []);
+  const [tickets, setTickets] = useState(() => initialCache?.tickets || []);
+  const [announcements, setAnnouncements] = useState(() => initialCache?.announcements || []);
 
   // Modals & Drawers
   const [isPayRentOpen, setIsPayRentOpen] = useState(false);
+  const [isPayAdvanceOpen, setIsPayAdvanceOpen] = useState(false);
   const [isReportIssueOpen, setIsReportIssueOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
@@ -127,10 +142,11 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
 
     async function loadTenantData() {
       try {
-        // High-concurrency worker batch request off UI thread
-        const batch = await tenantApi.getConcurrentPortalData();
-
+        // ── PRIMARY: singular consolidated endpoint (1 HTTP call) ──
+        const res = await tenantApi.getPortalInit();
         if (!isMounted) return;
+
+        const batch = res?.data; // { dash, payments, tickets, announcements, lease }
 
         // Process dash results
         const dashVal = batch?.dash?.data;
@@ -172,20 +188,35 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
         if (leaseVal?.data) {
           setLeaseData(leaseVal.data);
         }
+
+        // Cache fresh snapshot to sessionStorage for instant 0ms mount on next visit
+        if (userId && batch) {
+          try {
+            sessionStorage.setItem(`jptl_tenant_cache_${userId}`, JSON.stringify({
+              tenantData: dashVal?.data?.tenant || null,
+              unitData: dashVal?.data?.unit || null,
+              propertyData: dashVal?.data?.property || null,
+              landlordData: dashVal?.data?.landlord || null,
+              leaseData: leaseVal?.data || dashVal?.data?.lease || null,
+              payments: paymentsVal?.payments || paymentsVal?.data?.recentPayments || (Array.isArray(paymentsVal?.data) ? paymentsVal.data : []) || dashVal?.data?.payments?.recent || [],
+              tickets: ticketVal?.tickets || ticketVal?.data || (Array.isArray(ticketVal) ? ticketVal : []) || dashVal?.data?.tickets?.recent || [],
+              announcements: ancVal?.announcements || ancVal?.data || (Array.isArray(ancVal) ? ancVal : []) || dashVal?.data?.announcements || [],
+            }));
+          } catch (e) {
+            // Ignore quota errors
+          }
+        }
       } catch (err) {
-        console.warn('Concurrent fetch fallback, trying Promise.allSettled:', err.message);
+        console.warn('Singular /init failed, falling back to concurrent fetch:', err.message);
         try {
-          const [dashRes, paymentsRes, ticketsRes, ancRes] = await Promise.allSettled([
-            tenantApi.getDashboard(),
-            tenantApi.getPayments(),
-            tenantApi.getTickets(),
-            tenantApi.getAnnouncements(),
-          ]);
+          // ── FALLBACK: worker-based multi-fetch ──
+          const batch = await tenantApi.getConcurrentPortalData();
 
           if (!isMounted) return;
 
-          if (dashRes.status === 'fulfilled' && dashRes.value?.data) {
-            const d = dashRes.value.data;
+          const dashVal = batch?.dash?.data;
+          if (dashVal?.data) {
+            const d = dashVal.data;
             if (d.tenant) setTenantData(d.tenant);
             if (d.unit) setUnitData(d.unit);
             if (d.property) setPropertyData(d.property);
@@ -195,17 +226,24 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
             if (Array.isArray(d.tickets?.recent)) setTickets(d.tickets.recent);
             if (Array.isArray(d.announcements)) setAnnouncements(d.announcements);
           }
-          if (ticketsRes.status === 'fulfilled') {
-            const tList = ticketsRes.value?.tickets || ticketsRes.value?.data || (Array.isArray(ticketsRes.value) ? ticketsRes.value : []);
+          const ticketVal = batch?.tickets?.data;
+          if (ticketVal) {
+            const tList = ticketVal.tickets || ticketVal.data || (Array.isArray(ticketVal) ? ticketVal : []);
             if (Array.isArray(tList) && tList.length > 0) setTickets(tList);
           }
-          if (ancRes.status === 'fulfilled') {
-            const aList = ancRes.value?.announcements || ancRes.value?.data || (Array.isArray(ancRes.value) ? ancRes.value : []);
+          const ancVal = batch?.announcements?.data;
+          if (ancVal) {
+            const aList = ancVal.announcements || ancVal.data || (Array.isArray(ancVal) ? ancVal : []);
             if (Array.isArray(aList) && aList.length > 0) setAnnouncements(aList);
           }
-          if (paymentsRes.status === 'fulfilled') {
-            const pList = paymentsRes.value?.payments || paymentsRes.value?.data?.recentPayments || paymentsRes.value?.data || (Array.isArray(paymentsRes.value) ? paymentsRes.value : []);
+          const paymentsVal = batch?.payments?.data;
+          if (paymentsVal) {
+            const pList = paymentsVal.payments || paymentsVal.data?.recentPayments || paymentsVal.data || (Array.isArray(paymentsVal) ? paymentsVal : []);
             if (Array.isArray(pList) && pList.length > 0) setPayments(pList);
+          }
+          const leaseVal = batch?.lease?.data;
+          if (leaseVal?.data) {
+            setLeaseData(leaseVal.data);
           }
         } catch (fallbackErr) {
           console.warn('Tenant live data fetch fallback:', fallbackErr.message);
@@ -315,9 +353,24 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
     setPayments((prev) => [newPaymentRecord, ...prev]);
   };
 
-  const handleLogout = async () => {
-    await logout();
-    onNavigate('/login');
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const handleConfirmLogout = async () => {
+    setIsLoggingOut(true);
+    try {
+      await logout();
+      onNavigate('/login');
+    } catch (e) {
+      console.error('Logout error:', e);
+    } finally {
+      setIsLoggingOut(false);
+      setShowLogoutConfirm(false);
+    }
   };
 
   const displayName = currentTenant.name || 'Resident';
@@ -444,9 +497,11 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
                   tenant={currentTenant}
                   unit={currentUnit}
                   property={currentProperty}
+                  lease={leaseData}
                   payments={payments}
                   securityDeposit={tenantData?.securityDeposit ?? leaseData?.securityDeposit}
                   onPayRentClick={() => setIsPayRentOpen(true)}
+                  onPayAdvanceClick={() => setIsPayAdvanceOpen(true)}
                 />
               )}
 
@@ -466,6 +521,19 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
                   unit={currentUnit}
                   property={currentProperty}
                   lease={leaseData}
+                  onExtensionRequested={async () => {
+                    try {
+                      const res = await tenantApi.getPortalInit();
+                      const leaseVal = res?.data?.lease?.data;
+                      if (leaseVal?.data) {
+                        setLeaseData(leaseVal.data);
+                      } else if (res?.data?.dash?.data?.data?.lease) {
+                        setLeaseData(res.data.dash.data.data.lease);
+                      }
+                    } catch (e) {
+                      console.warn('Failed to refresh lease after extension request:', e.message);
+                    }
+                  }}
                 />
               )}
 
@@ -512,12 +580,45 @@ export const TenantPortalPage = ({ currentPath = window.location.pathname, onNav
         onPaymentSuccess={handlePaymentSuccess}
       />
 
+      <AdvancePaymentModal
+        isOpen={isPayAdvanceOpen}
+        onClose={() => setIsPayAdvanceOpen(false)}
+        tenant={currentTenant}
+        unit={currentUnit}
+        lease={leaseData}
+        payments={payments}
+        onRequestExtension={() => handleTabChange('lease')}
+        onPaymentSuccess={async () => {
+          try {
+            const paymentsRes = await tenantApi.getPayments();
+            const pList = paymentsRes.data?.data?.payments || paymentsRes.data?.data || paymentsRes.data?.recentPayments;
+            if (Array.isArray(pList)) setPayments(pList);
+          } catch (err) {
+            console.warn('Failed to reload payments:', err.message);
+          }
+        }}
+      />
+
       <ReportIssueModal
         isOpen={isReportIssueOpen}
         onClose={() => setIsReportIssueOpen(false)}
         tenant={currentTenant}
         unit={currentUnit}
         onTicketSubmitted={handleTicketSubmitted}
+      />
+
+      {/* Logout Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={showLogoutConfirm}
+        onClose={() => !isLoggingOut && setShowLogoutConfirm(false)}
+        onConfirm={handleConfirmLogout}
+        title="Log Out of JPTL?"
+        description="Are you sure you want to log out of your resident account? You will need to sign in again to access the portal."
+        confirmText={isLoggingOut ? 'Logging out...' : 'Log Out'}
+        cancelText="Cancel"
+        variant="danger"
+        loading={isLoggingOut}
+        icon={LogOut}
       />
 
       {/* ─── MOBILE BOTTOM NAVIGATION BAR ─── */}

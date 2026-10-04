@@ -4,7 +4,9 @@ import TenantProfile from '../../../shared/models/tenantProfile.model.js';
 import Unit from '../../../shared/models/unit.model.js';
 import Property from '../../../shared/models/property.model.js';
 import Payment from '../../../shared/models/payment.model.js';
+import Lease from '../../../shared/models/lease.model.js';
 import AuditLog from '../../../shared/models/auditLog.model.js';
+import { createNotification } from '../../../shared/services/notification.service.js';
 
 class TenantPaymentError extends Error {
   constructor(message, statusCode = 400) {
@@ -426,4 +428,167 @@ export async function deletePaymentMethod(tenantId, methodId) {
   await profile.save();
 
   return { message: 'Payment method deleted successfully' };
+}
+
+/**
+ * POST /api/tenant/payments/pay-advance
+ * Pay one or more months in advance — strictly within the active lease period.
+ * Months already paid are skipped; cannot pay beyond lease end date.
+ */
+export async function payInAdvance(tenantId, data = {}, ipAddress = '') {
+  const { methodId, monthsAhead, note = '' } = data;
+
+  const monthsCount = parseInt(monthsAhead, 10);
+  if (!monthsCount || monthsCount < 1 || monthsCount > 12) {
+    throw new TenantPaymentError('monthsAhead must be between 1 and 12', 400);
+  }
+
+  // 1. Resolve tenant context
+  const { userDoc, profile, unit, property } = await resolveTenantContext(tenantId);
+
+  // 2. Find active lease — required to bound payment to lease period
+  const lease = await Lease.findOne({
+    tenant: tenantId,
+    status: { $in: ['active', 'renewal_pending', 'renewal_approved'] },
+  }).lean();
+
+  if (!lease) {
+    throw new TenantPaymentError('No active lease found. Advance payment requires an active lease.', 404);
+  }
+
+  const leaseEnd = new Date(lease.leaseEnd);
+  const baseMonthlyRent = lease.monthlyRent || profile?.monthlyRent || unit?.monthlyRent || 2400;
+  const hasParking = Boolean(profile?.hasParking ?? unit?.hasParking ?? false);
+  const parkingFee = hasParking ? Number(profile?.parkingFee ?? unit?.parkingFee ?? 0) : 0;
+  const utilityFee = 45;
+  const monthlyTotal = baseMonthlyRent + parkingFee + utilityFee;
+
+  // 3. Find the latest paid dueDate to determine starting point
+  const latestPaid = await Payment.findOne({ tenant: tenantId, status: 'paid' })
+    .sort({ dueDate: -1 })
+    .lean();
+
+  // Start from the month after the latest paid month, or from this month if no history
+  const startFrom = latestPaid ? new Date(latestPaid.dueDate) : new Date();
+  startFrom.setDate(1); // normalize to 1st of month
+  startFrom.setHours(0, 0, 0, 0);
+
+  // 4. Build list of available months within the lease
+  const availableMonths = [];
+  const cursor = new Date(startFrom);
+  cursor.setMonth(cursor.getMonth() + 1); // start from next month after latest paid
+
+  while (cursor <= leaseEnd) {
+    const monthStart = new Date(cursor);
+    const monthEnd = new Date(cursor);
+    monthEnd.setMonth(monthEnd.getMonth() + 1);
+    monthEnd.setDate(0); // last day of month
+
+    // Check if this month is already paid
+    const alreadyPaid = await Payment.findOne({
+      tenant: tenantId,
+      status: 'paid',
+      dueDate: { $gte: monthStart, $lte: monthEnd },
+    }).lean();
+
+    if (!alreadyPaid) {
+      const periodLabel = cursor.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+      availableMonths.push({
+        dueDate: new Date(cursor),
+        period: `${periodLabel} Rent (Advance)`,
+      });
+    }
+
+    cursor.setMonth(cursor.getMonth() + 1);
+  }
+
+  if (availableMonths.length === 0) {
+    throw new TenantPaymentError(
+      'All months within your lease period are already paid.',
+      400
+    );
+  }
+
+  if (monthsCount > availableMonths.length) {
+    throw new TenantPaymentError(
+      `You can only pay up to ${availableMonths.length} month(s) in advance within your lease period (ends ${leaseEnd.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}).`,
+      400
+    );
+  }
+
+  // 5. Resolve payment method label
+  const savedMethods = profile?.paymentMethods?.length ? profile.paymentMethods : DEFAULT_PAYMENT_METHODS;
+  const selectedMethod = methodId ? savedMethods.find((m) => m.id === methodId) : savedMethods.find((m) => m.isDefault);
+  const methodLabel = selectedMethod
+    ? `${selectedMethod.brand} ••••${selectedMethod.last4}`
+    : 'Default Payment Method';
+
+  // 6. Create Payment documents for each month selected
+  const selectedMonths = availableMonths.slice(0, monthsCount);
+  const now = new Date();
+
+  const paymentDocs = selectedMonths.map((m, i) => ({
+    tenant: tenantId,
+    unit: unit ? unit._id : profile?.unit || null,
+    property: property ? property._id : profile?.property || null,
+    amount: monthlyTotal,
+    baseRent: baseMonthlyRent,
+    parkingFee,
+    utilityFee,
+    processingFee: 0,
+    dueDate: m.dueDate,
+    status: 'paid',
+    period: m.period,
+    paymentMethod: methodLabel,
+    mockTransactionId: `ADV_${Math.floor(10000000 + Math.random() * 90000000)}`,
+    paidAt: now,
+    isAdvancePayment: true,
+    advanceMonthsAhead: i + 1,
+    notes: note || `Advance payment for ${m.period}`,
+  }));
+
+  const createdPayments = await Payment.insertMany(paymentDocs);
+
+  // 7. Audit log each payment
+  await Promise.all(
+    createdPayments.map((p) =>
+      AuditLog.create({
+        actor: tenantId,
+        actorRole: 'tenant',
+        action: 'ADVANCE_PAYMENT_MADE',
+        entityKind: 'Payment',
+        entityId: p._id,
+        afterState: { period: p.period, amount: p.amount, advanceMonthsAhead: p.advanceMonthsAhead },
+        ipAddress,
+      }).catch(() => {})
+    )
+  );
+
+  // 8. Notify landlord
+  try {
+    createNotification({
+      userId: lease.landlord,
+      title: '💳 Advance Rent Payment Received',
+      body: `${userDoc.firstName || 'Your tenant'} paid ${monthsCount} month(s) in advance (${selectedMonths.map((m) => m.period.replace(' (Advance)', '')).join(', ')}).`,
+      type: 'payment',
+      refModel: 'Payment',
+      refId: createdPayments[0]._id,
+    });
+  } catch (err) {
+    console.error('Advance payment notification error:', err.message);
+  }
+
+  return {
+    monthsPaid: monthsCount,
+    totalPaid: monthlyTotal * monthsCount,
+    leaseEnd: leaseEnd.toISOString().split('T')[0],
+    monthsAvailableInLease: availableMonths.length,
+    payments: createdPayments.map((p) => ({
+      id: p._id,
+      period: p.period,
+      amount: p.amount,
+      dueDate: p.dueDate,
+      mockTransactionId: p.mockTransactionId,
+    })),
+  };
 }

@@ -11,6 +11,9 @@ services:
     environment:
       - NODE_ENV=development
       - CHOKIDAR_USEPOLLING=true
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     env_file:
       - ./apps/server/.env
     command: sh -c "bun install && bunx nodemon --legacy-watch --exec bun run server.js"

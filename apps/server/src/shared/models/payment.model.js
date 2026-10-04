@@ -33,6 +33,8 @@ const paymentSchema = new mongoose.Schema(
     notes: { type: String, default: '' },
     mockTransactionId: { type: String, default: null },
     paidAt: { type: Date, default: null },
+    isAdvancePayment: { type: Boolean, default: false },
+    advanceMonthsAhead: { type: Number, default: 0 }, // 1, 2, 3... months paid ahead of current due
   },
   { timestamps: true }
 );
@@ -40,5 +42,6 @@ const paymentSchema = new mongoose.Schema(
 paymentSchema.index({ tenant: 1, dueDate: 1 });
 paymentSchema.index({ status: 1 });
 paymentSchema.index({ property: 1 });
+paymentSchema.index({ unit: 1, createdAt: -1 });
 
 export default mongoose.model('Payment', paymentSchema);

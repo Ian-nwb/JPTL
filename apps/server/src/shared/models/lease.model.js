@@ -69,4 +69,8 @@ const leaseSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+leaseSchema.index({ tenant: 1, status: 1 });
+leaseSchema.index({ landlord: 1 });
+leaseSchema.index({ unit: 1 });
+
 export default mongoose.model('Lease', leaseSchema);

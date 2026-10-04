@@ -1,6 +1,6 @@
 import React from 'react';
-import { 
-  Home, CreditCard, Wrench, Megaphone, Calendar, ShieldCheck, ArrowUpRight, 
+import {
+  Home, CreditCard, Wrench, Megaphone, Calendar, ShieldCheck, ArrowUpRight,
   Key, Wifi, Car, FileText, CheckCircle2, Clock, AlertTriangle, ArrowRight, UserCheck, BookOpen
 } from 'lucide-react';
 
@@ -32,18 +32,18 @@ export const TenantOverviewTab = ({
 
   return (
     <div className="space-y-6">
-      
+
       {/* ─── 1. HERO RESIDENT LEASE BANNER ─── */}
       <div className="relative overflow-hidden rounded-3xl apple-glass top-shade p-5 sm:p-8 border border-slate-200 dark:border-slate-800/90 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-5 sm:gap-6">
         <div className="space-y-2 w-full md:w-auto">
-          
+
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-600 dark:text-indigo-400 text-xs font-mono font-medium">
             <Home className="w-3.5 h-3.5 text-indigo-500" />
             <span className="truncate max-w-[240px] sm:max-w-none">{property?.name || 'JPTL Property Management'}</span>
           </div>
 
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold font-grotesk tracking-tight text-slate-900 dark:text-white leading-tight break-words">
-            Welcome, <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">{tenant?.name || tenant?.firstName || 'Resident'}</span> 👋
+            Welcome, <span className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-transparent">{tenant?.name || tenant?.firstName || 'Resident'}</span>
           </h1>
 
           {isPreAdded ? (
@@ -94,7 +94,7 @@ export const TenantOverviewTab = ({
 
       {/* ─── 2. KEY STATS & ACTION WIDGETS ─── */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        
+
         {/* WIDGET 1: Rent Payment Card */}
         <div className="top-shade apple-glass rounded-2xl border border-slate-200 dark:border-slate-800/80 p-4 sm:p-5 space-y-3 flex flex-col justify-between">
           <div>
@@ -275,7 +275,7 @@ export const TenantOverviewTab = ({
 
       {/* ─── 3. COMMUNITY BROADCASTS & RECENT UPDATES ─── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Announcements Preview */}
         <div className="lg:col-span-2 space-y-3">
           <div className="flex items-center justify-between">

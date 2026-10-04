@@ -1,18 +1,11 @@
+import asyncHandler from '../../../shared/middleware/asyncHandler.middleware.js';
 import * as tenantPaymentService from './payments.service.js';
 
-export async function getTenantLedger(req, res) {
-  try {
-    const tenantId = req.user.id;
-    const ledger = await tenantPaymentService.getTenantLedger(tenantId);
-    return res.status(200).json({
-      success: true,
-      data: ledger,
-    });
-  } catch (err) {
-    const statusCode = err.statusCode || 500;
-    return res.status(statusCode).json({ success: false, message: err.message });
-  }
-}
+export const getTenantLedger = asyncHandler(async (req, res) => {
+  const tenantId = req.user.id;
+  const ledger = await tenantPaymentService.getTenantLedger(tenantId);
+  return res.status(200).json({ success: true, data: ledger });
+});
 
 export async function getPaymentReceipt(req, res) {
   try {
@@ -104,3 +97,19 @@ export async function deletePaymentMethod(req, res) {
     return res.status(statusCode).json({ success: false, message: err.message });
   }
 }
+
+/**
+ * POST /api/tenant/payments/pay-advance
+ * Pay 1+ months in advance, bounded to the active lease end date
+ */
+export const payAdvance = asyncHandler(async (req, res) => {
+  const tenantId = req.user.id;
+  const ipAddress = req.ip || req.headers['x-forwarded-for'] || '';
+  const result = await tenantPaymentService.payInAdvance(tenantId, req.body, ipAddress);
+  return res.status(200).json({
+    success: true,
+    message: `Successfully paid ${result.monthsPaid} month(s) in advance.`,
+    data: result,
+  });
+});
+

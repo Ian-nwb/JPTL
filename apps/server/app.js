@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import compression from 'compression';
 import { corsOptions } from './src/shared/config/cors.js';
 import { swaggerUi, swaggerSpec } from './src/shared/config/swagger.js';
 import authRoutes from './src/modules/auth/auth.routes.js';
@@ -13,6 +14,7 @@ import landlordRentRollRoutes from './src/modules/landlord/rentroll/rentroll.rou
 import landlordPropertyRoutes from './src/modules/landlord/properties/properties.routes.js';
 import landlordTicketRoutes from './src/modules/landlord/tickets/tickets.routes.js';
 import landlordLeaseRoutes from './src/modules/landlord/lease/lease.routes.js';
+import landlordLeaseExtensionRoutes from './src/modules/landlord/leaseExtensions/leaseExtensions.routes.js';
 import landlordDocumentRoutes from './src/modules/landlord/documents/documents.routes.js';
 import tenantAnnouncementRoutes from './src/modules/tenant/announcements/announcements.routes.js';
 import tenantDashRoutes from './src/modules/tenant/dash/dash.routers.js';
@@ -24,6 +26,7 @@ import notificationRoutes from './src/modules/notifications/notification.routes.
 import vehicleRoutes from './src/modules/tenant/vehicle/vehicle.routes.js';
 import { generalLimiter, authLimiter } from './src/shared/middleware/rateLimiter.middleware.js';
 import { checkMaintenanceMode } from './src/shared/middleware/maintenance.middleware.js';
+import { securityHeaders } from './src/shared/middleware/securityHeaders.middleware.js';
 import { getMaintenanceState } from './src/shared/services/systemState.service.js';
 
 const app = express();
@@ -32,19 +35,27 @@ const app = express();
 app.set('trust proxy', 1);
 
 // Apply middleware
+app.use(securityHeaders);
 app.use(cors(corsOptions));
+app.use(compression({
+  threshold: 1024, // Compress responses larger than 1KB
+  level: 6,        // Balanced compression ratio & CPU speed
+}));
 app.use(express.json());
 app.use(cookieParser());
 
 // Swagger Documentation UI (Accessible at /api/docs)
 app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Caching policy optimized for concurrent reads & edge/CDN proxies:
-// Safe GET reads use short SWR (s-maxage=3, stale-while-revalidate=15)
-// Mutations and auth strictly bypass cache
+// Caching policy:
+// - Authenticated GET routes: private (browser-only), no CDN caching
+// - Mutations and auth: strict no-store
+// CDN caching (s-maxage) is ONLY safe for public, unauthenticated routes
+// (health, system/status), set directly on those handlers.
 app.use('/api', (req, res, next) => {
   if (req.method === 'GET' && !req.path.startsWith('/auth')) {
-    res.setHeader('Cache-Control', 'public, s-maxage=3, stale-while-revalidate=15');
+    // Private cache: browser can revalidate via ETag/304, but CDN never caches
+    res.setHeader('Cache-Control', 'private, no-cache, no-store, must-revalidate');
   } else {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');
@@ -85,6 +96,7 @@ app.use('/api/landlord/onboarding', landlordOnboardingRoutes);
 app.use('/api/landlord/properties', landlordPropertyRoutes);
 app.use('/api/landlord/tickets', landlordTicketRoutes);
 app.use('/api/landlord/lease', landlordLeaseRoutes);
+app.use('/api/landlord/lease-extensions', landlordLeaseExtensionRoutes);
 app.use('/api/landlord/documents', landlordDocumentRoutes);
 app.use('/api/landlord/announcements', landlordAnnouncementRoutes);
 app.use('/api/landlord/tenantdirectory', landlordTenantDirectoryRoutes);

@@ -83,6 +83,7 @@ const ticketSchema = new mongoose.Schema(
 
 ticketSchema.index({ tenant: 1, createdAt: -1 });
 ticketSchema.index({ unit: 1, status: 1 });
+ticketSchema.index({ unit: 1, createdAt: -1 });
 ticketSchema.index({ status: 1 });
 
 export default mongoose.model('Ticket', ticketSchema);
