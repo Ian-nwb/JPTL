@@ -148,18 +148,61 @@ export async function requestLeaseExtension(tenantId, payload, ipAddress = '') {
 }
 
 /**
- * GET digital lease agreement contract document details
+ * GET full lease data for PDF generation (includes populated names)
  */
 export async function getLeaseDocument(tenantId) {
-  const lease = await getTenantLease(tenantId);
+  const lease = await Lease.findOne({ tenant: tenantId, status: { $ne: 'ended' } })
+    .populate('property')
+    .populate('unit')
+    .populate('tenant', 'firstName lastName email')
+    .populate('landlord', 'firstName lastName email')
+    .lean();
+
+  if (!lease) {
+    // Fallback — initialise lease first then re-query
+    await getTenantLease(tenantId);
+    const fallback = await Lease.findOne({ tenant: tenantId, status: { $ne: 'ended' } })
+      .populate('property')
+      .populate('unit')
+      .populate('tenant', 'firstName lastName email')
+      .populate('landlord', 'firstName lastName email')
+      .lean();
+    if (!fallback) throw new LeaseError('No active lease found', 404);
+    return buildLeaseDocData(fallback);
+  }
+
+  return buildLeaseDocData(lease);
+}
+
+function buildLeaseDocData(lease) {
+  const tenantName = lease.tenant
+    ? `${lease.tenant.firstName || ''} ${lease.tenant.lastName || ''}`.trim() || lease.tenant.email
+    : '—';
+  const landlordName = lease.landlord
+    ? `${lease.landlord.firstName || ''} ${lease.landlord.lastName || ''}`.trim() || lease.landlord.email
+    : '—';
 
   return {
-    contractPdfUrl: lease.contractPdfUrl || '/docs/sample-lease-agreement.pdf',
-    documentTitle: `Signed Lease Agreement — ${lease.unitLabel}, ${lease.propertyName}`,
+    id: lease._id,
+    tenantName,
+    landlordName,
+    propertyName: lease.property?.name || 'Property N/A',
+    propertyAddress: lease.property?.address || '',
+    unitLabel: lease.unit?.label || 'Unit N/A',
+    unitBedrooms: lease.unit?.bedrooms || null,
+    unitBathrooms: lease.unit?.bathrooms || null,
+    unitSqft: lease.unit?.sqft || null,
     leaseStart: lease.leaseStart,
     leaseEnd: lease.leaseEnd,
     monthlyRent: lease.monthlyRent,
     securityDeposit: lease.securityDeposit,
+    hasParking: lease.hasParking,
+    parkingSpot: lease.parkingSpot,
+    parkingFee: lease.parkingFee,
+    status: lease.status,
     covenants: lease.covenants,
+    extensionRequests: lease.extensionRequests || [],
+    contractPdfUrl: lease.contractPdfUrl,
   };
 }
+

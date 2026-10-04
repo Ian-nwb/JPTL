@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JPTL Database Schema — Entity Relationship Diagram</title>
+  <style>
+    :root {
+      --bg: #F8FAFC;
+      --grid: #E2E8F0;
+      --card-bg: #FFFFFF;
+      --card-border: #CBD5E1;
+      --card-header: #1E293B;
+      --card-header-sub: #475569;
+      --header-text: #FFFFFF;
+      --text-main: #0F172A;
+      --text-muted: #64748B;
+      --line-color: #475569;
+      --badge-pk: #B45309;
+      --badge-fk: #6D28D9;
+      --badge-uk: #0369A1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: var(--bg);
+      background-image: 
+        linear-gradient(to right, var(--grid) 1px, transparent 1px),
+        linear-gradient(to bottom, var(--grid) 1px, transparent 1px);
+      background-size: 24px 24px;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--text-main);
+      user-select: none;
+    }
+
+    /* Enterprise Toolbar */
+    header {
+      position: fixed;
+      top: 14px;
+      left: 16px;
+      right: 16px;
+      height: 52px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand h1 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #0F172A;
+      letter-spacing: -0.01em;
+    }
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      background: #F1F5F9;
+      color: #475569;
+      border: 1px solid #CBD5E1;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn {
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      color: #334155;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .btn:hover {
+      background: #F8FAFC;
+      border-color: #94A3B8;
+      color: #0F172A;
+    }
+    .zoom-text {
+      font-size: 12px;
+      font-family: monospace;
+      color: var(--text-muted);
+      min-width: 44px;
+      text-align: center;
+    }
+
+    /* Infinite Canvas */
+    #viewport {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      cursor: grab;
+    }
+    #viewport.panning {
+      cursor: grabbing;
+    }
+
+    #world {
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: 0 0;
+      width: 3200px;
+      height: 2200px;
+    }
+
+    #connections-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .conn-path {
+      fill: none;
+      stroke: #475569;
+      stroke-width: 1.5px;
+    }
+    .conn-dashed {
+      stroke-dasharray: 4 4;
+      stroke: #64748B;
+    }
+
+    /* Database Table Cards */
+    .table-card {
+      position: absolute;
+      width: 290px;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+      z-index: 10;
+      cursor: grab;
+      overflow: hidden;
+    }
+    .table-card:hover {
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.14);
+      border-color: #94A3B8;
+    }
+    .table-card.dragging {
+      cursor: grabbing;
+      z-index: 50;
+      box-shadow: 0 10px 25px rgba(15, 23, 42, 0.2);
+      border-color: #1E293B;
+    }
+
+    .table-header {
+      background: var(--card-header);
+      color: var(--header-text);
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid #0F172A;
+    }
+    .table-header.subdoc {
+      background: var(--card-header-sub);
+    }
+    .table-header-tag {
+      font-size: 10px;
+      font-weight: 600;
+      opacity: 0.8;
+      font-family: monospace;
+    }
+
+    .field-rows {
+      font-family: Consolas, ui-monospace, Menlo, Monaco, monospace;
+      font-size: 11.5px;
+      background: #FFFFFF;
+    }
+    .field-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 5px 12px;
+      border-bottom: 1px solid #F1F5F9;
+    }
+    .field-row:nth-child(even) {
+      background: #F8FAFC;
+    }
+    .field-row:hover {
+      background: #EFF6FF;
+    }
+    .field-key {
+      font-weight: 700;
+      font-size: 10px;
+      width: 28px;
+      display: inline-block;
+    }
+    .key-pk { color: var(--badge-pk); }
+    .key-fk { color: var(--badge-fk); }
+    .key-uk { color: var(--badge-uk); }
+
+    .field-name {
+      color: #1E293B;
+      font-weight: 600;
+      flex: 1;
+    }
+    .field-type {
+      color: #64748B;
+      font-size: 11px;
+    }
+
+    /* Bottom Info bar */
+    .info-bar {
+      position: fixed;
+      bottom: 16px;
+      left: 16px;
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      border-radius: 6px;
+      padding: 8px 14px;
+      font-size: 11.5px;
+      color: #475569;
+      display: flex;
+      gap: 16px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+      z-index: 100;
+    }
+    .info-bar b {
+      color: #0F172A;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <h1>JPTL Database Schema</h1>
+      <span class="badge">ERD • 16 Models</span>
+      <span style="font-size: 12px; color: #64748B;">Standard Professional Notation</span>
+    </div>
+    <div class="controls">
+      <button class="btn" id="btn-zoom-in">Zoom In</button>
+      <span class="zoom-text" id="zoom-label">85%</span>
+      <button class="btn" id="btn-zoom-out">Zoom Out</button>
+      <button class="btn" id="btn-reset">Reset</button>
+      <button class="btn" id="btn-fit">Fit Screen</button>
+    </div>
+  </header>
+
+  <div id="viewport">
+    <div id="world">
+      <svg id="connections-layer">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+            <path d="M 0 1 L 8 5 L 0 9 z" fill="#475569"/>
+          </marker>
+        </defs>
+      </svg>
+
+      <!-- 1. USER -->
+      <div class="table-card" id="card-user" style="left: 60px; top: 90px;">
+        <div class="table-header"><span>USER</span><span class="table-header-tag">users</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-uk">UK</span><span class="field-name">email</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">firstName</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">lastName</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">role</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">plan</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">landlord</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">status</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">createdAt</span></div><span class="field-type">Date</span></div>
+        </div>
+      </div>
+
+      <!-- 2. PROPERTY -->
+      <div class="table-card" id="card-property" style="left: 420px; top: 90px;">
+        <div class="table-header"><span>PROPERTY</span><span class="table-header-tag">properties</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">landlord</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">name</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">address</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">city</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">unitsCount</span></div><span class="field-type">Number</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">category</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">createdAt</span></div><span class="field-type">Date</span></div>
+        </div>
+      </div>
+
+      <!-- 3. UNIT -->
+      <div class="table-card" id="card-unit" style="left: 780px; top: 90px;">
+        <div class="table-header"><span>UNIT</span><span class="table-header-tag">units</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">property</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">tenant</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">label</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">monthlyRent</span></div><span class="field-type">Number</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">sqft</span></div><span class="field-type">Number</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">status</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">leaseEnd</span></div><span class="field-type">Date</span></div>
+        </div>
+      </div>
+
+      <!-- 4. TICKET -->
+      <div class="table-card" id="card-ticket" style="left: 1140px; top: 90px;">
+        <div class="table-header"><span>TICKET</span><span class="table-header-tag">tickets</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">unit</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">tenant</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">title</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">category</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">priority</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">status</span></div><span class="field-type">String</span></div>
+        </div>
+      </div>
+
+      <!-- 5. TICKET_STATUS_HISTORY -->
+      <div class="table-card" id="card-history" style="left: 1500px; top: 90px;">
+        <div class="table-header subdoc"><span>TICKET_STATUS_HISTORY</span><span class="table-header-tag">subdoc</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">status</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">changedBy</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">userRole</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">note</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">timestamp</span></div><span class="field-type">Date</span></div>
+        </div>
+      </div>
+
+      <!-- 6. TENANT_PROFILE -->
+      <div class="table-card" id="card-tenantprofile" style="left: 60px; top: 460px;">
+        <div class="table-header"><span>TENANT_PROFILE</span><span class="table-header-tag">profiles</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">user</span></div><span class="field-type">ObjectId (UK)</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">property</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">unit</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">monthlyRent</span></div><span class="field-type">Number</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">status</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">autoPayEnabled</span></div><span class="field-type">Boolean</span></div>
+        </div>
+      </div>
+
+      <!-- 7. PAYMENT -->
+      <div class="table-card" id="card-payment" style="left: 420px; top: 460px;">
+        <div class="table-header"><span>PAYMENT</span><span class="table-header-tag">payments</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">tenant</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">unit</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">property</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">amount</span></div><span class="field-type">Number</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">dueDate</span></div><span class="field-type">Date</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">status</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">isAdvancePayment</span></div><span class="field-type">Boolean</span></div>
+        </div>
+      </div>
+
+      <!-- 8. LEASE -->
+      <div class="table-card" id="card-lease" style="left: 780px; top: 460px;">
+        <div class="table-header"><span>LEASE</span><span class="table-header-tag">leases</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">tenant</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">landlord</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">property</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">unit</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">leaseStart/End</span></div><span class="field-type">Date</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">monthlyRent</span></div><span class="field-type">Number</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">status</span></div><span class="field-type">String</span></div>
+        </div>
+      </div>
+
+      <!-- 9. EXTENSION_REQUEST -->
+      <div class="table-card" id="card-extension" style="left: 1140px; top: 460px;">
+        <div class="table-header subdoc"><span>EXTENSION_REQUEST</span><span class="table-header-tag">subdoc</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">termMonths</span></div><span class="field-type">Number</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">proposedDates</span></div><span class="field-type">Date</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">monthlyRent</span></div><span class="field-type">Number</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">status</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">reviewedBy</span></div><span class="field-type">ObjectId</span></div>
+        </div>
+      </div>
+
+      <!-- 10. DOCUMENT -->
+      <div class="table-card" id="card-document" style="left: 1500px; top: 460px;">
+        <div class="table-header"><span>DOCUMENT</span><span class="table-header-tag">documents</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">tenant</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">unit</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">name</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">category</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">status</span></div><span class="field-type">String</span></div>
+        </div>
+      </div>
+
+      <!-- 11. SESSION_LOG -->
+      <div class="table-card" id="card-session" style="left: 60px; top: 820px;">
+        <div class="table-header"><span>SESSION_LOG</span><span class="table-header-tag">sessions</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">userId</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">email</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">ip</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">loginAt</span></div><span class="field-type">Date</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">isActive</span></div><span class="field-type">Boolean</span></div>
+        </div>
+      </div>
+
+      <!-- 12. AUDIT_LOG -->
+      <div class="table-card" id="card-audit" style="left: 420px; top: 820px;">
+        <div class="table-header"><span>AUDIT_LOG</span><span class="table-header-tag">audits</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">actor</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">actorRole</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">action</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">entityKind</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">entityId</span></div><span class="field-type">ObjectId</span></div>
+        </div>
+      </div>
+
+      <!-- 13. ANNOUNCEMENT -->
+      <div class="table-card" id="card-announcement" style="left: 780px; top: 820px;">
+        <div class="table-header"><span>ANNOUNCEMENT</span><span class="table-header-tag">comms</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">title</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">category</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">author</span></div><span class="field-type">ObjectId</span></div>
+        </div>
+      </div>
+
+      <!-- 14. NOTIFICATION -->
+      <div class="table-card" id="card-notification" style="left: 1140px; top: 820px;">
+        <div class="table-header"><span>NOTIFICATION</span><span class="table-header-tag">alerts</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">user</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">title</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">type</span></div><span class="field-type">String</span></div>
+        </div>
+      </div>
+
+      <!-- 15. PUSH_SUBSCRIPTION -->
+      <div class="table-card" id="card-push" style="left: 1500px; top: 820px;">
+        <div class="table-header"><span>PUSH_SUBSCRIPTION</span><span class="table-header-tag">devices</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-fk">FK</span><span class="field-name">user</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">endpoint</span></div><span class="field-type">String</span></div>
+        </div>
+      </div>
+
+      <!-- 16. SYSTEM_SETTING -->
+      <div class="table-card" id="card-system" style="left: 1860px; top: 820px;">
+        <div class="table-header"><span>SYSTEM_SETTING</span><span class="table-header-tag">system</span></div>
+        <div class="field-rows">
+          <div class="field-row"><div><span class="field-key key-pk">PK</span><span class="field-name">_id</span></div><span class="field-type">ObjectId</span></div>
+          <div class="field-row"><div><span class="field-key key-uk">UK</span><span class="field-name">key</span></div><span class="field-type">String</span></div>
+          <div class="field-row"><div><span class="field-key"></span><span class="field-name">value</span></div><span class="field-type">Mixed</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="info-bar">
+    <span><b>Interactive ERD:</b> Click &amp; drag any table card to reposition</span>
+    <span><b>Pan:</b> Drag canvas background</span>
+    <span><b>Zoom:</b> Mouse scroll wheel or toolbar buttons</span>
+  </div>
+
+  <script>
+    const relationships = [
+      { from: 'card-user', to: 'card-property', dashed: false },
+      { from: 'card-user', to: 'card-tenantprofile', dashed: false },
+      { from: 'card-property', to: 'card-unit', dashed: false },
+      { from: 'card-unit', to: 'card-lease', dashed: false },
+      { from: 'card-lease', to: 'card-extension', dashed: true },
+      { from: 'card-user', to: 'card-payment', dashed: false },
+      { from: 'card-unit', to: 'card-payment', dashed: false },
+      { from: 'card-unit', to: 'card-ticket', dashed: false },
+      { from: 'card-ticket', to: 'card-history', dashed: true },
+      { from: 'card-unit', to: 'card-document', dashed: false },
+      { from: 'card-user', to: 'card-session', dashed: false },
+      { from: 'card-user', to: 'card-audit', dashed: false },
+      { from: 'card-user', to: 'card-announcement', dashed: false },
+      { from: 'card-user', to: 'card-notification', dashed: false },
+      { from: 'card-user', to: 'card-push', dashed: false }
+    ];
+
+    const viewport = document.getElementById('viewport');
+    const world = document.getElementById('world');
+    const svgLayer = document.getElementById('connections-layer');
+    const zoomLabel = document.getElementById('zoom-label');
+
+    let scale = 0.85;
+    let panX = 30;
+    let panY = 20;
+    let isPanning = false;
+    let startX = 0, startY = 0;
+
+    function updateTransform() {
+      world.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+      zoomLabel.textContent = `${Math.round(scale * 100)}%`;
+    }
+
+    viewport.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.table-card') || e.target.closest('header')) return;
+      isPanning = true;
+      viewport.classList.add('panning');
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isPanning) {
+        panX = e.clientX - startX;
+        panY = e.clientY - startY;
+        updateTransform();
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isPanning = false;
+      viewport.classList.remove('panning');
+    });
+
+    viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoomFactor = 1.1;
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
+
+      let newScale = e.deltaY < 0 ? scale * zoomFactor : scale / zoomFactor;
+      newScale = Math.min(Math.max(newScale, 0.3), 2.2);
+
+      panX = mouseX - (mouseX - panX) * (newScale / scale);
+      panY = mouseY - (mouseY - panY) * (newScale / scale);
+      scale = newScale;
+
+      updateTransform();
+    }, { passive: false });
+
+    document.getElementById('btn-zoom-in').onclick = () => { scale = Math.min(scale * 1.15, 2.2); updateTransform(); };
+    document.getElementById('btn-zoom-out').onclick = () => { scale = Math.max(scale / 1.15, 0.3); updateTransform(); };
+    document.getElementById('btn-reset').onclick = () => { scale = 0.85; panX = 30; panY = 20; updateTransform(); };
+    document.getElementById('btn-fit').onclick = () => { scale = 0.65; panX = 20; panY = 20; updateTransform(); };
+
+    // Card Dragging
+    let activeCard = null;
+    let cardOffsetX = 0, cardOffsetY = 0;
+
+    document.querySelectorAll('.table-card').forEach(card => {
+      card.addEventListener('mousedown', (e) => {
+        activeCard = card;
+        card.classList.add('dragging');
+
+        const cardLeft = parseFloat(card.style.left) || 0;
+        const cardTop = parseFloat(card.style.top) || 0;
+
+        cardOffsetX = (e.clientX - panX) / scale - cardLeft;
+        cardOffsetY = (e.clientY - panY) / scale - cardTop;
+        e.stopPropagation();
+      });
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (activeCard) {
+        const mouseWorldX = (e.clientX - panX) / scale;
+        const mouseWorldY = (e.clientY - panY) / scale;
+
+        activeCard.style.left = `${mouseWorldX - cardOffsetX}px`;
+        activeCard.style.top = `${mouseWorldY - cardOffsetY}px`;
+
+        drawConnections();
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      if (activeCard) {
+        activeCard.classList.remove('dragging');
+        activeCard = null;
+      }
+    });
+
+    function drawConnections() {
+      const defs = svgLayer.querySelector('defs');
+      svgLayer.innerHTML = '';
+      svgLayer.appendChild(defs);
+
+      relationships.forEach(rel => {
+        const fromElem = document.getElementById(rel.from);
+        const toElem = document.getElementById(rel.to);
+        if (!fromElem || !toElem) return;
+
+        const fromLeft = parseFloat(fromElem.style.left) || 0;
+        const fromTop = parseFloat(fromElem.style.top) || 0;
+        const fromWidth = fromElem.offsetWidth;
+        const fromHeight = fromElem.offsetHeight;
+
+        const toLeft = parseFloat(toElem.style.left) || 0;
+        const toTop = parseFloat(toElem.style.top) || 0;
+        const toWidth = toElem.offsetWidth;
+        const toHeight = toElem.offsetHeight;
+
+        let x1, y1, x2, y2;
+        if (fromLeft + fromWidth < toLeft) {
+          x1 = fromLeft + fromWidth;
+          y1 = fromTop + fromHeight / 2;
+          x2 = toLeft;
+          y2 = toTop + toHeight / 2;
+        } else if (toLeft + toWidth < fromLeft) {
+          x1 = fromLeft;
+          y1 = fromTop + fromHeight / 2;
+          x2 = toLeft + toWidth;
+          y2 = toTop + toHeight / 2;
+        } else {
+          x1 = fromLeft + fromWidth / 2;
+          y1 = fromTop + fromHeight;
+          x2 = toLeft + toWidth / 2;
+          y2 = toTop;
+        }
+
+        const dx = Math.abs(x2 - x1) * 0.5;
+        const cx1 = x1 + (x2 > x1 ? dx : -dx);
+        const cx2 = x2 - (x2 > x1 ? dx : -dx);
+
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', `M ${x1} ${y1} C ${cx1} ${y1}, ${cx2} ${y2}, ${x2} ${y2}`);
+        path.setAttribute('class', rel.dashed ? 'conn-path conn-dashed' : 'conn-path');
+        path.setAttribute('marker-end', 'url(#arrow)');
+        svgLayer.appendChild(path);
+      });
+    }
+
+    updateTransform();
+    drawConnections();
+  </script>
+</body>
+</html>

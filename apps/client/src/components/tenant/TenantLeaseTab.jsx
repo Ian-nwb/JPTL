@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Download, ShieldCheck, Home, Calendar, CheckCircle2, Clock, Plus, AlertCircle } from 'lucide-react';
+import { FileText, Download, ShieldCheck, Home, Calendar, CheckCircle2, Clock, Plus, AlertCircle, Loader2 } from 'lucide-react';
 import { LeaseRenewalModal } from './LeaseRenewalModal';
 
 export const TenantLeaseTab = ({
@@ -11,6 +11,7 @@ export const TenantLeaseTab = ({
 }) => {
   const [isRenewalOpen, setIsRenewalOpen] = useState(false);
   const [renewalStatus, setRenewalStatus] = useState(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   const pendingExtension = renewalStatus || (lease?.extensionRequests?.find((r) => r.status === 'pending') ? {
     term: lease.extensionRequests.find((r) => r.status === 'pending').termMonths,
@@ -50,6 +51,48 @@ export const TenantLeaseTab = ({
 
   const handleRenewalSubmitted = (data) => {
     setRenewalStatus(data);
+  };
+
+  const handleDownloadLease = async () => {
+    setIsDownloading(true);
+    try {
+      const token = sessionStorage.getItem('jptl_token');
+      const apiBase = import.meta.env.VITE_API_URL || '/api';
+
+      const response = await fetch(`${apiBase}/tenant/lease/document`, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : '',
+        },
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        // Try to parse error message from JSON body
+        const errBody = await response.json().catch(() => ({}));
+        throw new Error(errBody?.message || 'Failed to generate lease PDF');
+      }
+
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      // Build a descriptive filename
+      const unitLabel = unit?.label || lease?.unitLabel || 'unit';
+      const propName = property?.name || lease?.propertyName || 'property';
+      const safeName = `${propName}-${unitLabel}-Lease-Agreement`.replace(/[^a-zA-Z0-9-_]/g, '_');
+
+      const a = document.createElement('a');
+      a.href = blobUrl;
+      a.download = `${safeName}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+    } catch (err) {
+      console.error('Lease download failed:', err);
+      alert(err?.message || 'Unable to download lease agreement. Please try again later.');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   // Pre-added empty state
@@ -117,11 +160,14 @@ export const TenantLeaseTab = ({
 
           <button
             type="button"
-            onClick={() => alert('Downloading official Signed Lease Agreement PDF')}
-            className="px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-grotesk font-bold text-xs shadow-lg shadow-indigo-600/20 flex items-center gap-2 btn-press"
+            disabled={isDownloading}
+            onClick={handleDownloadLease}
+            className={`px-5 py-3 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-grotesk font-bold text-xs shadow-lg shadow-indigo-600/20 flex items-center gap-2 btn-press transition-opacity ${
+              isDownloading ? 'opacity-70 cursor-wait' : ''
+            }`}
           >
-            <Download className="w-4 h-4" />
-            <span>Download Signed Lease PDF</span>
+            {isDownloading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            <span>{isDownloading ? 'Downloading…' : 'Download Signed Lease PDF'}</span>
           </button>
         </div>
       </div>
