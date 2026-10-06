@@ -85,9 +85,60 @@ Integration test cases examine cross-boundary data synchronization, relational f
 | **IT-TCK-01** | Maintenance ↔ Audit Log & Alerts | Tenant cancels open maintenance ticket | `PATCH /api/tenant/tickets/:id/cancel` with `{ reason: 'Self-resolved' }` | 1. Ticket status updated to `"cancelled"`.<br>2. Audit log entry recorded with actor role `"tenant"`.<br>3. Status history entry appended with timestamp and reason. | **Pass** |
 | **IT-SYS-01** | Superadmin ↔ Platform Middleware Barrier | Superadmin toggles platform maintenance mode | `POST /api/superadmin/system/maintenance` with `{ enabled: true }` | 1. System state persisted in DB.<br>2. Non-superadmin requests to `/api/landlord/*` blocked by barrier with HTTP 503.<br>3. Superadmin routes remain accessible. | **Pass** |
 
+### 9.3.1 Implemented API, Workflow, and Messaging Component
+
+JPTL's implemented integration component is its authenticated REST API and the workflows that connect tenant and landlord actions to MongoDB, audit records, in-app notifications, Web Push, and email. The examples below describe implemented behavior and point to the server modules that own it.
+
+| Integration area | Implemented component | Evidence / endpoint |
+|---|---|---|
+| **API** | Express routes expose tenant, landlord, and superadmin operations; protected routes use JWT authentication and role checks. | `POST /api/tenant/tickets`; `PATCH /api/landlord/tickets/:id/assign`; `POST /api/notifications/subscribe` |
+| **Workflow** | Maintenance requests move through `submitted`, `acknowledged`, `in_progress`, `resolved`, and other supported states. Landlords can assign a technician; tenants can request a lease extension and landlords can review it. | `apps/server/src/modules/landlord/tickets/tickets.service.js`; `POST /api/tenant/lease/extension`; `PATCH /api/landlord/lease-extensions/:leaseId/:extensionId` |
+| **Messaging** | Workflow events create in-app notifications and can send Web Push notifications to registered browser subscriptions. SMTP-backed email supports password reset and tenant welcome messages. | `apps/server/src/shared/services/notification.service.js`; `pushNotification.service.js`; `email.service.js`; `utils/mailer.js` |
+| **Data export / ETL** | Superadmins can extract audit and session log records as CSV for downstream reporting. This is an export path, not a scheduled ETL pipeline. | `GET /api/superadmin/audit-logs/export`; `GET /api/superadmin/sessions/export` |
+| **Webhook** | No generic inbound or outbound webhook endpoint is currently implemented. Notifications use in-app records and Web Push. | The notification subscription endpoint registers browser Push API subscriptions; it is not a server-to-server webhook. |
+
+#### Example: Maintenance Dispatch Integration Flow
+
+```mermaid
+sequenceDiagram
+    actor Tenant
+    participant UI as Tenant Portal
+    participant API as Express API
+    participant DB as MongoDB
+    actor Landlord
+    participant Msg as Notification / Web Push
+
+    Tenant->>UI: Submit maintenance request
+    UI->>API: POST /api/tenant/tickets
+    API->>DB: Create ticket and initial status history
+    API->>DB: Record audit event
+    API->>DB: Create in-app notification
+    API-->>UI: 201 Created with ticket
+    Landlord->>API: PATCH /api/landlord/tickets/:id/assign
+    API->>DB: Save technician, status, and history
+    API->>DB: Record audit event
+    API->>Msg: Notify tenant in-app and via Web Push
+    API-->>Landlord: Updated ticket
+```
+
+The implementation and its automated checks are in `apps/server/src/modules/tenant/tickets/`, `apps/server/src/modules/landlord/tickets/`, and `apps/server/src/modules/notifications/`. The Postman collections `tests/tickets.json` and `tests/notifications.json` exercise the HTTP integration paths.
+
 ---
 
-## 9.4 Error-Handling Test Cases
+## 9.4 Validation and Error Handling
+
+The API validates required fields and business rules in the service layer before writing data. Controllers return a JSON error response with an HTTP status and message when a request fails. Validation and state errors use client-error status codes; unexpected server or dependency failures default to HTTP 500 in the affected controllers.
+
+| Data condition | How the system handles it | Typical response |
+|---|---|---|
+| **Missing required data** | Required fields are checked before creating or updating a record. For example, property creation requires a non-empty name and address; sign-up requires names, a valid email, and a sufficiently strong password. The operation is rejected before the record is created. | **400 Bad Request** with `success: false` and a message describing the missing field. |
+| **Invalid data** | The service validates formats, allowed values, and business rules. For example, an invalid email or password is rejected at sign-up, and a lease extension must have a positive term in months. | **400 Bad Request** with a validation message. |
+| **Duplicate data** | Before creating an account, the system normalizes the email and checks whether it is already registered. It rejects a duplicate instead of creating another account. | **409 Conflict** with `Email is already registered` (or a module-specific duplicate message). |
+| **Missing or inaccessible record** | Resource operations check that the requested record exists and is accessible to the current user. If the lookup fails, the requested update or deletion is not performed. | **404 Not Found** with a resource-specific message. |
+| **Invalid workflow state** | Business rules prevent actions that are not valid for the record's current state, such as cancelling a resolved or closed maintenance ticket. | **400 Bad Request** with the reason the action cannot proceed. |
+| **Unexpected processing or dependency failure** | Controllers catch service errors and return the error status when provided. Errors without a specific status code fall back to **500 Internal Server Error**; some non-critical actions, such as recording a login session, are handled asynchronously and log their failure without failing the main request. | **500 Internal Server Error** for unhandled operation failures; the response includes `success: false` and an error message. |
+
+### 9.4.1 Error-Handling Test Cases
 
 Error-handling tests evaluate application resilience against boundary violations, missing parameters, unauthorized access, and database conflict states.
 

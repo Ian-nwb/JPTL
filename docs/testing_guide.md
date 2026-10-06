@@ -441,10 +441,25 @@ docker exec server npm run purge:force
 | Role | Email | Password | Details |
 | :--- | :--- | :--- | :--- |
 | **Landlord** | `landlord@jptl.dev` | `Password123!` | Alexander Vance (Properties, units, active tickets) |
-| **Tenant** | `sophia@jptl.dev` | `Password123!` | Sophia Lin (Apt 4B, **with parking $150**, active lease) |
-| **Tenant** | `liam@jptl.dev` | `Password123!` | Liam Carter (Unit 201, **no parking**, pending ticket) |
-| **Tenant** | `david@jptl.dev` | `Password123!` | David K. Miller (Villa 3, with parking $150) |
-| **Tenant** | `elena@jptl.dev` | `Password123!` | Elena Rostova (Unit 102, pending onboarding) |
+| **Tenant** | `sophia@jptl.dev` | `Password123!` | Sophia Lin (Aura Sky, Unit 14B, parking $150, active lease) |
+| **Tenant** | `liam@jptl.dev` | `Password123!` | Liam Carter (Vantro Executive Lofts, Loft 304, no parking, active lease) |
+| **Tenant** | `david@jptl.dev` | `Password123!` | David K. Miller (Solis Villa Estate, Villa 04, parking $200, active lease) |
+| **Tenant** | `elena@jptl.dev` | `Password123!` | Elena Rostova (pre-added tenant profile; no unit or lease assigned) |
+
+### Sample Data by Record Type
+
+The seed script uses JPTL-specific model names. Use this mapping when describing the sample data in project or evaluation documents: properties act as projects, units as assets, maintenance tickets as tasks, landlord users as reviewers, tenant users as clients, and audit records as logs.
+
+| Requested sample type | JPTL record | Examples from `apps/server/scripts/seed.js` |
+| :--- | :--- | :--- |
+| **Projects** | Properties | Aura Sky Towers & Residences (Downtown Metro), Vantro Executive Lofts (Eastside Business), Solis Villa Estate & Spa (Northgate Hills), Lumina Green Park Apartments (Westpark District), and Nexus Commercial Center (Financial District). |
+| **Assets** | Units | Unit 14B (occupied, $2,400/month, $150 parking); Loft 304 (occupied, $1,950/month); Villa 04 (occupied, $4,500/month, $200 parking); Unit 18A (vacant, $3,800/month); Suite 202 (vacant, $2,100/month); Office Suite 501 (vacant, $5,200/month). |
+| **Tasks** | Maintenance tickets | HVAC pressure drop (Sophia, high priority, in progress); kitchen sink pipe seep (Liam, medium priority, submitted); patio smart-lock battery alert (David, low priority, resolved). |
+| **Reviewers** | Landlord user referenced by `Document.reviewedBy` and ticket history | Alexander Vance (`landlord@jptl.dev`) is the seeded reviewer. Two Sophia documents are verified, David’s pet vaccination document is rejected, and other seeded documents await review. |
+| **Clients** | Tenant users and profiles | Sophia Lin (Unit 14B), Liam Carter (Loft 304), David K. Miller (Villa 04), and Elena Rostova (pre-added, unassigned). All seeded tenant accounts use `Password123!`. |
+| **Logs** | Audit log records | Three example events: `TICKET_STATUS_UPDATE` by the landlord, `PAYMENT_CONFIRMED_EVENT` by Liam, and `TENANT_CREATED` by the landlord. Login session logs are recorded when users sign in; `seed.js` does not seed session logs. |
+
+The seeder also creates three active leases, five payment records covering paid, pending, and overdue states, three announcements, and five tenant documents. It is idempotent: existing matching records are skipped rather than overwritten. For the exact seed values and relationships, see [`apps/server/scripts/seed.js`](../apps/server/scripts/seed.js).
 
 ---
 
