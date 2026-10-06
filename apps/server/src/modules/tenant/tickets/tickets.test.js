@@ -6,6 +6,7 @@ import app from '../../../../app.js';
 import User from '../../../shared/models/user.model.js';
 import Property from '../../../shared/models/property.model.js';
 import Unit from '../../../shared/models/unit.model.js';
+import Ticket from '../../../shared/models/ticket.model.js';
 
 let mongoServer;
 let tenantToken;
@@ -13,6 +14,7 @@ let landlordUser;
 let tenantUser;
 let property;
 let unit;
+let createdTicketId;
 
 beforeAll(async () => {
   mongoServer = await MongoMemoryServer.create();
@@ -70,8 +72,6 @@ afterAll(async () => {
 });
 
 describe('Tenant Maintenance Ticketing API (/api/tenant/tickets)', () => {
-  let createdTicketId;
-
   it('POST /api/tenant/tickets - tenant files a new maintenance request', async () => {
     const res = await request(app)
       .post('/api/tenant/tickets')
@@ -151,6 +151,7 @@ describe('Error Handling', () => {
   });
 
   it('returns 400 when cancelling already resolved or closed ticket', async () => {
+    await Ticket.findByIdAndUpdate(createdTicketId, { status: 'resolved' });
     const res = await request(app)
       .patch(`/api/tenant/tickets/${createdTicketId}/cancel`)
       .set('Cookie', [`token=${tenantToken}`])
@@ -158,4 +159,3 @@ describe('Error Handling', () => {
     expect(res.status).toBe(400);
   });
 });
-

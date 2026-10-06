@@ -9,7 +9,9 @@ This document outlines the testing architecture, environment configuration, comm
 5. **Load Testing** — ApacheBench (`ab`) throughput and concurrency benchmarks
 6. **Database Utilities** — Seed & Purge scripts
 
-> **Note on test runners:** All test commands can now be run from the **repository root** or directly from `apps/server` (delegated scripts are supported in both `package.json` files). Newman tests run against the running backend server on **port 8000**.
+> **Note on test runners:** Run the aggregate `test:all` command from the repository root. Server integration and delegated E2E/Newman commands are also available from `apps/server`. Newman tests run against the backend on **port 8000**.
+
+Run the standard complete suite from the repository root with `npm run test:all`. It runs Playwright E2E, Jest/Supertest integration, and all Newman collections. It deliberately excludes the separate load benchmark (`npm run test:load`).
 
 ---
 
@@ -160,7 +162,7 @@ Integration tests validate API contract compliance, controller-service workflows
 All Postman collections are stored in `tests/*.json`. Run from the repository root with Newman:
 
 ```bash
-# Run ALL 12 Postman test collections sequentially:
+# Run ALL 14 Postman test collections sequentially:
 npm run test:postman
 
 # Or execute any specific collection:
@@ -176,7 +178,11 @@ npx newman run tests/documents.json
 npx newman run tests/rentroll.json
 npx newman run tests/tenantdirectory.json
 npx newman run tests/tenantpayments.json
+npx newman run tests/superadmin.json
+npx newman run tests/vehicle.json
 ```
+
+The auth collection creates a fresh landlord email on each run because signup persists the new account.
 
 > **Prerequisite:** Start the backend server before running Newman tests:
 > ```bash
@@ -209,6 +215,8 @@ npx newman run tests/tenantpayments.json
 | `tests/announcements.json` | `DELETE` | `/api/landlord/announcements/:id` | Landlord deletes announcement | `200 OK` |
 | `tests/notifications.json` | `GET` | `/api/notifications/vapid-key` | Public VAPID public key query | `200 OK` |
 | `tests/notifications.json` | `POST` | `/api/notifications/subscribe` | Register web push subscription | `200 / 201` |
+| `tests/superadmin.json` | `GET/POST/DELETE` | `/api/superadmin/*` | Platform users, properties, units, sessions, and maintenance mode | `200 / 201` |
+| `tests/vehicle.json` | `POST/GET/DELETE` | `/api/tenant/vehicles` | Tenant vehicle CRUD and auth guard | `200 / 201` |
 | `tests/documents.json` | `POST` | `/api/tenant/documents` | Upload compliance file | `201 Created` |
 | `tests/documents.json` | `PATCH` | `/api/landlord/documents/:id/status`| Verify/reject compliance document | `200 OK` |
 | `tests/rentroll.json` | `GET` | `/api/landlord/rentroll` | Rent roll ledger & status filtering | `200 OK` |
@@ -216,6 +224,7 @@ npx newman run tests/tenantpayments.json
 | `tests/tenantpayments.json`| `GET` | `/api/tenant/payments` | Ledger breakdown (conditional fees) | `200 OK` |
 | `tests/tenantpayments.json`| `POST` | `/api/tenant/payments/pay` | Process payment | `200 OK` |
 | `tests/lease.json` | `GET` | `/api/tenant/lease` | Query active digital lease | `200 OK` |
+| `tests/lease.json` | `GET` | `/api/tenant/lease/document` | Download lease agreement PDF | `200 OK` (`application/pdf`) |
 | `tests/lease.json` | `POST` | `/api/tenant/lease/extension` | Submit renewal request | `201 Created` |
 | `tests/lease.json` | `PATCH` | `/api/landlord/lease/:id/approve` | Approve lease extension | `200 OK` |
 
@@ -227,11 +236,21 @@ npm run test:integration
 ```
 Or run a specific module suite:
 ```bash
-npm --prefix apps/server test -- src/modules/auth/auth.test.js
-npm --prefix apps/server test -- src/modules/landlord/announcements/announcements.test.js
-npm --prefix apps/server test -- src/modules/landlord/tickets/tickets.test.js
-npm --prefix apps/server test -- src/modules/tenant/payments/payments.test.js
+npm --prefix apps/server run test:integration -- --runTestsByPath src/modules/auth/auth.test.js
+npm --prefix apps/server run test:integration -- --runTestsByPath src/modules/landlord/announcements/announcements.test.js
+npm --prefix apps/server run test:integration -- --runTestsByPath src/modules/landlord/tickets/tickets.test.js
+npm --prefix apps/server run test:integration -- --runTestsByPath src/modules/tenant/payments/payments.test.js
 ```
+
+### 3.3 Complete Non-Load Test Suite
+
+From the repository root, run:
+
+```bash
+npm run test:all
+```
+
+This runs Playwright E2E tests, Jest/Supertest server integration tests, and the Newman collections in sequence. The backend and frontend must already be running for Playwright, and the backend must be available on port 8000 for Newman. Load testing is run separately with `npm run test:load`.
 
 ---
 
@@ -433,7 +452,8 @@ docker exec server npm run purge:force
 
 | Category | Command | Directory / Notes |
 | :--- | :--- | :--- |
-| **All Postman Suites** | `npm run test:postman` | Repo root (12 collections on port 8000) |
+| **All Postman Suites** | `npm run test:postman` | Repo root (14 collections on port 8000) |
+| **All Non-Load Suites** | `npm run test:all` | Repo root (E2E + Jest integration + all Newman collections) |
 | **Single Postman Suite** | `npx newman run tests/<name>.json` | Repo root |
 | **Playwright E2E Suite** | `npm run test:e2e` | Repo root (`tests/e2e.spec.js`) |
 | **Playwright UI Debugger** | `npx playwright test --ui` | Repo root |

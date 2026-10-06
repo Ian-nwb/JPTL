@@ -126,8 +126,10 @@ describe('Digital Lease & Extension Workflow API (Tenant & Landlord)', () => {
       .set('Cookie', [`token=${tenantToken}`]);
 
     expect(res.status).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data.contractPdfUrl).toBeTruthy();
+    expect(res.headers['content-type']).toMatch(/application\/pdf/);
+    expect(res.headers['content-disposition']).toMatch(/attachment; filename=.*Lease-Agreement\.pdf/);
+    expect(res.body).toBeInstanceOf(Buffer);
+    expect(res.body.subarray(0, 4).toString()).toBe('%PDF');
   });
 
   it('GET /api/landlord/lease/extensions - landlord retrieves pending extension requests', async () => {
@@ -181,4 +183,3 @@ describe('Error Handling', () => {
     expect(res.status).toBe(400);
   });
 });
-

@@ -17,8 +17,8 @@ test.describe('E2E Test Suite — JPTL Property Management Platform', () => {
       await page.click('button[type="submit"]');
 
       // Expect error alert or message to appear
-      const errorBanner = page.locator('text=/Invalid email or password|Authentication failed|Invalid credentials/i');
-      await expect(errorBanner).toBeVisible({ timeout: 5000 });
+      await expect(page.getByText('Invalid email or password', { exact: false }))
+        .toBeVisible({ timeout: 10000 });
     });
 
     test('1.3 Landlord login succeeds and lands on Landlord Dashboard', async ({ page }) => {
@@ -29,7 +29,7 @@ test.describe('E2E Test Suite — JPTL Property Management Platform', () => {
 
       // Expect redirect to /dashboard
       await expect(page).toHaveURL(/.*dashboard.*/, { timeout: 8000 });
-      await expect(page.locator('text=/Dashboard|Properties|Maintenance|Rent Roll|Tenant Directory/i').first()).toBeVisible();
+      await expect(page.getByRole('button', { name: 'Dashboard' })).toBeVisible();
     });
 
     test('1.4 Tenant login succeeds and lands on Resident Portal', async ({ page }) => {
@@ -125,13 +125,15 @@ test.describe('E2E Test Suite — JPTL Property Management Platform', () => {
     test('3.1 Maintenance tab displays tickets and Report Issue modal', async ({ page }) => {
       const maintTab = page.locator('button:has-text("Maintenance")').first();
       await maintTab.click();
+      await expect(page.getByRole('heading', { name: 'Maintenance & Repairs' }))
+        .toBeVisible({ timeout: 15000 });
 
-      const reportBtn = page.locator('button:has-text("Report Issue"), button:has-text("New Ticket")').first();
+      const reportBtn = page.getByRole('button', { name: 'Report Repair' });
       await expect(reportBtn).toBeVisible();
 
       // Open Modal
       await reportBtn.click();
-      await expect(page.locator('text=/Issue Details|Report Maintenance|Submit Ticket/i').first()).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Request Maintenance' })).toBeVisible();
 
       // Close modal
       const closeBtn = page.locator('button:has-text("Cancel"), button[aria-label="Close"]').first();
@@ -145,13 +147,11 @@ test.describe('E2E Test Suite — JPTL Property Management Platform', () => {
       await paymentsTab.click();
 
       // Verify Payments ledger is rendered
-      await expect(page.locator('text=/Total Due|Rent|Payment/i').first()).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'Payment History & Ledger' })).toBeVisible();
 
       // Sophia Lin has parking assigned ($150) -> parking fee item should be visible
-      const parkingFee = page.locator('text=/Parking Space|Parking Fee/i');
-      if (await parkingFee.count() > 0) {
-        await expect(parkingFee.first()).toBeVisible();
-      }
+      const parkingFee = page.getByText(/Assigned Parking|Parking Space|Parking Fee/i).first();
+      await expect(parkingFee).toBeVisible();
     });
 
     test('3.3 Documents tab contains document list and inspection viewer', async ({ page }) => {
@@ -282,4 +282,3 @@ test.describe('E2E Test Suite — JPTL Property Management Platform', () => {
   });
 
 });
-

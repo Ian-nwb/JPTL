@@ -8,7 +8,8 @@
     { "key": "base_url", "value": "http://localhost:8000", "type": "string" },
     { "key": "superadmin_token", "value": "", "type": "string" },
     { "key": "created_property_id", "value": "", "type": "string" },
-    { "key": "created_unit_id", "value": "", "type": "string" }
+    { "key": "created_unit_id", "value": "", "type": "string" },
+    { "key": "landlord_id", "value": "", "type": "string" }
   ],
   "item": [
     {
@@ -58,7 +59,9 @@
               "pm.test('Users list returned', () => {",
               "  pm.expect(res.success).to.be.true;",
               "  pm.expect(Array.isArray(res.users)).to.be.true;",
-              "});"
+              "});",
+              "const landlord = (res.users || []).find((user) => user.role === 'landlord');",
+              "if (landlord) pm.collectionVariables.set('landlord_id', landlord._id);"
             ]
           }
         }
@@ -103,7 +106,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"name\": \"Postman Superadmin Plaza\",\n  \"address\": \"777 Test Parkway\",\n  \"city\": \"Metro East\",\n  \"category\": \"Commercial\"\n}"
+          "raw": "{\n  \"name\": \"Postman Superadmin Plaza\",\n  \"address\": \"777 Test Parkway\",\n  \"city\": \"Metro East\",\n  \"category\": \"Commercial\",\n  \"landlord\": \"{{landlord_id}}\"\n}"
         },
         "url": {
           "raw": "{{base_url}}/api/superadmin/properties",
