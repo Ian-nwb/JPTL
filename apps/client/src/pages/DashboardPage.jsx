@@ -34,7 +34,7 @@ import { AddPropertyOrUnitModal } from '../components/dashboard/AddPropertyOrUni
 import { MobileNavBar } from '../components/common/MobileNavBar';
 import { MobileNavDrawer } from '../components/common/MobileNavDrawer';
 import { ConfirmationModal } from '../components/common/ConfirmationModal';
-import { LayoutDashboard, FileCheck, Settings } from 'lucide-react';
+import { LayoutDashboard, FileCheck, Settings, CalendarClock } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { landlordApi } from '../services/api';
 import { DashboardSkeleton } from '../components/ui/SkeletonLoader';
@@ -1613,6 +1613,7 @@ export const DashboardPage = ({ currentPath = window.location.pathname, onNaviga
           { key: 'tickets', label: 'Maintenance Pipeline', icon: Wrench, badge: pendingTickets || undefined },
           { key: 'announcements', label: 'Announcements Broadcast', icon: Megaphone },
           { key: 'documents', label: 'Documents & Verification', icon: FileCheck, badge: documents.filter((d) => d.status === 'Pending Review').length || undefined },
+          { key: 'lease-extensions', label: 'Lease Extensions', icon: CalendarClock },
           { key: 'settings', label: 'Console Settings', icon: Settings },
         ]}
         activeKey={activeView}
