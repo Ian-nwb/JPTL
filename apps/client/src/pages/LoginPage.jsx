@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { Building2, Eye, EyeOff, AlertCircle, Loader2, ArrowRight, Sun, Moon, CheckCircle2, Lock } from 'lucide-react';
+import { Building2, Eye, EyeOff, AlertCircle, Loader2, ArrowRight, Sun, Moon, CheckCircle2, Lock, ShieldCheck } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
 import { useAuth } from '../context/AuthContext';
 import { landlordApi, tenantApi } from '../services/api';
+import { PrivacyPolicyModal } from './PrivacyPolicyPage';
+import { TermsOfServiceModal } from './TermsOfServicePage';
+import { CookiePolicyModal } from './CookiePolicyPage';
 
 export const LoginPage = ({ onNavigate = () => {} }) => {
   const { theme, toggleTheme } = useTheme();
@@ -19,6 +22,9 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [targetPortal, setTargetPortal] = useState('');
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showCookieModal, setShowCookieModal] = useState(false);
 
   const validateField = (name, value) => {
     let error = '';
@@ -306,7 +312,7 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
         </div>
 
         {/* Footer Note */}
-        <div className="mt-8 pt-6 border-t border-slate-200/80 dark:border-slate-800/80 text-center text-xs text-slate-600 dark:text-slate-400 space-y-2">
+        <div className="mt-8 pt-6 border-t border-slate-200/80 dark:border-slate-800/80 text-center text-xs text-slate-600 dark:text-slate-400 space-y-3">
           <div>
             Need a landlord account?{' '}
             <button
@@ -320,9 +326,52 @@ export const LoginPage = ({ onNavigate = () => {} }) => {
           <div className="text-xs text-slate-400 dark:text-slate-500">
             Resident access is granted by your landlord or property management office.
           </div>
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-2.5 text-[11px] text-slate-400 dark:text-slate-500 font-medium">
+            <button
+              type="button"
+              onClick={() => setShowPrivacyModal(true)}
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline inline-flex items-center gap-1 transition-colors"
+            >
+              <ShieldCheck className="w-3 h-3 text-indigo-500" />
+              <span>Privacy</span>
+            </button>
+            <span>&bull;</span>
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors"
+            >
+              <span>Terms of Service</span>
+            </button>
+            <span>&bull;</span>
+            <button
+              type="button"
+              onClick={() => setShowCookieModal(true)}
+              className="hover:text-indigo-600 dark:hover:text-indigo-400 hover:underline transition-colors"
+            >
+              <span>Cookies</span>
+            </button>
+          </div>
         </div>
 
       </div>
+
+      {/* Legal Modals */}
+      <PrivacyPolicyModal
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        onNavigate={onNavigate}
+      />
+      <TermsOfServiceModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onNavigate={onNavigate}
+      />
+      <CookiePolicyModal
+        isOpen={showCookieModal}
+        onClose={() => setShowCookieModal(false)}
+        onNavigate={onNavigate}
+      />
 
     </div>
   );

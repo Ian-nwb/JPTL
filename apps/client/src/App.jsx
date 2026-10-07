@@ -12,6 +12,9 @@ const LoginPage = lazy(() => import('./pages/LoginPage').then(m => ({ default: m
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const TenantPortalPage = lazy(() => import('./pages/TenantPortalPage').then(m => ({ default: m.TenantPortalPage })));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(m => ({ default: m.ForgotPasswordPage })));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage').then(m => ({ default: m.PrivacyPolicyPage })));
+const TermsOfServicePage = lazy(() => import('./pages/TermsOfServicePage').then(m => ({ default: m.TermsOfServicePage })));
+const CookiePolicyPage = lazy(() => import('./pages/CookiePolicyPage').then(m => ({ default: m.CookiePolicyPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })));
 
 /* ─────────────────────────────────────────────
@@ -199,7 +202,18 @@ function AppRouter() {
     const role = user?.role;
 
     if (!isAuthenticated) {
-      const publicPaths = ['/login', '/', '/register', '/forgot-password'];
+      const publicPaths = [
+        '/login', 
+        '/', 
+        '/register', 
+        '/forgot-password', 
+        '/privacy', 
+        '/privacy-policy',
+        '/terms',
+        '/terms-of-service',
+        '/cookies',
+        '/cookie-policy'
+      ];
       const isPublic =
         publicPaths.includes(currentPath) || currentPath.startsWith('/reset-password');
       const isProtected =
@@ -292,6 +306,9 @@ function AppRouter() {
         if (currentPath === '/onboarding' || currentPath.startsWith('/onboarding')) return <OnboardingPage onNavigate={navigate} />;
         if (currentPath === '/login') return <LoginPage onNavigate={navigate} />;
         if (currentPath === '/forgot-password' || currentPath.startsWith('/reset-password')) return <ForgotPasswordPage onNavigate={navigate} />;
+        if (currentPath === '/privacy' || currentPath === '/privacy-policy') return <PrivacyPolicyPage onNavigate={navigate} />;
+        if (currentPath === '/terms' || currentPath === '/terms-of-service') return <TermsOfServicePage onNavigate={navigate} />;
+        if (currentPath === '/cookies' || currentPath === '/cookie-policy') return <CookiePolicyPage onNavigate={navigate} />;
         if (isTenantRoute(currentPath)) return <TenantPortalPage currentPath={currentPath} onNavigate={navigate} />;
         if (isLandlordRoute(currentPath)) return <DashboardPage currentPath={currentPath} onNavigate={navigate} />;
         if (currentPath === '/') return <LandingPage onNavigate={navigate} />;

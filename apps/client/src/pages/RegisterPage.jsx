@@ -5,6 +5,9 @@ import { CountryCodeDropdown } from '../components/common/CountryCodeDropdown';
 import { useTheme } from '../hooks/useTheme';
 import { useAuth } from '../context/AuthContext';
 import { onlyPhoneDigits, handleNumericKeyDown } from '../utils/numberSanitizers';
+import { PrivacyPolicyModal } from './PrivacyPolicyPage';
+import { TermsOfServiceModal } from './TermsOfServicePage';
+import { CookiePolicyModal } from './CookiePolicyPage';
 
 export const RegisterPage = ({ onNavigate = () => { } }) => {
   const { theme, toggleTheme } = useTheme();
@@ -28,6 +31,9 @@ export const RegisterPage = ({ onNavigate = () => { } }) => {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showCookieModal, setShowCookieModal] = useState(false);
 
   // Field validation - only triggers on blur or submit
   const validateField = (name, value) => {
@@ -592,11 +598,41 @@ export const RegisterPage = ({ onNavigate = () => { } }) => {
             )}
           </div>
 
+          {/* Privacy & Legal Acknowledgment Notice */}
+          <div className="p-3.5 rounded-2xl bg-slate-100/80 dark:bg-slate-900/80 border border-slate-200 dark:border-slate-800 text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+            By creating an account, you agree to JPTL's{' '}
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline"
+            >
+              Terms of Service
+            </button>
+            , and acknowledge our{' '}
+            <button
+              type="button"
+              onClick={() => setShowPrivacyModal(true)}
+              className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline inline-flex items-center gap-0.5"
+            >
+              <span>Privacy Policy</span>
+              <ShieldCheck className="w-3 h-3 inline" />
+            </button>
+            {' '}and{' '}
+            <button
+              type="button"
+              onClick={() => setShowCookieModal(true)}
+              className="text-indigo-600 dark:text-indigo-400 font-semibold hover:underline"
+            >
+              Cookies Policy
+            </button>
+            .
+          </div>
+
           {/* Submit Action Button with Emil active:scale-[0.97] press feedback */}
           <button
             type="submit"
             disabled={!isFormValid || isSubmitting}
-            className="w-full py-3.5 px-4 rounded-2xl font-grotesk font-bold text-xs sm:text-sm text-white bg-indigo-600 hover:bg-indigo-500 active:scale-[0.97] disabled:opacity-50 shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-transform duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-indigo-400 mt-5"
+            className="w-full py-3.5 px-4 rounded-2xl font-grotesk font-bold text-xs sm:text-sm text-white bg-indigo-600 hover:bg-indigo-500 active:scale-[0.97] disabled:opacity-50 shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-transform duration-150 ease-out focus:outline-none focus:ring-2 focus:ring-indigo-400 mt-2 cursor-pointer"
           >
             {isSubmitting ? (
               <>
@@ -614,17 +650,61 @@ export const RegisterPage = ({ onNavigate = () => { } }) => {
         </form>
 
         {/* Footer Link */}
-        <div className="mt-8 text-center text-xs text-slate-600 dark:text-slate-300">
-          Already have an account?{' '}
-          <button
-            onClick={() => onNavigate('/login')}
-            className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
-          >
-            Sign in
-          </button>
+        <div className="mt-8 text-center text-xs text-slate-600 dark:text-slate-300 space-y-2">
+          <div>
+            Already have an account?{' '}
+            <button
+              onClick={() => onNavigate('/login')}
+              className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline"
+            >
+              Sign in
+            </button>
+          </div>
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-2 text-[11px] text-slate-400 dark:text-slate-500">
+            <button
+              type="button"
+              onClick={() => setShowTermsModal(true)}
+              className="hover:underline hover:text-slate-600 dark:hover:text-slate-300"
+            >
+              Terms of Service
+            </button>
+            <span>&bull;</span>
+            <button
+              type="button"
+              onClick={() => setShowPrivacyModal(true)}
+              className="hover:underline hover:text-slate-600 dark:hover:text-slate-300"
+            >
+              Privacy Policy
+            </button>
+            <span>&bull;</span>
+            <button
+              type="button"
+              onClick={() => setShowCookieModal(true)}
+              className="hover:underline hover:text-slate-600 dark:hover:text-slate-300"
+            >
+              Cookies Policy
+            </button>
+          </div>
         </div>
 
       </div>
+
+      {/* Legal Modals */}
+      <PrivacyPolicyModal
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        onNavigate={onNavigate}
+      />
+      <TermsOfServiceModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        onNavigate={onNavigate}
+      />
+      <CookiePolicyModal
+        isOpen={showCookieModal}
+        onClose={() => setShowCookieModal(false)}
+        onNavigate={onNavigate}
+      />
 
     </div>
   );

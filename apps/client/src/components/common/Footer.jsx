@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Building2, ArrowRight, CheckCircle2, Mail } from 'lucide-react';
 
-export const Footer = () => {
+export const Footer = ({ onNavigate = () => {} }) => {
   const [email, setEmail] = useState('');
   const [subscribed, setSubscribed] = useState(false);
 
@@ -148,10 +148,25 @@ export const Footer = () => {
           <div>
             &copy; {new Date().getFullYear()} JPTL Living System &bull; All Rights Reserved
           </div>
-          <div className="flex items-center gap-6 text-xs">
-            <span>Privacy Policy</span>
-            <span>Terms of Service</span>
-            <span>Security Architecture</span>
+          <div className="flex flex-wrap items-center gap-4 sm:gap-6 text-xs">
+            <button
+              onClick={() => onNavigate('/privacy')}
+              className="hover:text-slate-900 dark:hover:text-white hover:underline transition-colors"
+            >
+              Privacy Policy
+            </button>
+            <button
+              onClick={() => onNavigate('/terms')}
+              className="hover:text-slate-900 dark:hover:text-white hover:underline transition-colors"
+            >
+              Terms of Service
+            </button>
+            <button
+              onClick={() => onNavigate('/cookies')}
+              className="hover:text-slate-900 dark:hover:text-white hover:underline transition-colors"
+            >
+              Cookies Policy
+            </button>
           </div>
         </div>
 
