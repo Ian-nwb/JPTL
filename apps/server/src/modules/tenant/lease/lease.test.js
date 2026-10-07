@@ -126,8 +126,10 @@ describe('Digital Lease & Extension Workflow API (Tenant & Landlord)', () => {
       .set('Cookie', [`token=${tenantToken}`]);
 
     expect(res.status).toBe(200);
-    expect(res.body.success).toBe(true);
-    expect(res.body.data.contractPdfUrl).toBeTruthy();
+    expect(res.headers['content-type']).toMatch(/application\/pdf/);
+    expect(res.headers['content-disposition']).toMatch(/attachment; filename=.*Lease-Agreement\.pdf/);
+    expect(res.body).toBeInstanceOf(Buffer);
+    expect(res.body.subarray(0, 4).toString()).toBe('%PDF');
   });
 
   it('GET /api/landlord/lease/extensions - landlord retrieves pending extension requests', async () => {
@@ -157,5 +159,27 @@ describe('Digital Lease & Extension Workflow API (Tenant & Landlord)', () => {
     // Verify Unit leaseEnd was extended
     const updatedUnit = await Unit.findById(unit._id);
     expect(new Date(updatedUnit.leaseEnd).getFullYear()).toBe(2028);
+  });
+});
+
+describe('Error Handling', () => {
+  it('returns 401 when no auth token is provided', async () => {
+    const res = await request(app).get('/api/tenant/lease');
+    expect(res.status).toBe(401);
+  });
+
+  it('returns 403 when wrong role accesses tenant route', async () => {
+    const res = await request(app)
+      .get('/api/tenant/lease')
+      .set('Cookie', [`token=${landlordToken}`]);
+    expect(res.status).toBe(403);
+  });
+
+  it('returns 400 when extension request has invalid termMonths', async () => {
+    const res = await request(app)
+      .post('/api/tenant/lease/extension')
+      .set('Cookie', [`token=${tenantToken}`])
+      .send({ termMonths: 0 });
+    expect(res.status).toBe(400);
   });
 });

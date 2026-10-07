@@ -9,7 +9,9 @@ This document outlines the testing architecture, environment configuration, comm
 5. **Load Testing** — ApacheBench (`ab`) throughput and concurrency benchmarks
 6. **Database Utilities** — Seed & Purge scripts
 
-> **Note on test runners:** All test commands can now be run from the **repository root** or directly from `apps/server` (delegated scripts are supported in both `package.json` files). Newman tests run against the running backend server on **port 8000**.
+> **Note on test runners:** Run the aggregate `test:all` command from the repository root. Server integration and delegated E2E/Newman commands are also available from `apps/server`. Newman tests run against the backend on **port 8000**.
+
+Run the standard complete suite from the repository root with `npm run test:all`. It runs Playwright E2E, Jest/Supertest integration, and all Newman collections. It deliberately excludes the separate load benchmark (`npm run test:load`).
 
 ---
 
@@ -160,7 +162,7 @@ Integration tests validate API contract compliance, controller-service workflows
 All Postman collections are stored in `tests/*.json`. Run from the repository root with Newman:
 
 ```bash
-# Run ALL 12 Postman test collections sequentially:
+# Run ALL 14 Postman test collections sequentially:
 npm run test:postman
 
 # Or execute any specific collection:
@@ -176,7 +178,11 @@ npx newman run tests/documents.json
 npx newman run tests/rentroll.json
 npx newman run tests/tenantdirectory.json
 npx newman run tests/tenantpayments.json
+npx newman run tests/superadmin.json
+npx newman run tests/vehicle.json
 ```
+
+The auth collection creates a fresh landlord email on each run because signup persists the new account.
 
 > **Prerequisite:** Start the backend server before running Newman tests:
 > ```bash
@@ -209,6 +215,8 @@ npx newman run tests/tenantpayments.json
 | `tests/announcements.json` | `DELETE` | `/api/landlord/announcements/:id` | Landlord deletes announcement | `200 OK` |
 | `tests/notifications.json` | `GET` | `/api/notifications/vapid-key` | Public VAPID public key query | `200 OK` |
 | `tests/notifications.json` | `POST` | `/api/notifications/subscribe` | Register web push subscription | `200 / 201` |
+| `tests/superadmin.json` | `GET/POST/DELETE` | `/api/superadmin/*` | Platform users, properties, units, sessions, and maintenance mode | `200 / 201` |
+| `tests/vehicle.json` | `POST/GET/DELETE` | `/api/tenant/vehicles` | Tenant vehicle CRUD and auth guard | `200 / 201` |
 | `tests/documents.json` | `POST` | `/api/tenant/documents` | Upload compliance file | `201 Created` |
 | `tests/documents.json` | `PATCH` | `/api/landlord/documents/:id/status`| Verify/reject compliance document | `200 OK` |
 | `tests/rentroll.json` | `GET` | `/api/landlord/rentroll` | Rent roll ledger & status filtering | `200 OK` |
@@ -216,6 +224,7 @@ npx newman run tests/tenantpayments.json
 | `tests/tenantpayments.json`| `GET` | `/api/tenant/payments` | Ledger breakdown (conditional fees) | `200 OK` |
 | `tests/tenantpayments.json`| `POST` | `/api/tenant/payments/pay` | Process payment | `200 OK` |
 | `tests/lease.json` | `GET` | `/api/tenant/lease` | Query active digital lease | `200 OK` |
+| `tests/lease.json` | `GET` | `/api/tenant/lease/document` | Download lease agreement PDF | `200 OK` (`application/pdf`) |
 | `tests/lease.json` | `POST` | `/api/tenant/lease/extension` | Submit renewal request | `201 Created` |
 | `tests/lease.json` | `PATCH` | `/api/landlord/lease/:id/approve` | Approve lease extension | `200 OK` |
 
@@ -227,11 +236,21 @@ npm run test:integration
 ```
 Or run a specific module suite:
 ```bash
-npm --prefix apps/server test -- src/modules/auth/auth.test.js
-npm --prefix apps/server test -- src/modules/landlord/announcements/announcements.test.js
-npm --prefix apps/server test -- src/modules/landlord/tickets/tickets.test.js
-npm --prefix apps/server test -- src/modules/tenant/payments/payments.test.js
+npm --prefix apps/server run test:integration -- --runTestsByPath src/modules/auth/auth.test.js
+npm --prefix apps/server run test:integration -- --runTestsByPath src/modules/landlord/announcements/announcements.test.js
+npm --prefix apps/server run test:integration -- --runTestsByPath src/modules/landlord/tickets/tickets.test.js
+npm --prefix apps/server run test:integration -- --runTestsByPath src/modules/tenant/payments/payments.test.js
 ```
+
+### 3.3 Complete Non-Load Test Suite
+
+From the repository root, run:
+
+```bash
+npm run test:all
+```
+
+This runs Playwright E2E tests, Jest/Supertest server integration tests, and the Newman collections in sequence. The backend and frontend must already be running for Playwright, and the backend must be available on port 8000 for Newman. Load testing is run separately with `npm run test:load`.
 
 ---
 
@@ -422,10 +441,25 @@ docker exec server npm run purge:force
 | Role | Email | Password | Details |
 | :--- | :--- | :--- | :--- |
 | **Landlord** | `landlord@jptl.dev` | `Password123!` | Alexander Vance (Properties, units, active tickets) |
-| **Tenant** | `sophia@jptl.dev` | `Password123!` | Sophia Lin (Apt 4B, **with parking $150**, active lease) |
-| **Tenant** | `liam@jptl.dev` | `Password123!` | Liam Carter (Unit 201, **no parking**, pending ticket) |
-| **Tenant** | `david@jptl.dev` | `Password123!` | David K. Miller (Villa 3, with parking $150) |
-| **Tenant** | `elena@jptl.dev` | `Password123!` | Elena Rostova (Unit 102, pending onboarding) |
+| **Tenant** | `sophia@jptl.dev` | `Password123!` | Sophia Lin (Aura Sky, Unit 14B, parking $150, active lease) |
+| **Tenant** | `liam@jptl.dev` | `Password123!` | Liam Carter (Vantro Executive Lofts, Loft 304, no parking, active lease) |
+| **Tenant** | `david@jptl.dev` | `Password123!` | David K. Miller (Solis Villa Estate, Villa 04, parking $200, active lease) |
+| **Tenant** | `elena@jptl.dev` | `Password123!` | Elena Rostova (pre-added tenant profile; no unit or lease assigned) |
+
+### Sample Data by Record Type
+
+The seed script uses JPTL-specific model names. Use this mapping when describing the sample data in project or evaluation documents: properties act as projects, units as assets, maintenance tickets as tasks, landlord users as reviewers, tenant users as clients, and audit records as logs.
+
+| Requested sample type | JPTL record | Examples from `apps/server/scripts/seed.js` |
+| :--- | :--- | :--- |
+| **Projects** | Properties | Aura Sky Towers & Residences (Downtown Metro), Vantro Executive Lofts (Eastside Business), Solis Villa Estate & Spa (Northgate Hills), Lumina Green Park Apartments (Westpark District), and Nexus Commercial Center (Financial District). |
+| **Assets** | Units | Unit 14B (occupied, $2,400/month, $150 parking); Loft 304 (occupied, $1,950/month); Villa 04 (occupied, $4,500/month, $200 parking); Unit 18A (vacant, $3,800/month); Suite 202 (vacant, $2,100/month); Office Suite 501 (vacant, $5,200/month). |
+| **Tasks** | Maintenance tickets | HVAC pressure drop (Sophia, high priority, in progress); kitchen sink pipe seep (Liam, medium priority, submitted); patio smart-lock battery alert (David, low priority, resolved). |
+| **Reviewers** | Landlord user referenced by `Document.reviewedBy` and ticket history | Alexander Vance (`landlord@jptl.dev`) is the seeded reviewer. Two Sophia documents are verified, David’s pet vaccination document is rejected, and other seeded documents await review. |
+| **Clients** | Tenant users and profiles | Sophia Lin (Unit 14B), Liam Carter (Loft 304), David K. Miller (Villa 04), and Elena Rostova (pre-added, unassigned). All seeded tenant accounts use `Password123!`. |
+| **Logs** | Audit log records | Three example events: `TICKET_STATUS_UPDATE` by the landlord, `PAYMENT_CONFIRMED_EVENT` by Liam, and `TENANT_CREATED` by the landlord. Login session logs are recorded when users sign in; `seed.js` does not seed session logs. |
+
+The seeder also creates three active leases, five payment records covering paid, pending, and overdue states, three announcements, and five tenant documents. It is idempotent: existing matching records are skipped rather than overwritten. For the exact seed values and relationships, see [`apps/server/scripts/seed.js`](../apps/server/scripts/seed.js).
 
 ---
 
@@ -433,7 +467,8 @@ docker exec server npm run purge:force
 
 | Category | Command | Directory / Notes |
 | :--- | :--- | :--- |
-| **All Postman Suites** | `npm run test:postman` | Repo root (12 collections on port 8000) |
+| **All Postman Suites** | `npm run test:postman` | Repo root (14 collections on port 8000) |
+| **All Non-Load Suites** | `npm run test:all` | Repo root (E2E + Jest integration + all Newman collections) |
 | **Single Postman Suite** | `npx newman run tests/<name>.json` | Repo root |
 | **Playwright E2E Suite** | `npm run test:e2e` | Repo root (`tests/e2e.spec.js`) |
 | **Playwright UI Debugger** | `npx playwright test --ui` | Repo root |

@@ -1,0 +1,281 @@
+<mxfile host="app.diagrams.net">
+  <diagram id="jptl-enterprise-erd" name="Entity Relationship Diagram">
+    <mxGraphModel dx="2200" dy="1600" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="2800" pageHeight="1800" background="#FFFFFF" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- ROW 1: USER, PROPERTY, UNIT, TICKET, STATUS HISTORY     -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+
+        <!-- 1. USER -->
+        <mxCell id="tbl_user" value="USER" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="60" y="80" width="280" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="user_fields" value="[PK]  _id : ObjectId&#xa;      firstName : String&#xa;      middleName : String&#xa;      lastName : String&#xa;[UK]  email : String&#xa;      phone : String&#xa;      password : String&#xa;      role : String&#xa;      plan : String&#xa;      onboardingCompleted : Boolean&#xa;[FK]  landlord : ObjectId&#xa;      status : String&#xa;      avatarUrl : String&#xa;      createdAt : Date" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_user">
+          <mxGeometry y="32" width="280" height="288" as="geometry" />
+        </mxCell>
+
+        <!-- 2. PROPERTY -->
+        <mxCell id="tbl_property" value="PROPERTY" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="460" y="80" width="280" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="property_fields" value="[PK]  _id : ObjectId&#xa;      name : String&#xa;      address : String&#xa;      city : String&#xa;      unitsCount : Number&#xa;      occupancyRate : Number&#xa;      category : String&#xa;      featured : Boolean&#xa;[FK]  landlord : ObjectId&#xa;      createdAt : Date" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_property">
+          <mxGeometry y="32" width="280" height="218" as="geometry" />
+        </mxCell>
+
+        <!-- 3. UNIT -->
+        <mxCell id="tbl_unit" value="UNIT" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="860" y="80" width="280" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="unit_fields" value="[PK]  _id : ObjectId&#xa;      label : String&#xa;[FK]  property : ObjectId&#xa;[FK]  tenant : ObjectId&#xa;      monthlyRent : Number&#xa;      hasParking : Boolean&#xa;      parkingSpot : String&#xa;      parkingFee : Number&#xa;      bedrooms : Number&#xa;      bathrooms : Number&#xa;      sqft : Number&#xa;      status : String&#xa;      leaseStart : Date&#xa;      leaseEnd : Date" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_unit">
+          <mxGeometry y="32" width="280" height="288" as="geometry" />
+        </mxCell>
+
+        <!-- 4. TICKET -->
+        <mxCell id="tbl_ticket" value="TICKET" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="80" width="280" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="ticket_fields" value="[PK]  _id : ObjectId&#xa;      title : String&#xa;      description : String&#xa;      category : String&#xa;      priority : String&#xa;      status : String&#xa;[FK]  unit : ObjectId&#xa;[FK]  tenant : ObjectId" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_ticket">
+          <mxGeometry y="32" width="280" height="198" as="geometry" />
+        </mxCell>
+
+        <!-- 5. TICKET_STATUS_HISTORY -->
+        <mxCell id="tbl_ticket_history" value="TICKET_STATUS_HISTORY" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#475569;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1660" y="80" width="280" height="170" as="geometry" />
+        </mxCell>
+        <mxCell id="ticket_history_fields" value="      status : String&#xa;[FK]  changedBy : ObjectId&#xa;      userRole : String&#xa;      note : String&#xa;      timestamp : Date" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_ticket_history">
+          <mxGeometry y="32" width="280" height="138" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- ROW 2: PROFILES, PAYMENTS, LEASES, EXTENSIONS, DOCS     -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+
+        <!-- 6. TENANT_PROFILE -->
+        <mxCell id="tbl_tenant_profile" value="TENANT_PROFILE" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="60" y="480" width="280" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="tenant_profile_fields" value="[PK]  _id : ObjectId&#xa;[FK]  user : ObjectId&#xa;[FK]  property : ObjectId&#xa;[FK]  unit : ObjectId&#xa;      monthlyRent : Number&#xa;      hasParking : Boolean&#xa;      parkingSpot : String&#xa;      parkingFee : Number&#xa;      leaseStart : Date&#xa;      leaseEnd : Date&#xa;      status : String&#xa;      autoPayEnabled : Boolean&#xa;      securityDeposit : Number" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_tenant_profile">
+          <mxGeometry y="32" width="280" height="268" as="geometry" />
+        </mxCell>
+
+        <!-- 7. PAYMENT -->
+        <mxCell id="tbl_payment" value="PAYMENT" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="460" y="480" width="280" height="320" as="geometry" />
+        </mxCell>
+        <mxCell id="payment_fields" value="[PK]  _id : ObjectId&#xa;[FK]  tenant : ObjectId&#xa;[FK]  unit : ObjectId&#xa;[FK]  property : ObjectId&#xa;      amount : Number&#xa;      dueDate : Date&#xa;      status : String&#xa;      period : String&#xa;      paymentMethod : String&#xa;      baseRent : Number&#xa;      parkingFee : Number&#xa;      utilityFee : Number&#xa;      isAdvancePayment : Boolean&#xa;      advanceMonthsAhead : Number&#xa;      paidAt : Date" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_payment">
+          <mxGeometry y="32" width="280" height="288" as="geometry" />
+        </mxCell>
+
+        <!-- 8. LEASE -->
+        <mxCell id="tbl_lease" value="LEASE" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="860" y="480" width="280" height="300" as="geometry" />
+        </mxCell>
+        <mxCell id="lease_fields" value="[PK]  _id : ObjectId&#xa;[FK]  tenant : ObjectId&#xa;[FK]  landlord : ObjectId&#xa;[FK]  property : ObjectId&#xa;[FK]  unit : ObjectId&#xa;      leaseStart : Date&#xa;      leaseEnd : Date&#xa;      monthlyRent : Number&#xa;      hasParking : Boolean&#xa;      parkingSpot : String&#xa;      parkingFee : Number&#xa;      securityDeposit : Number&#xa;      status : String&#xa;      contractPdfUrl : String" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_lease">
+          <mxGeometry y="32" width="280" height="268" as="geometry" />
+        </mxCell>
+
+        <!-- 9. EXTENSION_REQUEST -->
+        <mxCell id="tbl_extension_request" value="EXTENSION_REQUEST" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#475569;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=12;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="480" width="280" height="260" as="geometry" />
+        </mxCell>
+        <mxCell id="extension_request_fields" value="[PK]  _id : ObjectId&#xa;      termMonths : Number&#xa;      proposedStartDate : Date&#xa;      proposedEndDate : Date&#xa;      monthlyRent : Number&#xa;      tenantNotes : String&#xa;      status : String&#xa;      landlordNotes : String&#xa;      requestedAt : Date&#xa;      reviewedAt : Date&#xa;[FK]  reviewedBy : ObjectId" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_extension_request">
+          <mxGeometry y="32" width="280" height="228" as="geometry" />
+        </mxCell>
+
+        <!-- 10. DOCUMENT -->
+        <mxCell id="tbl_document" value="DOCUMENT" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1660" y="480" width="280" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="document_fields" value="[PK]  _id : ObjectId&#xa;[FK]  tenant : ObjectId&#xa;[FK]  unit : ObjectId&#xa;      name : String&#xa;      type : String&#xa;      category : String&#xa;      size : String&#xa;      fileUrl : String&#xa;      status : String&#xa;      rejectionReason : String&#xa;[FK]  reviewedBy : ObjectId&#xa;      verifiedAt : Date" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_document">
+          <mxGeometry y="32" width="280" height="238" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- ROW 3: LOGS, COMMS & SYSTEM SETTINGS                    -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+
+        <!-- 11. SESSION_LOG -->
+        <mxCell id="tbl_session_log" value="SESSION_LOG" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="60" y="880" width="280" height="230" as="geometry" />
+        </mxCell>
+        <mxCell id="session_log_fields" value="[PK]  _id : ObjectId&#xa;[FK]  userId : ObjectId&#xa;      email : String&#xa;      role : String&#xa;      ip : String&#xa;      userAgent : String&#xa;      loginAt : Date&#xa;      logoutAt : Date&#xa;      isActive : Boolean" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_session_log">
+          <mxGeometry y="32" width="280" height="198" as="geometry" />
+        </mxCell>
+
+        <!-- 12. AUDIT_LOG -->
+        <mxCell id="tbl_audit_log" value="AUDIT_LOG" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="460" y="880" width="280" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="audit_log_fields" value="[PK]  _id : ObjectId&#xa;[FK]  actor : ObjectId&#xa;      actorRole : String&#xa;      action : String&#xa;      entityKind : String&#xa;      entityId : ObjectId&#xa;      ipAddress : String" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_audit_log">
+          <mxGeometry y="32" width="280" height="168" as="geometry" />
+        </mxCell>
+
+        <!-- 13. ANNOUNCEMENT -->
+        <mxCell id="tbl_announcement" value="ANNOUNCEMENT" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="860" y="880" width="280" height="180" as="geometry" />
+        </mxCell>
+        <mxCell id="announcement_fields" value="[PK]  _id : ObjectId&#xa;      title : String&#xa;      content : String&#xa;      category : String&#xa;      isPinned : Boolean&#xa;[FK]  author : ObjectId" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_announcement">
+          <mxGeometry y="32" width="280" height="148" as="geometry" />
+        </mxCell>
+
+        <!-- 14. NOTIFICATION -->
+        <mxCell id="tbl_notification" value="NOTIFICATION" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1260" y="880" width="280" height="200" as="geometry" />
+        </mxCell>
+        <mxCell id="notification_fields" value="[PK]  _id : ObjectId&#xa;[FK]  user : ObjectId&#xa;      title : String&#xa;      body : String&#xa;      type : String&#xa;      read : Boolean&#xa;      refModel : String&#xa;      refId : ObjectId" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_notification">
+          <mxGeometry y="32" width="280" height="168" as="geometry" />
+        </mxCell>
+
+        <!-- 15. PUSH_SUBSCRIPTION -->
+        <mxCell id="tbl_push_sub" value="PUSH_SUBSCRIPTION" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="1660" y="880" width="280" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="push_sub_fields" value="[PK]  _id : ObjectId&#xa;[FK]  user : ObjectId&#xa;      endpoint : String" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_push_sub">
+          <mxGeometry y="32" width="280" height="108" as="geometry" />
+        </mxCell>
+
+        <!-- 16. SYSTEM_SETTING -->
+        <mxCell id="tbl_sys_setting" value="SYSTEM_SETTING" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=32;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=0;marginBottom=0;html=1;whiteSpace=wrap;fillColor=#1E293B;strokeColor=#334155;strokeWidth=1.5;fontColor=#FFFFFF;fontSize=13;fontFamily=Helvetica;" vertex="1" parent="1">
+          <mxGeometry x="2040" y="880" width="280" height="140" as="geometry" />
+        </mxCell>
+        <mxCell id="sys_setting_fields" value="[PK]  _id : ObjectId&#xa;[UK]  key : String&#xa;      value : Mixed" style="text;strokeColor=none;fillColor=#F8FAFC;align=left;verticalAlign=top;spacingLeft=10;spacingTop=8;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;fontFamily=Consolas,monospace;fontSize=11;fontColor=#1E293B;lineHeight=1.45;" vertex="1" parent="tbl_sys_setting">
+          <mxGeometry y="32" width="280" height="108" as="geometry" />
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════════════════ -->
+        <!-- PROFESSIONAL CROW'S FOOT RELATIONSHIP CONNECTORS       -->
+        <!-- ═══════════════════════════════════════════════════════ -->
+
+        <!-- USER (1) -> PROPERTY (N) [owns] -->
+        <mxCell id="e_user_prop" value="owns" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_user" target="tbl_property">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- PROPERTY (1) -> UNIT (N) [contains] -->
+        <mxCell id="e_prop_unit" value="contains" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_property" target="tbl_unit">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- USER (1) -> TENANT_PROFILE (1) [profile] -->
+        <mxCell id="e_user_profile" value="profile" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERone;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_user" target="tbl_tenant_profile">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- UNIT (1) -> LEASE (N) [leased] -->
+        <mxCell id="e_unit_lease" value="leased" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_unit" target="tbl_lease">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- LEASE (1) -> EXTENSION_REQUEST (N) [extensions] -->
+        <mxCell id="e_lease_ext" value="extensions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;strokeDasharray=4 4;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_lease" target="tbl_extension_request">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- USER (1) -> LEASE (N) [contract] -->
+        <mxCell id="e_user_lease" value="contract" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#64748B;strokeWidth=1.2;strokeDasharray=4 4;fontColor=#475569;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_user" target="tbl_lease">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- USER (1) -> PAYMENT (N) [pays] -->
+        <mxCell id="e_user_pay" value="pays" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_user" target="tbl_payment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- UNIT (1) -> PAYMENT (N) [rent] -->
+        <mxCell id="e_unit_pay" value="rent" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_unit" target="tbl_payment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- PROPERTY (1) -> PAYMENT (N) [billed] -->
+        <mxCell id="e_prop_pay" value="billed" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#64748B;strokeWidth=1.2;strokeDasharray=4 4;fontColor=#475569;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_property" target="tbl_payment">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- UNIT (1) -> TICKET (N) [repairs] -->
+        <mxCell id="e_unit_ticket" value="repairs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_unit" target="tbl_ticket">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- USER (1) -> TICKET (N) [reports] -->
+        <mxCell id="e_user_ticket" value="reports" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#64748B;strokeWidth=1.2;strokeDasharray=4 4;fontColor=#475569;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_user" target="tbl_ticket">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="340" y="50" />
+              <mxPoint x="1400" y="50" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- TICKET (1) -> TICKET_STATUS_HISTORY (N) [history] -->
+        <mxCell id="e_ticket_history" value="history" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;strokeDasharray=4 4;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_ticket" target="tbl_ticket_history">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- UNIT (1) -> DOCUMENT (N) [docs] -->
+        <mxCell id="e_unit_doc" value="docs" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_unit" target="tbl_document">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1190" y="240" />
+              <mxPoint x="1190" y="440" />
+              <mxPoint x="1800" y="440" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- USER (1) -> DOCUMENT (N) [uploads] -->
+        <mxCell id="e_user_doc" value="uploads" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#64748B;strokeWidth=1.2;strokeDasharray=4 4;fontColor=#475569;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_user" target="tbl_document">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="200" y="30" />
+              <mxPoint x="1900" y="30" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- USER (1) -> SESSION_LOG (N) [sessions] -->
+        <mxCell id="e_user_session" value="sessions" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_user" target="tbl_session_log">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- USER (1) -> AUDIT_LOG (N) [acts] -->
+        <mxCell id="e_user_audit" value="acts" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_user" target="tbl_audit_log">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- USER (1) -> ANNOUNCEMENT (N) [broadcasts] -->
+        <mxCell id="e_user_ann" value="broadcasts" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_user" target="tbl_announcement">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="840" />
+              <mxPoint x="930" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- USER (1) -> NOTIFICATION (N) [receives] -->
+        <mxCell id="e_user_notif" value="receives" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_user" target="tbl_notification">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="840" />
+              <mxPoint x="1340" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+        <!-- USER (1) -> PUSH_SUBSCRIPTION (N) [devices] -->
+        <mxCell id="e_user_push" value="devices" style="edgeStyle=orthogonalEdgeStyle;rounded=0;html=1;startArrow=ERmandOne;endArrow=ERmany;strokeColor=#475569;strokeWidth=1.5;fontColor=#334155;fontSize=11;fontFamily=Helvetica;" edge="1" parent="1" source="tbl_user" target="tbl_push_sub">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="230" y="840" />
+              <mxPoint x="1750" y="840" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

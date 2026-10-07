@@ -3,7 +3,7 @@ import {
   Activity, Radio, Search, Filter, RefreshCw, Clock, User, Globe,
   ShieldCheck, CheckCircle2, LogOut, AlertTriangle, ArrowUpRight
 } from 'lucide-react';
-import { getSessionLogs, subscribeToSessionStream } from '../services/superadminApi';
+import { getSessionLogs, subscribeToSessionStream, exportSessionLogsCsv } from '../services/superadminApi';
 import { Skeleton } from './ui/SkeletonLoader';
 
 export const SessionMonitorTab = () => {
@@ -13,6 +13,7 @@ export const SessionMonitorTab = () => {
   const [page, setPage] = useState(1);
   const [limit] = useState(25);
   const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
 
   // Filters
   const [roleFilter, setRoleFilter] = useState('');
@@ -121,13 +122,31 @@ export const SessionMonitorTab = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#070A12] border border-slate-800 text-xs font-mono">
             <span className={`w-2.5 h-2.5 rounded-full ${streamConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500'}`} />
             <span className={streamConnected ? 'text-emerald-400 font-bold' : 'text-amber-400'}>
               {streamConnected ? 'SSE Live Stream Active' : 'Connecting to Stream...'}
             </span>
           </div>
+
+          <button
+            onClick={async () => {
+              try {
+                setExporting(true);
+                await exportSessionLogsCsv({ role: roleFilter, search });
+              } catch (err) {
+                console.error('CSV export failed:', err);
+              } finally {
+                setExporting(false);
+              }
+            }}
+            disabled={exporting}
+            className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 btn-press shadow-md shadow-emerald-600/20 disabled:opacity-50 transition cursor-pointer"
+          >
+            <ArrowUpRight className="w-3.5 h-3.5" />
+            {exporting ? 'Exporting…' : 'Export CSV'}
+          </button>
 
           <button
             onClick={fetchSessions}

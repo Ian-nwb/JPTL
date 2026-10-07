@@ -2,6 +2,7 @@ import express from 'express';
 import * as superadminController from './superadmin.controller.js';
 import { requireAuth, requireRole } from '../../shared/middleware/auth.middleware.js';
 import { getMaintenanceState, setMaintenanceState } from '../../shared/services/systemState.service.js';
+import * as superadminService from './superadmin.service.js';
 
 const router = express.Router();
 
@@ -283,6 +284,19 @@ router.route('/units/:id')
  */
 router.get('/sessions', superadminController.getSessionLogs);
 
+// ─── SESSION CSV EXPORT ───
+router.get('/sessions/export', async (req, res) => {
+  try {
+    const { role = '', search = '' } = req.query;
+    const result = await superadminService.exportSessionLogsCsv({ role, search });
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+    return res.status(200).send(result.csv);
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 /**
  * @swagger
  * /api/superadmin/sessions/stream:
@@ -464,5 +478,28 @@ router.route('/system/maintenance')
     const updated = await setMaintenanceState(enabled, message);
     return res.status(200).json({ success: true, ...updated });
   });
+
+// ─── AUDIT TRAIL ───
+router.get('/audit-logs', async (req, res) => {
+  try {
+    const { page, limit, actorRole, action, entityKind, search, startDate, endDate } = req.query;
+    const result = await superadminService.getAuditLogs({ page, limit, actorRole, action, entityKind, search, startDate, endDate });
+    return res.status(200).json({ success: true, ...result });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.get('/audit-logs/export', async (req, res) => {
+  try {
+    const { actorRole, action, entityKind, search, startDate, endDate } = req.query;
+    const result = await superadminService.exportAuditLogsCsv({ actorRole, action, entityKind, search, startDate, endDate });
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="${result.filename}"`);
+    return res.status(200).send(result.csv);
+  } catch (err) {
+    return res.status(500).json({ success: false, message: err.message });
+  }
+});
 
 export default router;

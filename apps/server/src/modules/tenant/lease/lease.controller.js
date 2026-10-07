@@ -1,4 +1,5 @@
 import * as leaseService from './lease.service.js';
+import { generateLeasePdf } from '../../../shared/utils/pdfGenerator.js';
 
 export async function getLease(req, res) {
   try {
@@ -27,9 +28,17 @@ export async function getLeaseDocument(req, res) {
   try {
     const tenantId = req.user._id || req.user.id;
     const doc = await leaseService.getLeaseDocument(tenantId);
-    return res.status(200).json({ success: true, data: doc });
+
+    const safeName = `${doc.propertyName}-${doc.unitLabel}-Lease-Agreement`
+      .replace(/[^a-zA-Z0-9-_]/g, '_');
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `attachment; filename="${safeName}.pdf"`);
+
+    generateLeasePdf(doc, res);
   } catch (err) {
     const statusCode = err.statusCode || 500;
     return res.status(statusCode).json({ success: false, message: err.message });
   }
 }
+

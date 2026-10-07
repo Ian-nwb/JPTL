@@ -7,6 +7,7 @@ import Ticket from '../../../shared/models/ticket.model.js';
 import Payment from '../../../shared/models/payment.model.js';
 import Document from '../../../shared/models/document.model.js';
 import AuditLog from '../../../shared/models/auditLog.model.js';
+import Lease from '../../../shared/models/lease.model.js';
 import crypto from 'crypto';
 import { sendTenantWelcomeEmail } from '../../../shared/utils/mailer.js';
 
@@ -101,9 +102,22 @@ async function getTenantDirectory(landlordId, query = {}, context = {}) {
 
   const profileMap = new Map(profiles.map((pr) => [pr.user.toString(), pr]));
 
-  // 4. Combine user and profile data
+  // 4. Fetch active leases for these tenants so we always show the up-to-date leaseEnd
+  //    (TenantProfile.leaseEnd is NOT updated when a lease extension is approved;
+  //     only the Lease document itself gets updated.)
+  const leases = await Lease.find({
+    tenant: { $in: tenantUserIds },
+    landlord: landlordId,
+    status: { $in: ['active', 'renewal_pending', 'renewal_approved'] },
+  })
+    .select('tenant leaseStart leaseEnd monthlyRent status')
+    .lean();
+
+  const leaseMap = new Map(leases.map((l) => [l.tenant.toString(), l]));
+
   let directory = tenantUsers.map((u) => {
     const profile = profileMap.get(u._id.toString());
+    const activeLease = leaseMap.get(u._id.toString()) || null;
     const unitDoc = profile?.unit || null;
     const propDoc = profile?.property || (unitDoc ? propertyMap.get(unitDoc.property?.toString()) : null);
 
@@ -148,8 +162,8 @@ async function getTenantDirectory(landlordId, query = {}, context = {}) {
       parkingSpot: profile?.parkingSpot ?? unitDoc?.parkingSpot ?? null,
       parkingFee: profile?.parkingFee ?? unitDoc?.parkingFee ?? 0,
       securityDeposit: profile?.securityDeposit ?? (profile?.monthlyRent ? profile.monthlyRent * 1.5 : 0),
-      leaseStart: profile?.leaseStart ?? unitDoc?.leaseStart ?? null,
-      leaseEnd: profile?.leaseEnd ?? unitDoc?.leaseEnd ?? null,
+      leaseStart: activeLease?.leaseStart ?? profile?.leaseStart ?? unitDoc?.leaseStart ?? null,
+      leaseEnd:   activeLease?.leaseEnd   ?? profile?.leaseEnd   ?? unitDoc?.leaseEnd   ?? null,
       memberSince: u.createdAt,
     };
   });

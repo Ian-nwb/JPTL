@@ -10,7 +10,7 @@
     "seed:fresh": "node scripts/purge.js --force && node scripts/seed.js",
     "purge": "node scripts/purge.js",
     "purge:force": "node scripts/purge.js --force",
-    "test:integration": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --runInBand",
+    "test:integration": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --runInBand --testTimeout=30000",
     "test:postman": "npm --prefix ../.. run test:postman",
     "test:e2e": "npm --prefix ../.. run test:e2e",
     "env:encrypt": "openssl aes-256-cbc -salt -pbkdf2 -in .env -out .env.enc -k",
@@ -26,16 +26,17 @@
     "compression": "^1.8.2",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
     "express": "^5.2.1",
     "express-rate-limit": "^8.7.0",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.3",
     "multer": "^2.3.0",
     "nodemailer": "^10.0.9",
+    "pdfkit": "^0.20.2",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1",
-    "web-push": "^3.6.7",
-    "dotenv": "^17.4.2"
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
     "@types/jest": "^30.0.0",

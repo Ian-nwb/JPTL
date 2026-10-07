@@ -2,6 +2,7 @@ import Property from '../../shared/models/property.model.js';
 import Unit from '../../shared/models/unit.model.js';
 import User from '../../shared/models/user.model.js';
 import SessionLog from '../../shared/models/sessionLog.model.js';
+import AuditLog from '../../shared/models/auditLog.model.js';
 
 // ═════════════════════════════════════════════════
 // PROPERTIES CRUD
@@ -430,3 +431,101 @@ export async function deleteUser(id) {
   return { message: 'User deleted successfully' };
 }
 
+
+// ═════════════════════════════════════════════════
+// AUDIT TRAIL
+// ═════════════════════════════════════════════════
+
+export async function getAuditLogs({
+  page = 1, limit = 50, actorRole = '', action = '',
+  entityKind = '', search = '', startDate = '', endDate = '',
+} = {}) {
+  const safeLimit = Math.min(Number(limit) || 50, 200);
+  const skip = (Math.max(Number(page) || 1, 1) - 1) * safeLimit;
+  const filter = {};
+  if (actorRole) filter.actorRole = actorRole;
+  if (action) filter.action = { $regex: action, $options: 'i' };
+  if (entityKind) filter.entityKind = entityKind;
+  if (startDate || endDate) {
+    filter.createdAt = {};
+    if (startDate) filter.createdAt.$gte = new Date(startDate);
+    if (endDate) filter.createdAt.$lte = new Date(endDate);
+  }
+
+  const [total, logs] = await Promise.all([
+    AuditLog.countDocuments(filter),
+    AuditLog.find(filter)
+      .populate('actor', 'firstName middleName lastName email role')
+      .sort({ createdAt: -1 }).skip(skip).limit(safeLimit).lean(),
+  ]);
+
+  let formatted = logs.map((log) => ({
+    id: log._id,
+    timestamp: log.createdAt,
+    actor: log.actor
+      ? { id: log.actor._id, name: [log.actor.firstName, log.actor.middleName, log.actor.lastName].filter(Boolean).join(' '), email: log.actor.email, role: log.actor.role }
+      : null,
+    actorRole: log.actorRole,
+    action: log.action,
+    entityKind: log.entityKind,
+    entityId: log.entityId,
+    ipAddress: log.ipAddress || '',
+  }));
+
+  if (search && search.trim()) {
+    const q = search.trim().toLowerCase();
+    formatted = formatted.filter((l) =>
+      l.actor?.name?.toLowerCase().includes(q) ||
+      l.actor?.email?.toLowerCase().includes(q) ||
+      l.action?.toLowerCase().includes(q) ||
+      l.entityKind?.toLowerCase().includes(q)
+    );
+  }
+
+  return { total, page: Number(page) || 1, limit: safeLimit, logs: formatted };
+}
+
+export async function exportAuditLogsCsv(filters = {}) {
+  const { logs } = await getAuditLogs({ ...filters, page: 1, limit: 5000 });
+  const headers = ['Timestamp', 'Actor Name', 'Actor Email', 'Role', 'Action', 'Entity Type', 'Entity ID', 'IP Address'];
+  const csvLines = [headers.join(',')];
+  for (const log of logs) {
+    csvLines.push([
+      `"${new Date(log.timestamp).toISOString()}"`,
+      `"${log.actor?.name || ''}"`,
+      `"${log.actor?.email || ''}"`,
+      `"${log.actorRole}"`,
+      `"${log.action}"`,
+      `"${log.entityKind}"`,
+      `"${log.entityId || ''}"`,
+      `"${log.ipAddress}"`,
+    ].join(','));
+  }
+  return { filename: `Audit_Trail_${new Date().toISOString().slice(0, 10)}.csv`, csv: csvLines.join('\n'), count: logs.length };
+}
+
+export async function exportSessionLogsCsv({ role = '', search = '' } = {}) {
+  const filter = {};
+  if (role) filter.role = role;
+  if (search) filter.$or = [{ email: { $regex: search, $options: 'i' } }, { ip: { $regex: search, $options: 'i' } }];
+
+  const sessions = await SessionLog.find(filter).sort({ loginAt: -1 }).limit(5000).lean();
+  const headers = ['Login At', 'Logout At', 'Duration (min)', 'Email', 'Role', 'IP', 'User Agent', 'Status'];
+  const csvLines = [headers.join(',')];
+  for (const s of sessions) {
+    const loginAt = s.loginAt ? new Date(s.loginAt) : null;
+    const logoutAt = s.logoutAt ? new Date(s.logoutAt) : null;
+    const durationMin = loginAt && logoutAt ? Math.round((logoutAt - loginAt) / 60000) : '';
+    csvLines.push([
+      `"${loginAt ? loginAt.toISOString() : ''}"`,
+      `"${logoutAt ? logoutAt.toISOString() : ''}"`,
+      `"${durationMin}"`,
+      `"${s.email}"`,
+      `"${s.role}"`,
+      `"${s.ip}"`,
+      `"${(s.userAgent || '').replace(/"/g, "'")}"`,
+      `"${s.isActive ? 'Active' : 'Ended'}"`,
+    ].join(','));
+  }
+  return { filename: `Session_Logs_${new Date().toISOString().slice(0, 10)}.csv`, csv: csvLines.join('\n'), count: sessions.length };
+}

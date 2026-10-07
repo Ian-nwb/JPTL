@@ -3,8 +3,8 @@ import { ShieldCheck, Lock, Mail, Sparkles, ArrowRight, ShieldAlert } from 'luci
 import { loginSuperadmin } from '../services/superadminApi';
 
 export const SuperadminLoginPage = ({ onLoginSuccess = () => {} }) => {
-  const [email, setEmail] = useState('superadmin@jptl.sys');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -80,6 +80,7 @@ export const SuperadminLoginPage = ({ onLoginSuccess = () => {} }) => {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="superadmin@jptl.sys"
                 required
+                autoComplete="off"
                 className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#070A12] border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -95,6 +96,7 @@ export const SuperadminLoginPage = ({ onLoginSuccess = () => {} }) => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
                 required
+                autoComplete="new-password"
                 className="w-full pl-9 pr-3 py-2.5 rounded-xl bg-[#070A12] border border-slate-800 text-white placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
@@ -116,19 +118,6 @@ export const SuperadminLoginPage = ({ onLoginSuccess = () => {} }) => {
           </button>
         </form>
 
-        {/* Quick Credentials Auto-Fill Button */}
-        <div className="pt-2 border-t border-slate-800/80 text-center">
-          <button
-            type="button"
-            onClick={() => {
-              setEmail('superadmin@jptl.sys');
-              setPassword('admin123');
-            }}
-            className="text-[11px] font-mono text-indigo-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
-          >
-            <Sparkles className="w-3 h-3 text-indigo-400" /> Auto-Fill Default Superadmin Credentials
-          </button>
-        </div>
 
         {/* Footer info */}
         <div className="text-center text-[10px] font-mono text-slate-500">

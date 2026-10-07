@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import {
   ShieldCheck, Activity, Users, Building2, Layers,
-  AlertTriangle, RefreshCw, HardDrive, LogOut, ExternalLink, Sliders, Power
+  AlertTriangle, RefreshCw, HardDrive, LogOut, ExternalLink, Sliders, Power, ClipboardList
 } from 'lucide-react';
 import { UserManagementTab } from '../components/UserManagementTab';
 import { PropertiesTab } from '../components/PropertiesTab';
 import { UnitsTab } from '../components/UnitsTab';
 import { SessionMonitorTab } from '../components/SessionMonitorTab';
+import { AuditTrailTab } from '../components/AuditTrailTab';
 import { getMaintenanceStatus, setMaintenanceMode } from '../services/superadminApi';
 
 export const SuperadminPortalPage = ({ onLogout = () => {} }) => {
@@ -123,6 +124,7 @@ export const SuperadminPortalPage = ({ onLogout = () => {} }) => {
           { key: 'units', label: 'Units Inventory', icon: Layers },
           { key: 'live-monitor', label: 'Live Login Monitor', icon: Activity },
           { key: 'users', label: 'User & Tenant Hierarchy', icon: Users },
+          { key: 'audit-trail', label: 'Audit Trail', icon: ClipboardList },
           { key: 'overview', label: 'System Overview', icon: HardDrive },
         ].map((tab) => {
           const Icon = tab.icon;
@@ -159,7 +161,10 @@ export const SuperadminPortalPage = ({ onLogout = () => {} }) => {
         {/* 4. USER & TENANT HIERARCHY */}
         {activeTab === 'users' && <UserManagementTab />}
 
-        {/* 5. SYSTEM OVERVIEW */}
+        {/* 5. AUDIT TRAIL */}
+        {activeTab === 'audit-trail' && <AuditTrailTab />}
+
+        {/* 6. SYSTEM OVERVIEW */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">

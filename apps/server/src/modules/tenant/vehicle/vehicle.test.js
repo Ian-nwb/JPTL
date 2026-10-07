@@ -1,20 +1,20 @@
-import { describe, it, expect, mock, beforeEach } from 'bun:test';
+import { describe, it, expect, jest, beforeEach } from '@jest/globals';
 import express from 'express';
 import request from 'supertest';
 
-const mockFindOneAndUpdate = mock();
-const mockFindOne = mock();
-const mockUpdateOne = mock();
+const mockFindOneAndUpdate = jest.fn();
+const mockFindOne = jest.fn();
+const mockUpdateOne = jest.fn();
 
-mock.module('../../../shared/models/tenantProfile.model.js', () => ({
+jest.unstable_mockModule('../../../shared/models/tenantProfile.model.js', () => ({
   default: {
     findOneAndUpdate: mockFindOneAndUpdate,
     findOne: mockFindOne,
     updateOne: mockUpdateOne,
   },
 }));
-mock.module('../../../shared/middleware/authenticate.js', () => ({
-  default: (req, _res, next) => { req.user = { id: 'user-1' }; next(); },
+jest.unstable_mockModule('../../../shared/middleware/auth.middleware.js', () => ({
+  requireAuth: (req, _res, next) => { req.user = { id: 'user-1' }; next(); },
 }));
 
 const { default: vehicleService } = await import('./vehicle.service.js');
@@ -60,7 +60,7 @@ describe('vehicle.service', () => {
         { $push: { vehicles: { model: 'Civic', plate: 'ABC123' } } },
         { new: true, runValidators: true }
       );
-      expect(result).toEqual({ id: 'veh-1', model: 'Civic', plate: 'ABC123' });
+      expect(result).toEqual({ id: 'veh-1', make: 'Civic', model: 'Civic', plate: 'ABC123' });
     });
 
     it('throws 404 when tenant profile not found', async () => {
@@ -109,7 +109,7 @@ describe('vehicle routes', () => {
       .send({ model: 'Civic', plate: 'ABC123' });
 
     expect(res.status).toBe(201);
-    expect(res.body).toEqual({ data: { id: 'veh-1', model: 'Civic', plate: 'ABC123' } });
+    expect(res.body).toEqual({ data: { id: 'veh-1', make: 'Civic', model: 'Civic', plate: 'ABC123' } });
   });
 
   it('POST / returns 400 on validation error', async () => {
