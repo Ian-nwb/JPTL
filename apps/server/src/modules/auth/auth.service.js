@@ -128,6 +128,11 @@ async function login({ email, password, ip = '', userAgent = '' }) {
     throw new AuthError('Invalid email or password', 401);
   }
 
+  // Superadmins must authenticate through the dedicated superadmin login flow.
+  if (user.role === 'superadmin') {
+    throw new AuthError('Invalid email or password', 401);
+  }
+  
   // Check maintenance mode: non-superadmin users are blocked when active
   if (state.enabled && user.role !== 'superadmin') {
     throw new AuthError(state.message || 'Platform is currently undergoing scheduled maintenance. Non-administrative logins are temporarily paused.', 503);
