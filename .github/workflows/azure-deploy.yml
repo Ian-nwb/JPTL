@@ -3,7 +3,7 @@ name: Build and deploy Node.js app to Azure Web App - jptl-api
 on:
   push:
     branches:
-      - kpi                  # matches your Azure-selected branch
+      - prod                  # matches your Azure-selected branch
     paths:
       - 'apps/server/**'    # only runs when server files change
   workflow_dispatch:
