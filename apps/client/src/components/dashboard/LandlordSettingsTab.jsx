@@ -85,7 +85,9 @@ export const LandlordSettingsTab = ({
   const [avatarError, setAvatarError] = useState('');
   const [passwordForm, setPasswordForm] = useState({ current: '', newPass: '', confirm: '' });
   const [passwordStatus, setPasswordStatus] = useState({ loading: false, error: '', success: '' });
-  const [showPassword, setShowPassword] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [enable2FA, setEnable2FA] = useState(false);
   const [show2FAModal, setShow2FAModal] = useState(false);
 
@@ -677,36 +679,57 @@ export const LandlordSettingsTab = ({
                 <div className="space-y-2">
                   <div className="relative">
                     <input
-                      type={showPassword ? 'text' : 'password'}
+                      type={showCurrentPassword ? 'text' : 'password'}
                       placeholder="Current Password"
                       value={passwordForm.current}
                       onChange={(e) => setPasswordForm((p) => ({ ...p, current: e.target.value }))}
-                      className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
+                      className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl pl-3 pr-10 py-2 text-slate-900 dark:text-white font-mono"
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200"
+                      onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-0.5"
+                      aria-label={showCurrentPassword ? 'Hide password' : 'Show password'}
                     >
-                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
 
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="New Password"
-                    value={passwordForm.newPass}
-                    onChange={(e) => setPasswordForm((p) => ({ ...p, newPass: e.target.value }))}
-                    className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showNewPassword ? 'text' : 'password'}
+                      placeholder="New Password (min 8 chars)"
+                      value={passwordForm.newPass}
+                      onChange={(e) => setPasswordForm((p) => ({ ...p, newPass: e.target.value }))}
+                      className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl pl-3 pr-10 py-2 text-slate-900 dark:text-white font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowNewPassword(!showNewPassword)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-0.5"
+                      aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
 
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder="Confirm New Password"
-                    value={passwordForm.confirm}
-                    onChange={(e) => setPasswordForm((p) => ({ ...p, confirm: e.target.value }))}
-                    className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl px-3 py-2 text-slate-900 dark:text-white font-mono"
-                  />
+                  <div className="relative">
+                    <input
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      placeholder="Confirm New Password"
+                      value={passwordForm.confirm}
+                      onChange={(e) => setPasswordForm((p) => ({ ...p, confirm: e.target.value }))}
+                      className="w-full bg-slate-50 dark:bg-[#080B14] border border-slate-300 dark:border-slate-800 rounded-xl pl-3 pr-10 py-2 text-slate-900 dark:text-white font-mono"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors p-0.5"
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                   {passwordStatus.error && (
                     <div className="p-2 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-600 dark:text-rose-400 text-xs">
                       {passwordStatus.error}

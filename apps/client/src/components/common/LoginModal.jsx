@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, Mail, Smartphone, Building2, CheckCircle2, ArrowRight, UserPlus, User } from 'lucide-react';
+import { X, Lock, Mail, Smartphone, Building2, CheckCircle2, ArrowRight, UserPlus, User, Eye, EyeOff } from 'lucide-react';
 import { CountryCodeDropdown } from './CountryCodeDropdown';
 import { onlyPhoneDigits, handleNumericKeyDown } from '../../utils/numberSanitizers';
 
@@ -15,6 +15,7 @@ export const LoginModal = ({ isOpen, initialRole = 'tenant', onClose, onLoginSuc
   const [localPhone, setLocalPhone] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -307,13 +308,21 @@ export const LoginModal = ({ isOpen, initialRole = 'tenant', onClose, onLoginSuc
                   <div className="relative">
                     <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-3" />
                     <input
-                      type="password"
+                      type={showPassword ? 'text' : 'password'}
                       required
                       placeholder={mode === 'register' ? 'Create a secure password' : ''}
                       value={password || (mode === 'login' ? '••••••••••••' : '')}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-10 pr-3 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
+                      className="w-full bg-slate-900 border border-slate-700/80 rounded-xl pl-10 pr-10 py-2.5 text-xs text-white focus:outline-none focus:border-indigo-500"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200 transition-colors p-0.5"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
                   </div>
                 </div>
 
