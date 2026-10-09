@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Key, Building2, Home, Calendar, DollarSign, Clock, AlertCircle, CheckCircle2, Loader2, Sparkles, Car } from 'lucide-react';
 import { landlordApi } from '../../services/api';
 import { onlyDecimal, handleNumericKeyDown } from '../../utils/numberSanitizers';
@@ -42,8 +42,10 @@ export const AssignTenantModal = ({
     return date.toISOString().split('T')[0];
   };
 
+  const wasOpenRef = useRef(false);
+
   useEffect(() => {
-    if (isOpen && tenant) {
+    if (isOpen && tenant && !wasOpenRef.current) {
       setError('');
       setIsSubmitting(false);
 
@@ -85,7 +87,8 @@ export const AssignTenantModal = ({
         setLeaseEnd(calculateEndDate(start, 12));
       }
     }
-  }, [isOpen, tenant, properties]);
+    wasOpenRef.current = Boolean(isOpen && tenant);
+  }, [isOpen, tenant]);
 
   if (!isOpen || !tenant) return null;
 

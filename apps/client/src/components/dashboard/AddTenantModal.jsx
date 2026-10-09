@@ -79,8 +79,10 @@ export const AddTenantModal = ({
   const preAddedTenants = tenants.filter((t) => t.status === 'pre_added' || !t.unitId || t.unitId === 'pre_add_unassigned');
   const otherTenants = tenants.filter((t) => t.status !== 'pre_added' && t.unitId && t.unitId !== 'pre_add_unassigned');
 
+  const wasOpenRef = useRef(false);
+
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !wasOpenRef.current) {
       setFirstName('');
       setMiddleName('');
       setLastName('');
@@ -137,7 +139,8 @@ export const AddTenantModal = ({
       setDurationMonths(12);
       setLeaseEnd(calculateEndDate(today, 12));
     }
-  }, [isOpen, initialPropertyId, initialUnitId, properties, units, tenants]);
+    wasOpenRef.current = isOpen;
+  }, [isOpen, initialPropertyId, initialUnitId]);
 
   // Handle property change
   const handlePropertyChange = (propId) => {
